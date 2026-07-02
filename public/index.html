@@ -34,7 +34,7 @@
 html,body{height:100%;font-family:'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
 body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent 62%),radial-gradient(900px 520px at 88% 14%,var(--grad2),transparent 60%),var(--bg);color:var(--text);min-height:100vh}
 .hdr{position:sticky;top:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:var(--header-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-.hdr-brand{position:relative;padding-bottom:6px;display:flex;align-items:center}
+.hdr-brand{position:relative;padding-bottom:6px;display:flex;align-items:center;text-decoration:none}
 .hdr-brand::after{content:'';position:absolute;left:0;bottom:0;width:40px;height:2px;background:var(--gold)}
 .hdr-brand img{height:30px;width:auto}
 [data-theme="dark"] .hdr-brand img{filter:brightness(0) invert(1)}
@@ -177,10 +177,10 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 
 <header class="hdr">
   <div style="display:flex;align-items:center">
-    <div class="hdr-brand">
+    <a class="hdr-brand" href="https://hub-granmarquise.fly.dev" target="_blank" rel="noopener">
       <img src="https://letsimage.s3.amazonaws.com/editor/granmarquise/imgs/1760033174793-hotelgranmarquise_pos_footer.png" alt="Gran Marquise">
       <em> · Gestão da Qualidade</em>
-    </div>
+    </a>
   </div>
   <div class="hdr-right">
     <span class="hdr-ts" id="ts"></span>
