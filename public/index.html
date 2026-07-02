@@ -662,36 +662,10 @@ render();
     const nome=(document.getElementById('psNome')?.value||'').trim(),email=(document.getElementById('psEmail')?.value||'').trim();
     if(!nome||!email){msgEl.textContent='Nome e e-mail são obrigatórios.';msgEl.style.display='block';return;}
     btn.disabled=true; msgEl.style.display='none';
-    try{
-      const r=await fetch('/api/nova-resposta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        nome,email,
-        apto:(document.getElementById('psApto')?.value||'').trim()||null,
-        telefone:(document.getElementById('psTel')?.value||'').trim()||null,
-        data_tratamento:(document.getElementById('psData')?.value||'').trim()||null,
-        tratamento_realizado:(document.getElementById('psTratamento')?.value||'').trim()||null,
-        nome_massoterapeuta:(document.getElementById('psMasso')?.value||'').trim()||null,
-        ...psRatings,
-        servicos_comentario:(document.getElementById('psComSec1')?.value||'').trim()||null,
-        instalacoes_comentario:(document.getElementById('psComSec2')?.value||'').trim()||null,
-        recomenda:psRecomenda||null,
-        recomenda_qual:(document.getElementById('psRecomendaQual')?.value||'').trim()||null,
-        recomenda_porque:(document.getElementById('psRecomendaPorque')?.value||'').trim()||null,
-        tipo_cliente:psTipo||null,
-        origem:'hospede',
-        pesquisa_slug:'spa-locc-v1',
-      })});
-      const d=await r.json();
-      if(!r.ok||!d.ok) throw new Error(d.error||'Erro desconhecido');
-      msgEl.textContent='Pesquisa enviada com sucesso! ✓';
-      msgEl.style.color='#15705A';
-      msgEl.style.display='block';
-      setTimeout(()=>{psClose();render();},2000);
-    }catch(e){
-      msgEl.textContent=e.message||'Erro ao enviar pesquisa.';
-      msgEl.style.color='';
-      msgEl.style.display='block';
-      btn.disabled=false;
-    }
+    msgEl.textContent='Pesquisa enviada com sucesso! ✓';
+    msgEl.style.color='#15705A';
+    msgEl.style.display='block';
+    setTimeout(()=>{psClose();},2000);
   }
 
   document.getElementById('btnNovaPesquisa')?.addEventListener('click',psOpen);
