@@ -34,10 +34,11 @@
 html,body{height:100%;font-family:'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
 body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent 62%),radial-gradient(900px 520px at 88% 14%,var(--grad2),transparent 60%),var(--bg);color:var(--text);min-height:100vh}
 .hdr{position:sticky;top:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:var(--header-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-.hdr-brand{position:relative;padding-bottom:6px}
+.hdr-brand{position:relative;padding-bottom:6px;display:flex;align-items:center}
 .hdr-brand::after{content:'';position:absolute;left:0;bottom:0;width:40px;height:2px;background:var(--gold)}
-.hdr-brand span{font-family:'Helvetica Neue',Arial,sans-serif;font-weight:500;font-size:1.06rem;color:var(--text)}
-.hdr-brand em{font-family:'Helvetica Neue',Arial,sans-serif;font-style:italic;font-weight:300;font-size:.92rem;color:var(--muted2)}
+.hdr-brand img{height:30px;width:auto}
+[data-theme="dark"] .hdr-brand img{filter:brightness(0) invert(1)}
+.hdr-brand em{font-family:'Helvetica Neue',Arial,sans-serif;font-style:italic;font-weight:300;font-size:.92rem;color:var(--muted2);margin-left:2px}
 .hdr-right{display:flex;align-items:center;gap:18px}
 .hdr-ts{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)}
 .btn-icon{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--muted2);font-size:.82rem;transition:all .2s}
@@ -144,7 +145,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 <header class="hdr">
   <div style="display:flex;align-items:center">
     <div class="hdr-brand">
-      <span>Gran Marquise</span>
+      <img src="https://letsimage.s3.amazonaws.com/editor/granmarquise/imgs/1760033174793-hotelgranmarquise_pos_footer.png" alt="Gran Marquise">
       <em> · Gestão da Qualidade</em>
     </div>
   </div>
