@@ -346,7 +346,7 @@ async function render(){
     const qs = new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem});
     const qr = new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:1,limit:20});
     const [sRes,rRes] = await Promise.all([fetch('/api/stats?'+qs),fetch('/api/respostas?'+qr)]);
-    if(sRes.status===401||rRes.status===401){ location.href='/login.html'; return; }
+    if(sRes.status===401||rRes.status===401){ location.href='/acesso-hub.html'; return; }
     const [s,r] = await Promise.all([sRes.json(),rRes.json()]);
     if(!s.ok) throw new Error(s.error);
     const secsHtml = (s.secoes||[]).map((sec,i)=>renderSection(sec,i)).join('');
