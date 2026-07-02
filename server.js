@@ -92,6 +92,20 @@ async function proxyGQ(req, res, endpoint) {
 app.get('/api/stats', requireSession, (req, res) => proxyGQ(req, res, 'stats'));
 app.get('/api/respostas', requireSession, (req, res) => proxyGQ(req, res, 'respostas'));
 
+app.post('/api/nova-resposta', requireSession, async (req, res) => {
+  try {
+    const r = await fetch(`${PESQUISA_URL}/api/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${req.gqToken}` },
+      body: JSON.stringify(req.body),
+    });
+    const data = await r.json();
+    res.status(r.status).json(data);
+  } catch (e) {
+    res.status(502).json({ ok: false, error: 'Erro ao enviar resposta' });
+  }
+});
+
 // Root → dashboard (requires session)
 app.get('/', requireSession, (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))

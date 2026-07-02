@@ -141,6 +141,76 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
   .sec-legend{flex-wrap:wrap;gap:10px}
   .q-list{margin-bottom:48px}
 }
+.btn-nova-pesquisa{font-family:'Helvetica Neue',Arial,sans-serif;font-size:.78rem;font-weight:600;color:#ECE4D2;background:var(--gold);border:none;border-radius:8px;padding:7px 16px;cursor:pointer;transition:background .2s;letter-spacing:.04em}
+.btn-nova-pesquisa:hover{background:var(--gold-dark)}
+#psOverlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 16px}
+#psModal{background:var(--bg);width:100%;max-width:820px;margin:auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);position:relative}
+.ps-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border:none;background:rgba(122,107,90,.18);cursor:pointer;color:var(--muted);font-size:1.1rem;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .2s;z-index:2}
+.ps-close:hover{background:var(--gold-dim);color:var(--gold)}
+.ps-progress{height:4px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3px}
+.ps-prog-seg{background:rgba(156,88,67,.2);transition:background .3s}
+.ps-prog-seg.done{background:#9C5843}
+.ps-inner{padding:40px 48px 48px;background:#ECE4D2;color:#1A1A1A}
+[data-theme="dark"] #psModal .ps-inner{background:#202C28;color:#ECE4D2}
+.ps-title{font-size:1.5rem;font-weight:500;text-align:center;margin-bottom:10px;color:inherit}
+.ps-intro{font-size:.85rem;line-height:1.6;text-align:center;margin-bottom:6px;color:inherit}
+.ps-intro-en{font-size:.82rem;color:#6B6B6B;font-style:italic;line-height:1.6;text-align:center;margin-bottom:32px}
+.ps-id-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;margin-bottom:36px}
+.ps-field{padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid rgba(156,88,67,.18)}
+.ps-field label{display:block;font-size:.74rem;font-weight:600;margin-bottom:4px;color:inherit}
+.ps-field label em{font-style:italic;color:#6B6B6B;font-weight:400;margin-left:4px;font-size:.72rem}
+.ps-field input{width:100%;background:none;border:none;outline:none;font-size:.86rem;color:inherit;font-family:'Helvetica Neue',Arial,sans-serif;padding:2px 0}
+.ps-sec{margin-bottom:32px}
+.ps-sec-hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+.ps-sec-num{font-family:'JetBrains Mono',monospace;font-size:1.3rem;color:#9C5843;letter-spacing:.05em}
+.ps-sec-title{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;font-weight:600;color:inherit}
+.ps-sec-en{font-size:.78rem;font-style:italic;color:#6B6B6B;margin-left:6px}
+.ps-rating-hdr{display:grid;grid-template-columns:1fr 88px 88px 88px 88px;background:#9C5843;color:#fff;padding:10px 12px;border-radius:8px 8px 0 0;font-size:.72rem;gap:4px}
+.ps-rating-left{font-style:italic;display:flex;align-items:center;font-size:.78rem}
+.ps-rating-col{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;line-height:1.3}
+.ps-q-row{display:grid;grid-template-columns:1fr 88px 88px 88px 88px;gap:4px;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(156,88,67,.12);background:var(--surface)}
+.ps-q-text{font-size:.82rem;line-height:1.4;color:inherit}
+.ps-q-text em{display:block;font-style:italic;color:#6B6B6B;font-size:.76rem;margin-top:2px}
+.ps-face-wrap{display:flex;justify-content:center}
+.ps-face-btn{width:48px;height:48px;border:2px solid rgba(156,88,67,.22);border-radius:50%;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#7A6B5A;transition:all .18s}
+.ps-face-btn:hover{border-color:#9C5843;color:#9C5843}
+.ps-face-btn.sel{border-color:#9C5843;background:#9C5843;color:#fff}
+.ps-sec-comment{background:var(--surface);padding:10px 12px;border-radius:0 0 8px 8px;border-top:1px solid rgba(156,88,67,.12)}
+.ps-sec-comment input{width:100%;background:none;border:none;border-bottom:1px solid rgba(156,88,67,.3);outline:none;font-size:.82rem;color:inherit;font-family:'Helvetica Neue',Arial,sans-serif;padding:6px 0}
+.ps-radio-group{display:flex;flex-direction:column;gap:14px}
+.ps-radio-item{cursor:pointer}
+.ps-radio-row{display:flex;align-items:center;gap:12px}
+.ps-radio-dot{width:20px;height:20px;border:2px solid rgba(156,88,67,.35);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.ps-radio-dot.sel{border-color:#9C5843;background:#9C5843}
+.ps-radio-dot.sel::after{content:'';width:7px;height:7px;border-radius:50%;background:#fff}
+.ps-radio-label{font-size:.84rem;color:inherit}
+.ps-radio-label em{color:#6B6B6B;font-style:italic;font-size:.78rem;margin-left:4px}
+.ps-radio-reveal{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.ps-radio-reveal.open{max-height:80px}
+.ps-radio-reveal input{width:100%;margin-top:8px;background:none;border:none;border-bottom:1px solid rgba(156,88,67,.3);outline:none;font-size:.82rem;color:inherit;font-family:'Helvetica Neue',Arial,sans-serif;padding:6px 0;display:block}
+.ps-tipo-grid{display:flex;gap:12px;flex-wrap:wrap}
+.ps-tipo-btn{padding:9px 22px;border:1.5px solid rgba(156,88,67,.28);border-radius:999px;background:none;cursor:pointer;font-size:.82rem;color:#7A6B5A;font-family:'Helvetica Neue',Arial,sans-serif;transition:all .18s}
+.ps-tipo-btn:hover{border-color:#9C5843;color:#9C5843}
+.ps-tipo-btn.sel{border-color:#9C5843;background:rgba(156,88,67,.12);color:#7E4636;font-weight:600}
+.ps-footer{text-align:center;margin-top:28px;padding-top:24px;border-top:1px solid rgba(156,88,67,.18)}
+.ps-footer p{font-style:italic;color:#6B6B6B;font-size:.82rem;line-height:1.7}
+.ps-team{color:#9C5843;font-weight:500;font-size:.84rem;font-style:normal}
+.ps-address{font-size:.7rem;color:#6B6B6B;margin-top:14px;text-align:center}
+.ps-submit-wrap{text-align:center;margin-top:24px}
+.ps-submit{background:#9C5843;color:#fff;border:none;padding:15px 44px;font-size:.82rem;font-weight:600;letter-spacing:.17em;text-transform:uppercase;cursor:pointer;font-family:'Helvetica Neue',Arial,sans-serif;transition:background .2s}
+.ps-submit:hover:not(:disabled){background:#7E4636}
+.ps-submit:disabled{opacity:.6;cursor:not-allowed}
+.ps-msg{text-align:center;padding:10px 16px;font-size:.82rem;margin-top:10px;border-radius:8px;display:none}
+.ps-msg.ok{background:rgba(21,112,90,.12);color:#15705A}
+.ps-msg.err{background:rgba(184,84,80,.1);color:#B85450}
+@media(max-width:680px){
+  #psOverlay{padding:0}
+  #psModal{border-radius:0;min-height:100svh}
+  .ps-inner{padding:24px 18px 40px}
+  .ps-id-grid{grid-template-columns:1fr}
+  .ps-rating-hdr,.ps-q-row{grid-template-columns:1fr 66px 66px 66px 66px}
+  .ps-face-btn{width:40px;height:40px}
+}
 @media(max-width:480px){
   .hdr{padding:0 14px;height:54px}
   .hdr-brand em{display:none}
@@ -184,6 +254,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
   </div>
   <div class="hdr-right">
     <span class="hdr-ts" id="ts"></span>
+    <button class="btn-nova-pesquisa" id="btnNovaPesquisa">+ Nova Pesquisa</button>
     <button class="btn-icon" id="btnTheme" title="Alternar tema">☾</button>
     <button class="btn-sair" onclick="location.href='/api/logout'">Sair</button>
   </div>
@@ -414,6 +485,227 @@ async function render(){
   }
 }
 render();
+
+// ── Modal: Nova Pesquisa ──
+{
+  const PS_FACES = [
+    {key:'otimo',label:'Ótimo',en:'Excellent',svg:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M7.5 14.5C8.5 17.5 15.5 17.5 16.5 14.5"/></svg>`},
+    {key:'bom',label:'Bom',en:'Good',svg:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M9 15C9.5 16.5 14.5 16.5 15 15"/></svg>`},
+    {key:'regular',label:'Regular',en:'Fair',svg:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.2" fill="currentColor" stroke="none"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`},
+    {key:'ruim',label:'Ruim',en:'Poor',svg:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M9 16.5C9.5 14.5 14.5 14.5 15 16.5"/></svg>`},
+  ];
+  const SEC1_QS = [
+    {key:'servicos_expectativa',pt:'A expectativa do tratamento',en:'Your expectations.'},
+    {key:'servicos_explicacao',pt:'A explicação da massoterapeuta sobre benefícios e procedimentos',en:"The massage therapist's explanation about the benefits and procedures."},
+    {key:'servicos_atitude',pt:'A atitude e a qualidade dos serviços da massoterapeuta',en:'The attitude and the quality of the services provided by the massage therapist.'},
+    {key:'servicos_tecnica',pt:'A técnica e a habilidade da massoterapeuta',en:"The massage therapist's technique and ability."},
+  ];
+  const SEC2_QS = [
+    {key:'instalacoes_conforto',pt:'Conforto e conservação da estrutura',en:'SPA comfort and cleanliness.'},
+    {key:'instalacoes_organizacao',pt:'Organização da sala, equipamentos e atmosfera',en:'Room organization, equipment and atmosphere.'},
+    {key:'instalacoes_conveniencia',pt:'Itens de conveniência (roupões, toalhas, etc.)',en:'Were the convenience items (bathrobes, towels, etc.) provided during treatment sufficient?'},
+  ];
+
+  let psRatings = {}, psRecomenda = null, psTipo = null;
+
+  const psOverlay = document.createElement('div');
+  psOverlay.id = 'psOverlay';
+  document.body.appendChild(psOverlay);
+
+  function psToday(){
+    const d=new Date(),p=n=>String(n).padStart(2,'0');
+    return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;
+  }
+
+  function psRatingHdr(){
+    return `<div class="ps-rating-hdr">
+      <div class="ps-rating-left">Como você classifica: <em style="margin-left:4px;font-size:.74rem;opacity:.8">/ Your rating:</em></div>
+      ${PS_FACES.map(f=>`<div class="ps-rating-col">${f.svg}<span>${f.label}<br><span style="font-weight:400;opacity:.8;font-size:.64rem">${f.en}</span></span></div>`).join('')}
+    </div>`;
+  }
+
+  function psQRow(q){
+    return `<div class="ps-q-row">
+      <div class="ps-q-text">${esc(q.pt)}<em>${esc(q.en)}</em></div>
+      ${PS_FACES.map(f=>`<div class="ps-face-wrap"><button type="button" class="ps-face-btn${psRatings[q.key]===f.key?' sel':''}" data-qkey="${q.key}" data-val="${f.key}" title="${f.label}">${f.svg}</button></div>`).join('')}
+    </div>`;
+  }
+
+  function psBuildModal(){
+    return `<div id="psModal">
+      <button type="button" class="ps-close" id="psClose">✕</button>
+      <div class="ps-progress">
+        <div class="ps-prog-seg" id="psProg1"></div>
+        <div class="ps-prog-seg" id="psProg2"></div>
+        <div class="ps-prog-seg" id="psProg3"></div>
+        <div class="ps-prog-seg" id="psProg4"></div>
+      </div>
+      <div class="ps-inner">
+        <h1 class="ps-title">Formulário de Feedback de Serviço</h1>
+        <p class="ps-intro">Para que possamos continuar nos aperfeiçoando, gostaríamos que você respondesse as perguntas abaixo assinalando a opção apropriada. Apreciamos seu feedback.</p>
+        <p class="ps-intro-en">Share your experience with us. Client Feedback Form. In order to continue improving our services, we would like you to answer the following questions by selecting the appropriate checkbox. We appreciate your feedback.</p>
+        <div class="ps-id-grid">
+          <div class="ps-field"><label>Nome <em>/ Name</em></label><input type="text" id="psNome" autocomplete="off"></div>
+          <div class="ps-field"><label>Nº do Apto <em>/ Room number</em></label><input type="text" id="psApto" autocomplete="off"></div>
+          <div class="ps-field"><label>E-mail <em>/ E-mail</em></label><input type="email" id="psEmail" autocomplete="off"></div>
+          <div class="ps-field"><label>Tel / WhatsApp <em>/ Phone</em></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999"></div>
+          <div class="ps-field"><label>Data <em>/ Date</em></label><input type="text" id="psData" value="${psToday()}"></div>
+          <div class="ps-field"><label>Tratamento realizado <em>/ Spa treatment provided</em></label><input type="text" id="psTratamento" autocomplete="off"></div>
+          <div class="ps-field" style="grid-column:1/-1"><label>Nome da massoterapeuta <em>/ Massage therapist's name</em></label><input type="text" id="psMasso" autocomplete="off"></div>
+        </div>
+        <div class="ps-sec">
+          <div class="ps-sec-hdr"><span class="ps-sec-num">1</span><span class="ps-sec-title">SERVIÇOS</span><span class="ps-sec-en">Services</span></div>
+          ${psRatingHdr()}
+          ${SEC1_QS.map(psQRow).join('')}
+          <div class="ps-sec-comment"><input type="text" id="psComSec1" placeholder="Comentário e sugestões adicionais / Additional comments and suggestions… (Opcional)"></div>
+        </div>
+        <div class="ps-sec">
+          <div class="ps-sec-hdr"><span class="ps-sec-num">2</span><span class="ps-sec-title">INSTALAÇÕES</span><span class="ps-sec-en">Facilities</span></div>
+          ${psRatingHdr()}
+          ${SEC2_QS.map(psQRow).join('')}
+          <div class="ps-sec-comment"><input type="text" id="psComSec2" placeholder="Comentário sobre as instalações / Additional comments and suggestions… (Opcional)"></div>
+        </div>
+        <div class="ps-sec">
+          <div class="ps-sec-hdr"><span class="ps-sec-num">3</span><span class="ps-sec-title" style="font-size:.72rem">VOCÊ RECOMENDARIA ALGUM TRATAMENTO EM PARTICULAR?</span><span class="ps-sec-en">Would you recommend any particular treatment?</span></div>
+          <div class="ps-radio-group">
+            <div class="ps-radio-item" id="psRadioSim">
+              <div class="ps-radio-row"><div class="ps-radio-dot${psRecomenda==='sim'?' sel':''}" id="psDotSim"></div><div class="ps-radio-label">Sim <em>/ Yes</em></div></div>
+              <div class="ps-radio-reveal${psRecomenda==='sim'?' open':''}"><input type="text" id="psRecomendaQual" placeholder="Qual? / Which?"></div>
+            </div>
+            <div class="ps-radio-item" id="psRadioNao">
+              <div class="ps-radio-row"><div class="ps-radio-dot${psRecomenda==='nao'?' sel':''}" id="psDotNao"></div><div class="ps-radio-label">Não <em>/ No</em></div></div>
+              <div class="ps-radio-reveal${psRecomenda==='nao'?' open':''}"><input type="text" id="psRecomendaPorque" placeholder="Porque? / Why?"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ps-sec">
+          <div class="ps-sec-hdr"><span class="ps-sec-num">4</span><span class="ps-sec-title">TIPO DE CLIENTE</span><span class="ps-sec-en">Type of guest</span></div>
+          <div class="ps-tipo-grid">
+            <button type="button" class="ps-tipo-btn${psTipo==='lazer'?' sel':''}" data-tipo="lazer">Lazer <em style="font-style:italic;color:#6B6B6B;font-weight:400">/ Leisure</em></button>
+            <button type="button" class="ps-tipo-btn${psTipo==='negocios'?' sel':''}" data-tipo="negocios">Negócios <em style="font-style:italic;color:#6B6B6B;font-weight:400">/ Business</em></button>
+            <button type="button" class="ps-tipo-btn${psTipo==='evento'?' sel':''}" data-tipo="evento">Evento <em style="font-style:italic;color:#6B6B6B;font-weight:400">/ Event</em></button>
+          </div>
+        </div>
+        <div class="ps-footer">
+          <p>Obrigado por contribuir com o nosso sistema de melhoria.<br>
+          <em>Thank you for taking the time to evaluate us.</em><br>
+          Atenciosamente,<br>
+          <span class="ps-team">Equipe do Gran SPA by L'Occitane</span> <em style="color:#6B6B6B">/ Gran SPA by L'Occitane team</em></p>
+        </div>
+        <div class="ps-submit-wrap">
+          <button type="button" class="ps-submit" id="psSubmitBtn">ENVIAR AVALIAÇÃO</button>
+          <div id="psMsg" class="ps-msg"></div>
+        </div>
+        <p class="ps-address">Hotel Gran Marquise · Av. Beira Mar, 3980 · Fortaleza-CE · (85) 4006-5000 · www.granmarquise.com.br</p>
+      </div>
+    </div>`;
+  }
+
+  function psUpdateProgress(){
+    const idOk = document.getElementById('psNome')?.value?.trim() && document.getElementById('psEmail')?.value?.trim();
+    const s1Ok = SEC1_QS.every(q=>psRatings[q.key]);
+    const s2Ok = SEC2_QS.every(q=>psRatings[q.key]);
+    const s34Ok = psRecomenda && psTipo;
+    [idOk,s1Ok,s2Ok,s34Ok].forEach((done,i)=>{
+      document.getElementById(`psProg${i+1}`)?.classList.toggle('done',!!done);
+    });
+  }
+
+  function psOpen(){
+    psRatings={}; psRecomenda=null; psTipo=null;
+    psOverlay.innerHTML = psBuildModal();
+    psOverlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.getElementById('psClose')?.addEventListener('click', psClose);
+    psOverlay.addEventListener('click', e=>{ if(e.target===psOverlay) psClose(); });
+    psOverlay.querySelectorAll('.ps-face-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const qkey=btn.dataset.qkey, val=btn.dataset.val;
+        psRatings[qkey]=val;
+        psOverlay.querySelectorAll(`.ps-face-btn[data-qkey="${qkey}"]`).forEach(b=>b.classList.toggle('sel',b.dataset.val===val));
+        psUpdateProgress();
+      });
+    });
+    ['psNome','psEmail'].forEach(id=>document.getElementById(id)?.addEventListener('input',psUpdateProgress));
+    document.getElementById('psRadioSim')?.addEventListener('click',()=>{
+      psRecomenda='sim';
+      document.getElementById('psDotSim')?.classList.add('sel');
+      document.getElementById('psDotNao')?.classList.remove('sel');
+      document.querySelector('#psRadioSim .ps-radio-reveal')?.classList.add('open');
+      document.querySelector('#psRadioNao .ps-radio-reveal')?.classList.remove('open');
+      psUpdateProgress();
+    });
+    document.getElementById('psRadioNao')?.addEventListener('click',()=>{
+      psRecomenda='nao';
+      document.getElementById('psDotNao')?.classList.add('sel');
+      document.getElementById('psDotSim')?.classList.remove('sel');
+      document.querySelector('#psRadioNao .ps-radio-reveal')?.classList.add('open');
+      document.querySelector('#psRadioSim .ps-radio-reveal')?.classList.remove('open');
+      psUpdateProgress();
+    });
+    psOverlay.querySelectorAll('.ps-tipo-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        psTipo=btn.dataset.tipo;
+        psOverlay.querySelectorAll('.ps-tipo-btn').forEach(b=>b.classList.toggle('sel',b.dataset.tipo===psTipo));
+        psUpdateProgress();
+      });
+    });
+    document.getElementById('psSubmitBtn')?.addEventListener('click', psSubmit);
+  }
+
+  function psClose(){
+    psOverlay.style.display='none';
+    document.body.style.overflow='';
+  }
+
+  async function psSubmit(){
+    const btn=document.getElementById('psSubmitBtn');
+    const msgEl=document.getElementById('psMsg');
+    const nome=(document.getElementById('psNome')?.value||'').trim();
+    const email=(document.getElementById('psEmail')?.value||'').trim();
+    if(!nome||!email){
+      msgEl.textContent='Nome e e-mail são obrigatórios.';
+      msgEl.className='ps-msg err';
+      msgEl.style.display='block';
+      return;
+    }
+    btn.disabled=true;
+    msgEl.style.display='none';
+    const payload={
+      nome, email,
+      apto: (document.getElementById('psApto')?.value||'').trim()||null,
+      telefone: (document.getElementById('psTel')?.value||'').trim()||null,
+      data_tratamento: (document.getElementById('psData')?.value||'').trim()||null,
+      tratamento_realizado: (document.getElementById('psTratamento')?.value||'').trim()||null,
+      nome_massoterapeuta: (document.getElementById('psMasso')?.value||'').trim()||null,
+      ...psRatings,
+      servicos_comentario: (document.getElementById('psComSec1')?.value||'').trim()||null,
+      instalacoes_comentario: (document.getElementById('psComSec2')?.value||'').trim()||null,
+      recomenda: psRecomenda||null,
+      recomenda_qual: (document.getElementById('psRecomendaQual')?.value||'').trim()||null,
+      recomenda_porque: (document.getElementById('psRecomendaPorque')?.value||'').trim()||null,
+      tipo_cliente: psTipo||null,
+      origem: 'hospede',
+      pesquisa_slug: 'spa-locc-v1',
+    };
+    try{
+      const r=await fetch('/api/nova-resposta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const d=await r.json();
+      if(!r.ok||!d.ok) throw new Error(d.error||'Erro desconhecido');
+      msgEl.textContent='Pesquisa enviada com sucesso! ✓';
+      msgEl.className='ps-msg ok';
+      msgEl.style.display='block';
+      setTimeout(()=>{ psClose(); render(); },2000);
+    } catch(e){
+      msgEl.textContent=e.message||'Erro ao enviar pesquisa.';
+      msgEl.className='ps-msg err';
+      msgEl.style.display='block';
+      btn.disabled=false;
+    }
+  }
+
+  document.getElementById('btnNovaPesquisa')?.addEventListener('click', psOpen);
+}
 })();
 </script>
 </body>
