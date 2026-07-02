@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestão da Qualidade — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F4EEE1;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;display:grid;place-items:center;padding:20px}
+.card{background:#FAF9F5;border:1px solid rgba(96,87,56,.13);border-radius:18px;box-shadow:0 8px 40px rgba(138,107,31,.12);padding:52px 48px;width:100%;max-width:400px}
+.brand{text-align:center;margin-bottom:36px}
+.monogram{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:3rem;color:#8A6B1F;line-height:1}
+.brand-line{width:48px;height:2px;background:#8A6B1F;margin:10px auto 12px}
+.brand-name{font-family:'Fraunces',serif;font-weight:500;font-size:1.05rem;color:#1C2030}
+.brand-sub{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:.88rem;color:#605738;margin-top:2px}
+.label{display:block;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:#605738;margin-bottom:8px}
+.field{margin-bottom:18px}
+.input{width:100%;padding:11px 14px;background:#F4EEE1;border:1px solid rgba(96,87,56,.18);border-radius:9px;font-family:'Inter',sans-serif;font-size:.9rem;color:#1C2030;outline:none;transition:border-color .2s}
+.input:focus{border-color:#8A6B1F;background:#FAF9F5}
+.input::placeholder{color:#A09070}
+.btn{width:100%;padding:13px;background:#8A6B1F;color:#FAF9F5;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;border:none;border-radius:10px;cursor:pointer;transition:background .2s;margin-top:8px}
+.btn:hover{background:#6F551A}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.err{display:none;color:#B85450;font-size:.8rem;margin-top:12px;text-align:center}
+.footer{text-align:center;margin-top:28px;font-size:.72rem;color:#A09070}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="monogram">GM</div>
+    <div class="brand-line"></div>
+    <div class="brand-name">Gran Marquise</div>
+    <div class="brand-sub">Gestão da Qualidade</div>
+  </div>
+  <form id="form">
+    <div class="field">
+      <label class="label">Usuário</label>
+      <input class="input" type="text" id="user" placeholder="seu.usuario" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label class="label">Senha</label>
+      <input class="input" type="password" id="pass" placeholder="••••••••" autocomplete="current-password" required>
+    </div>
+    <button class="btn" type="submit" id="btn">Entrar</button>
+    <div class="err" id="err"></div>
+  </form>
+  <div class="footer">Acesso restrito — Hotel Gran Marquise</div>
+</div>
+<script>
+document.getElementById('form').onsubmit = async e => {
+  e.preventDefault();
+  const btn = document.getElementById('btn');
+  const err = document.getElementById('err');
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+  err.style.display = 'none';
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('user').value.trim(),
+        password: document.getElementById('pass').value
+      })
+    });
+    const d = await r.json();
+    if (d.ok) { location.href = '/'; return; }
+    err.textContent = d.error || 'Credenciais inválidas';
+    err.style.display = 'block';
+  } catch { err.textContent = 'Erro de conexão'; err.style.display = 'block'; }
+  btn.disabled = false;
+  btn.textContent = 'Entrar';
+};
+</script>
+</body>
+</html>
