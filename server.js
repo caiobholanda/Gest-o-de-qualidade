@@ -122,7 +122,7 @@ app.get('/api/resposta/:id', requireSession, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ ok: false, error: 'ID inválido' });
-    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/feedback/item/${id}`, {
+    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/gq/resposta/${id}`, {
       headers: { Authorization: `Bearer ${req.gqToken}` },
     });
     const data = await r.json();
