@@ -299,8 +299,7 @@ const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, 
 (function(){
   const now = new Date(), pad = n => String(n).padStart(2,'0');
   const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  state.to = fmt(now);
-  state.from = fmt(new Date(now.getTime() - 30*24*3600*1000));
+  state.from = state.to = fmt(now);
 })();
 
 function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
@@ -441,11 +440,12 @@ function renderComments(coms, secCount){
 
 function _defaultPeriod(){
   const now=new Date(),pad=n=>String(n).padStart(2,'0'),fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  return {defFrom:fmt(new Date(now.getTime()-30*24*3600*1000)),defTo:fmt(now)};
+  const today=fmt(now);
+  return {defFrom:today,defTo:today};
 }
 function renderFilters(){
   const chips = [];
-  if(state.periodCustom&&state.from&&state.to) chips.push({l:`Período: ${state.from.split('-').reverse().join('/')} → ${state.to.split('-').reverse().join('/')}`,k:'period'});
+  if(state.periodCustom&&state.from) chips.push({l:`Data: ${state.from.split('-').reverse().join('/')}`,k:'period'});
   const _tipoLabel={lazer:'Lazer',negocios:'Negócios',evento:'Evento',passante:'Passante',hospede:'Hóspede'};
   const _origemLabel={hospede:'Hóspede',colaborador:'Colaborador'};
   if(state.tipo) chips.push({l:`Tipo: ${_tipoLabel[state.tipo]||state.tipo}`,k:'tipo'});
@@ -454,8 +454,8 @@ function renderFilters(){
   return `<div class="filter-label">Filtros</div>
   <div class="filter-box">
     <div class="filter-group">
-      <span class="fl">Período</span>
-      <div class="fi"><input type="date" id="fFrom" value="${state.from}"><span style="color:var(--gold)">→</span><input type="date" id="fTo" value="${state.to}"></div>
+      <span class="fl">Data</span>
+      <div class="fi"><input type="date" id="fDate" value="${state.from}"></div>
     </div>
     <div class="filter-group">
       <span class="fl">Origem</span>
@@ -573,10 +573,10 @@ async function render(trigger){
       document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
     }
     document.getElementById('btnF')?.addEventListener('click',()=>{
-      const {defFrom,defTo}=_defaultPeriod();
-      state.from=document.getElementById('fFrom')?.value||defFrom;
-      state.to=document.getElementById('fTo')?.value||defTo;
-      state.periodCustom=(state.from!==defFrom||state.to!==defTo);
+      const {defFrom}=_defaultPeriod();
+      const d=document.getElementById('fDate')?.value||defFrom;
+      state.from=state.to=d;
+      state.periodCustom=(d!==defFrom);
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ')?.value||'';
@@ -585,10 +585,10 @@ async function render(trigger){
     });
     document.getElementById('fQ')?.addEventListener('keydown',e=>{
       if(e.key!=='Enter')return;
-      const {defFrom,defTo}=_defaultPeriod();
-      state.from=document.getElementById('fFrom')?.value||defFrom;
-      state.to=document.getElementById('fTo')?.value||defTo;
-      state.periodCustom=(state.from!==defFrom||state.to!==defTo);
+      const {defFrom}=_defaultPeriod();
+      const d=document.getElementById('fDate')?.value||defFrom;
+      state.from=state.to=d;
+      state.periodCustom=(d!==defFrom);
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ').value||'';
@@ -598,9 +598,8 @@ async function render(trigger){
     document.querySelectorAll('.chip-x').forEach(x=>x.addEventListener('click',()=>{
       const k=x.dataset.key;
       if(k==='period'){
-        const now=new Date(),pad=n=>String(n).padStart(2,'0');
-        const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-        state.to=fmt(now); state.from=fmt(new Date(now.getTime()-30*24*3600*1000));
+        const {defFrom,defTo}=_defaultPeriod();
+        state.from=defFrom; state.to=defTo;
         state.periodCustom=false;
       } else if(k in state)state[k]='';
       state.page=1;
