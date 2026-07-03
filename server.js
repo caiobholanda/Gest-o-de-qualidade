@@ -1,4 +1,3 @@
-import 'node:process';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
@@ -11,12 +10,21 @@ const PESQUISA_URL = (process.env.PESQUISA_URL || 'https://pesquisa-satisfacao.f
 const SSO_SECRET = process.env.SSO_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE = 'gq_sess';
+const FETCH_TIMEOUT = 10000;
 
 if (!SSO_SECRET) console.warn('[WARN] SSO_SECRET não configurado');
 if (!JWT_SECRET) console.warn('[WARN] JWT_SECRET não configurado');
 
 app.set('trust proxy', 1);
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
+
+// Cabeçalhos de segurança HTTP
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
 
 function getCookie(req, name) {
   const h = req.headers.cookie || '';
@@ -30,7 +38,8 @@ function setCookie(res, val) {
 }
 
 function clearCookie(res) {
-  res.appendHeader('Set-Cookie', `${COOKIE}=; Max-Age=0; Path=/; HttpOnly`);
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.appendHeader('Set-Cookie', `${COOKIE}=; Max-Age=0; Path=/; HttpOnly${secure}`);
 }
 
 function requireSession(req, res, next) {
@@ -39,8 +48,21 @@ function requireSession(req, res, next) {
     if (req.path.startsWith('/api/')) return res.status(401).json({ ok: false, error: 'Não autenticado' });
     return res.redirect('/acesso-hub.html');
   }
+  try {
+    jwt.verify(tok, JWT_SECRET);
+  } catch {
+    clearCookie(res);
+    if (req.path.startsWith('/api/')) return res.status(401).json({ ok: false, error: 'Sessão expirada' });
+    return res.redirect('/acesso-hub.html');
+  }
   req.gqToken = tok;
   next();
+}
+
+function fetchWithTimeout(url, opts) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT);
+  return fetch(url, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(timer));
 }
 
 // Health
@@ -58,7 +80,7 @@ app.get('/sso', (req, res) => {
     const role = isMaster ? 'master' : (siteRole || 'satisfacao');
     const token = jwt.sign({ sub: 0, username: email, role }, JWT_SECRET, { expiresIn: '8h' });
     setCookie(res, token);
-    if (theme) res.appendHeader('Set-Cookie', `gq_theme=${theme}; Max-Age=31536000; Path=/; SameSite=Lax`);
+    if (theme) res.appendHeader('Set-Cookie', `gq_theme=${theme}; HttpOnly; Max-Age=31536000; Path=/; SameSite=Lax`);
     res.redirect(nextPath || '/');
   } catch (e) {
     console.error('[SSO] erro:', e.message);
@@ -79,7 +101,7 @@ app.get('/api/logout', (_req, res) => { clearCookie(res); res.redirect('/acesso-
 async function proxyGQ(req, res, endpoint) {
   try {
     const url = `${PESQUISA_URL}/api/gq/${endpoint}?${new URLSearchParams(req.query)}`;
-    const r = await fetch(url, {
+    const r = await fetchWithTimeout(url, {
       headers: { Authorization: `Bearer ${req.gqToken}` },
     });
     const data = await r.json();
@@ -92,9 +114,27 @@ async function proxyGQ(req, res, endpoint) {
 app.get('/api/stats', requireSession, (req, res) => proxyGQ(req, res, 'stats'));
 app.get('/api/respostas', requireSession, (req, res) => proxyGQ(req, res, 'respostas'));
 
-app.post('/api/nova-resposta', requireSession, async (req, res) => {
+app.get('/api/resposta/:id', requireSession, async (req, res) => {
   try {
-    const r = await fetch(`${PESQUISA_URL}/api/feedback`, {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ ok: false, error: 'ID inválido' });
+    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/feedback/item/${id}`, {
+      headers: { Authorization: `Bearer ${req.gqToken}` },
+    });
+    const data = await r.json();
+    res.status(r.status).json(data);
+  } catch (e) {
+    res.status(502).json({ ok: false, error: 'Erro ao buscar detalhes' });
+  }
+});
+
+app.post('/api/nova-resposta', requireSession, async (req, res) => {
+  const b = req.body || {};
+  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
+  if (!b.email?.trim()) return res.status(400).json({ ok: false, error: 'E-mail obrigatório' });
+  if (!['hospede', 'colaborador'].includes(b.origem)) return res.status(400).json({ ok: false, error: 'Origem inválida' });
+  try {
+    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${req.gqToken}` },
       body: JSON.stringify(req.body),
@@ -106,8 +146,11 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
   }
 });
 
-// Root → dashboard (requires session)
+// Root e index.html → dashboard (requires session)
 app.get('/', requireSession, (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'index.html'))
+);
+app.get('/index.html', requireSession, (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 );
 

@@ -293,7 +293,8 @@ function updateTs() {
 }
 updateTs(); setInterval(updateTs, 60000);
 
-const state = { from:'', to:'', tipo:'', origem:'', q:'' };
+const LIMIT=20;
+const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1 };
 (function(){
   const now = new Date(), pad = n => String(n).padStart(2,'0');
   const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -303,6 +304,48 @@ const state = { from:'', to:'', tipo:'', origem:'', q:'' };
 
 function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
 function scoreClass(s){ if(s==='—')return'nenhum'; const n=parseInt(s); if(n>=85)return'alto'; if(n>=60)return'medio'; return'baixo'; }
+
+let _detOverlay=null;
+function ratingLabel(v){return{otimo:'Ótimo',bom:'Bom',regular:'Regular',ruim:'À Melhorar'}[v]||'—';}
+function ratingClass(v){return{otimo:'alto',bom:'medio',regular:'warn',ruim:'baixo'}[v]||'nenhum';}
+function detClose(){if(_detOverlay)_detOverlay.style.display='none';}
+async function openDetail(id){
+  if(!_detOverlay){
+    _detOverlay=document.createElement('div');
+    _detOverlay.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px 60px';
+    _detOverlay.addEventListener('click',e=>{if(e.target===_detOverlay)detClose();});
+    document.body.appendChild(_detOverlay);
+  }
+  _detOverlay.style.display='flex';
+  _detOverlay.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:700px;padding:36px;position:relative"><div class="empty">Carregando...</div></div>';
+  try{
+    const r=await fetch(`/api/resposta/${id}`);
+    const data=await r.json();
+    if(!data.ok)throw new Error(data.error||'Erro');
+    const it=data.item;
+    const dtFmt=s=>s?s.slice(0,10).split('-').reverse().join('/'):'—';
+    const rRow=(label,val)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-soft)"><span style="font-size:.87rem;color:var(--text)">${esc(label)}</span><span class="score ${ratingClass(val)}">${ratingLabel(val)}</span></div>`;
+    const sec1=[['A expectativa do tratamento',it.servicos_expectativa],['Explicação sobre benefícios e procedimentos',it.servicos_explicacao],['Atitude e qualidade dos serviços',it.servicos_atitude],['Técnica e habilidade da massoterapeuta',it.servicos_tecnica]].map(([l,v])=>rRow(l,v)).join('');
+    const sec2=[['Conforto e conservação do SPA',it.instalacoes_conforto],['Organização e atmosfera do ambiente',it.instalacoes_organizacao],['Itens de conveniência (roupões, toalhas)',it.instalacoes_conveniencia]].map(([l,v])=>rRow(l,v)).join('');
+    const html=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:700px;padding:36px;position:relative">
+      <button id="detCloseBtn" style="position:absolute;top:18px;right:18px;background:none;border:1px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:.85rem;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+      <div class="eyebrow" style="margin-bottom:6px">Avaliação #${id}</div>
+      <div style="font-size:1.25rem;font-weight:500;color:var(--text);margin-bottom:4px">${esc(it.nome||'Sem nome')}</div>
+      <div style="font-size:.82rem;color:var(--muted2);margin-bottom:20px">${esc(it.email||'—')} · ${esc(it.tipo_cliente||'—')} · ${dtFmt(it.submitted_at)}</div>
+      ${it.nome_massoterapeuta?`<div style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Massoterapeuta: <strong style="color:var(--text)">${esc(it.nome_massoterapeuta)}</strong>${it.tratamento_realizado?' &nbsp;·&nbsp; Tratamento: <strong style="color:var(--text)">'+esc(it.tratamento_realizado)+'</strong>':''}</div>`:''}
+      <div class="eyebrow" style="margin-bottom:8px;margin-top:4px">Serviços</div>${sec1}
+      ${it.servicos_comentario?`<div style="font-size:.82rem;color:var(--muted2);padding:8px 0 4px;font-style:italic">"${esc(it.servicos_comentario)}"</div>`:''}
+      <div class="eyebrow" style="margin-bottom:8px;margin-top:20px">Instalações</div>${sec2}
+      ${it.instalacoes_comentario?`<div style="font-size:.82rem;color:var(--muted2);padding:8px 0 4px;font-style:italic">"${esc(it.instalacoes_comentario)}"</div>`:''}
+      ${it.recomenda?`<div style="margin-top:20px;padding:12px 14px;background:var(--surface2);border-radius:8px;font-size:.88rem;color:var(--text)"><span class="eyebrow" style="display:block;margin-bottom:4px">Recomendação</span><strong>${it.recomenda==='sim'?'Sim':'Não'}</strong>${it.recomenda_qual?' — '+esc(it.recomenda_qual):''}${it.recomenda_porque?' — '+esc(it.recomenda_porque):''}</div>`:''}
+    </div>`;
+    _detOverlay.innerHTML=html;
+    _detOverlay.querySelector('#detCloseBtn')?.addEventListener('click',detClose);
+  }catch(e){
+    _detOverlay.querySelector('div').innerHTML=`<div class="empty">Erro ao carregar: ${esc(e.message)}</div><button class="btn-gold" style="margin:16px auto;display:block" id="detCloseBtn2">Fechar</button>`;
+    _detOverlay.querySelector('#detCloseBtn2')?.addEventListener('click',detClose);
+  }
+}
 
 function buildSegs(dist){
   const {otimo=0,bom=0,regular=0,ruim=0}=dist, tot=otimo+bom+regular+ruim||1, segs=[];
@@ -344,7 +387,7 @@ function renderSection(sec, i){
   <div class="q-list">${qs||'<div class="empty">Sem respostas no período</div>'}</div>`;
 }
 
-function renderComments(coms){
+function renderComments(coms, secCount){
   if(!coms.length)return'';
   const cols = coms.map(g=>`<div>
     <div class="comment-col-label">${esc(g.label)}</div>
@@ -354,7 +397,7 @@ function renderComments(coms){
       <div class="comment-meta">${esc(qt.author)} · <span class="mono">${esc(qt.date)}</span></div>
     </div>`).join('')}</div>
   </div>`).join('');
-  const numSec = String(coms.length ? 3 : 3).padStart(2,'0');
+  const numSec = String((secCount||0)+1).padStart(2,'0');
   return `<div class="sec-hdr"><div class="sec-hdr-left">
     <div class="sec-num">${numSec}</div>
     <div><div class="eyebrow">Seção</div><div class="sec-title">Comentários &amp; Respostas</div></div>
@@ -406,8 +449,8 @@ function renderFilters(){
   <div class="chips" id="chips">${chips.map(c=>`<div class="chip">${esc(c.l)}<span class="chip-x" data-key="${c.k}">✕</span></div>`).join('')}</div>`;
 }
 
-function renderTable(rows, total){
-  const rHtml = rows.map(r=>`<div class="tbl-row">
+function renderTable(rows, total, page){
+  const rHtml = rows.map(r=>`<div class="tbl-row" data-id="${r.id}">
     <div class="tbl-date">${esc(r.date)}</div>
     <div class="tbl-nome">${esc(r.nome)}</div>
     <div class="tbl-email">${esc(r.email)}</div>
@@ -416,11 +459,17 @@ function renderTable(rows, total){
     <div><span class="score ${scoreClass(r.media)}">${esc(r.media)}</span></div>
     <div class="tbl-ver"><span>Ver</span></div>
   </div>`).join('');
+  const totalPages=Math.ceil(total/LIMIT)||1;
+  const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
+    <button class="btn-icon" id="pgPrev" ${page<=1?'disabled':''} style="${page<=1?'opacity:.4;cursor:default':''}">← Anterior</button>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)">Página ${page} de ${totalPages}</span>
+    <button class="btn-icon" id="pgNext" ${page>=totalPages?'disabled':''} style="${page>=totalPages?'opacity:.4;cursor:default':''}">Próxima →</button>
+  </div>`:'';
   return `<div class="tbl-hdr"><div class="tbl-title">Avaliações</div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
   <div class="tbl-wrap">
     <div class="tbl-head"><div>Data</div><div>Nome</div><div>E-mail</div><div>Tipo</div><div>Origem</div><div>Média</div><div></div></div>
     ${rHtml||'<div class="empty">Nenhuma avaliação encontrada</div>'}
-  </div>`;
+  </div>${pgHtml}`;
 }
 
 function renderKpis(s){
@@ -456,27 +505,39 @@ async function render(){
   main.innerHTML = '<div class="empty">Carregando...</div>';
   try {
     const qs = new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem});
-    const qr = new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:1,limit:20});
+    const qr = new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:state.page,limit:LIMIT});
     const [sRes,rRes] = await Promise.all([fetch('/api/stats?'+qs),fetch('/api/respostas?'+qr)]);
     if(sRes.status===401||rRes.status===401){ location.href='/acesso-hub.html'; return; }
     const [s,r] = await Promise.all([sRes.json(),rRes.json()]);
     if(!s.ok) throw new Error(s.error);
-    const secsHtml = (s.secoes||[]).map((sec,i)=>renderSection(sec,i)).join('');
-    const comHtml = renderComments(s.comentarios||[]);
-    main.innerHTML = renderKpis(s)+secsHtml+comHtml+renderFilters()+renderTable(r.items||[],r.total||0);
+    const secoes = s.secoes||[];
+    const secsHtml = secoes.map((sec,i)=>renderSection(sec,i)).join('');
+    const comHtml = renderComments(s.comentarios||[], secoes.length);
+    main.innerHTML = renderKpis(s)+secsHtml+comHtml+renderFilters()+renderTable(r.items||[],r.total||0,state.page);
     document.getElementById('btnF')?.addEventListener('click',()=>{
       state.from=document.getElementById('fFrom')?.value||state.from;
       state.to=document.getElementById('fTo')?.value||state.to;
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ')?.value||'';
+      state.page=1;
       render();
     });
     document.querySelectorAll('.chip-x').forEach(x=>x.addEventListener('click',()=>{
       const k=x.dataset.key;
-      if(k==='period'){state.from='';state.to='';}
-      else if(k in state)state[k]='';
+      if(k==='period'){
+        const now=new Date(),pad=n=>String(n).padStart(2,'0');
+        const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+        state.to=fmt(now); state.from=fmt(new Date(now.getTime()-30*24*3600*1000));
+      } else if(k in state)state[k]='';
+      state.page=1;
       render();
+    }));
+    document.getElementById('pgPrev')?.addEventListener('click',()=>{if(state.page>1){state.page--;render();}});
+    document.getElementById('pgNext')?.addEventListener('click',()=>{state.page++;render();});
+    document.querySelectorAll('.tbl-ver span').forEach(span=>span.addEventListener('click',()=>{
+      const id=parseInt(span.closest('[data-id]')?.dataset.id);
+      if(id)openDetail(id);
     }));
   } catch(e) {
     const errDiv=document.createElement('div');
@@ -492,6 +553,7 @@ async function render(){
   }
 }
 render();
+setInterval(()=>{ render(); }, 5*60*1000);
 
 // ── Modal: Nova Pesquisa ──
 {
@@ -661,13 +723,42 @@ render();
 
   async function psSubmit(){
     const btn=document.getElementById('psSubmitBtn'),msgEl=document.getElementById('psMsg');
-    const nome=(document.getElementById('psNome')?.value||'').trim(),email=(document.getElementById('psEmail')?.value||'').trim();
+    const nome=(document.getElementById('psNome')?.value||'').trim();
+    const email=(document.getElementById('psEmail')?.value||'').trim();
     if(!nome||!email){msgEl.textContent='Nome e e-mail são obrigatórios.';msgEl.style.display='block';return;}
     btn.disabled=true; msgEl.style.display='none';
-    msgEl.textContent='Pesquisa enviada com sucesso! ✓';
-    msgEl.style.color='#15705A';
-    msgEl.style.display='block';
-    setTimeout(()=>{psClose();},2000);
+    try {
+      const payload={
+        nome,email,
+        apto:(document.getElementById('psApto')?.value||'').trim()||null,
+        telefone:(document.getElementById('psTel')?.value||'').trim()||null,
+        data_tratamento:(document.getElementById('psData')?.value||'').trim()||null,
+        tratamento_realizado:(document.getElementById('psTratamento')?.value||'').trim()||null,
+        nome_massoterapeuta:(document.getElementById('psMasso')?.value||'').trim()||null,
+        ...psRatings,
+        servicos_comentario:(document.getElementById('psComSec1')?.value||'').trim()||null,
+        instalacoes_comentario:(document.getElementById('psComSec2')?.value||'').trim()||null,
+        recomenda:psRecomenda||null,
+        recomenda_qual:psRecomenda==='sim'?(document.getElementById('psRecomendaQual')?.value||'').trim()||null:null,
+        recomenda_porque:psRecomenda==='nao'?(document.getElementById('psRecomendaPorque')?.value||'').trim()||null:null,
+        tipo_cliente:psTipo||'lazer',
+        origem:'hospede',
+        pesquisa_slug:'spa-locc-v1',
+        app_origem:'gestao-qualidade',
+      };
+      const r=await fetch('/api/nova-resposta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const data=await r.json();
+      if(!data.ok) throw new Error(data.error||'Erro ao enviar');
+      msgEl.textContent='Pesquisa enviada com sucesso! ✓';
+      msgEl.style.color='#15705A';
+      msgEl.style.display='block';
+      setTimeout(()=>{psClose();render();},2000);
+    } catch(e){
+      msgEl.textContent=`Erro: ${e.message}`;
+      msgEl.style.color='var(--danger)';
+      msgEl.style.display='block';
+      btn.disabled=false;
+    }
   }
 
   document.getElementById('btnNovaPesquisa')?.addEventListener('click',psOpen);
