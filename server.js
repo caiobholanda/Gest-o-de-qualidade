@@ -49,7 +49,7 @@ function requireSession(req, res, next) {
     return res.redirect('/acesso-hub.html');
   }
   try {
-    jwt.verify(tok, JWT_SECRET);
+    jwt.verify(tok, JWT_SECRET, { algorithms: ['HS256'] });
   } catch {
     clearCookie(res);
     if (req.path.startsWith('/api/')) return res.status(401).json({ ok: false, error: 'Sessão expirada' });
@@ -73,15 +73,16 @@ app.get('/sso', (req, res) => {
   const { sso_token, next: nextPath, theme } = req.query;
   if (!sso_token) return res.redirect('/acesso-hub.html');
   try {
-    const payload = jwt.verify(sso_token, SSO_SECRET);
+    const payload = jwt.verify(sso_token, SSO_SECRET, { algorithms: ['HS256'] });
     const email = (payload.email || '').trim().toLowerCase();
     const isMaster = payload.is_master || (payload.sites_admin || []).includes('pesquisa-satisfacao');
     const siteRole = payload.site_roles && payload.site_roles['pesquisa-satisfacao'];
     const role = isMaster ? 'master' : (siteRole || 'satisfacao');
     const token = jwt.sign({ sub: 0, username: email, role }, JWT_SECRET, { expiresIn: '8h' });
     setCookie(res, token);
-    if (theme) res.appendHeader('Set-Cookie', `gq_theme=${theme}; HttpOnly; Max-Age=31536000; Path=/; SameSite=Lax`);
-    res.redirect(nextPath || '/');
+    if (theme) res.appendHeader('Set-Cookie', `gq_theme=${theme}; Max-Age=31536000; Path=/; SameSite=Lax`);
+    const safeNext = nextPath && /^\/(?!\/)/.test(nextPath) ? nextPath : '/';
+    res.redirect(safeNext);
   } catch (e) {
     console.error('[SSO] erro:', e.message);
     res.redirect('/acesso-hub.html');
@@ -98,9 +99,12 @@ app.get('/login.html/sso', (req, res) => {
 app.get('/api/logout', (_req, res) => { clearCookie(res); res.redirect('/acesso-hub.html'); });
 
 // API proxy → pesquisa-satisfacao /api/gq/*
+const GQ_ALLOWED_PARAMS = new Set(['slug','from','to','tipo','origem','q','page','limit']);
 async function proxyGQ(req, res, endpoint) {
   try {
-    const url = `${PESQUISA_URL}/api/gq/${endpoint}?${new URLSearchParams(req.query)}`;
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(req.query)) if (GQ_ALLOWED_PARAMS.has(k)) params.set(k, v);
+    const url = `${PESQUISA_URL}/api/gq/${endpoint}?${params}`;
     const r = await fetchWithTimeout(url, {
       headers: { Authorization: `Bearer ${req.gqToken}` },
     });

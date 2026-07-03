@@ -6,7 +6,8 @@
 <title>Gestão da Qualidade — Gran Marquise</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='5' fill='%239C5843'/><text x='16' y='23' font-size='19' fill='white' font-family='Georgia,serif' text-anchor='middle'>G</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 [data-theme="light"]{
@@ -112,7 +113,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 .tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 18px var(--gold-dim)}
 .tbl-head{display:grid;grid-template-columns:110px 1.35fr 1.75fr 118px 104px 96px 60px;gap:16px;align-items:center;padding:13px 22px;border-bottom:1px solid var(--border);background:var(--surface2)}
 .tbl-head div{font-size:.62rem;letter-spacing:.11em;text-transform:uppercase;font-weight:600;color:var(--muted)}
-.tbl-row{display:grid;grid-template-columns:110px 1.35fr 1.75fr 118px 104px 96px 60px;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--border-soft);transition:background .2s}
+.tbl-row{display:grid;grid-template-columns:110px 1.35fr 1.75fr 118px 104px 96px 60px;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--border-soft);transition:background .2s;cursor:pointer}
 .tbl-row:last-child{border-bottom:none}
 .tbl-row:hover{background:var(--gold-dim2)}
 .tbl-date{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted2)}
@@ -144,7 +145,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 .btn-nova-pesquisa{font-family:'Helvetica Neue',Arial,sans-serif;font-size:.78rem;font-weight:600;color:#ECE4D2;background:var(--gold);border:none;border-radius:8px;padding:7px 16px;cursor:pointer;transition:background .2s;letter-spacing:.04em}
 .btn-nova-pesquisa:hover{background:var(--gold-dark)}
 #psOverlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;overflow-y:auto}
-#psOverlay{display:none;position:fixed;inset:0;z-index:200;overflow-y:auto;background:var(--bg)}
+.score.warn{color:var(--warn);background:var(--warn-dim)}
 #psModal{--bg:#ECE4D2;--bg-alt:#E3DACC;--bg-surf:#F5EFE2;--fg:#1A1A1A;--fg-2:#4A4A4A;--fg-3:#6B6B6B;--fg-4:#9B9B9B;--border:#B8B8B8;--bord-s:#C8B89A;--gold:#9C5843;--gold-s:#996442;--gold-d:#7A4334;--ui:#9C5843;--ui-soft:#996442;--ui-dark:#7A4334;--err:#B85450;background:var(--bg);color:var(--fg);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;width:100%;max-width:820px;margin:0 auto;box-shadow:0 24px 80px rgba(0,0,0,.35);position:relative}
 [data-theme="dark"] #psModal{--bg:#202C28;--bg-alt:#293630;--bg-surf:#2F3D38;--fg:#ECE4D2;--fg-2:#C8B89A;--fg-3:#8A7B6A;--fg-4:#6A5E56;--border:#3F524B;--bord-s:#4A5E57;--gold:#C4916A;--gold-s:#B87A52;--gold-d:#B87060;--ui:#C4916A;--ui-soft:#B87A52;--ui-dark:#B87060}
 .ps-sticky-hdr{position:sticky;top:0;z-index:10;background:var(--bg);padding:10px 24px 12px;transition:background .6s cubic-bezier(0.16,1,0.3,1)}
@@ -275,7 +276,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 (function(){
 'use strict';
 const body = document.body;
-const saved = localStorage.getItem('gq_theme') || 'light';
+const saved = localStorage.getItem('gq_theme') || (document.cookie.match(/(?:^|;\s*)gq_theme=([^;]+)/)||[])[1] || 'light';
 body.setAttribute('data-theme', saved);
 const btn = document.getElementById('btnTheme');
 btn.textContent = saved === 'dark' ? '☀' : '☾';
@@ -294,7 +295,7 @@ function updateTs() {
 updateTs(); setInterval(updateTs, 60000);
 
 const LIMIT=20;
-const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1 };
+const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1 };
 (function(){
   const now = new Date(), pad = n => String(n).padStart(2,'0');
   const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -308,15 +309,25 @@ function scoreClass(s){ if(s==='—')return'nenhum'; const n=parseInt(s); if(n>=
 let _detOverlay=null;
 function ratingLabel(v){return{otimo:'Ótimo',bom:'Bom',regular:'Regular',ruim:'À Melhorar'}[v]||'—';}
 function ratingClass(v){return{otimo:'alto',bom:'medio',regular:'warn',ruim:'baixo'}[v]||'nenhum';}
-function detClose(){if(_detOverlay)_detOverlay.style.display='none';}
+let _detEscHandler=null;
+function detClose(){
+  if(!_detOverlay)return;
+  _detOverlay.style.display='none';
+  if(_detEscHandler){document.removeEventListener('keydown',_detEscHandler);_detEscHandler=null;}
+}
 async function openDetail(id){
   if(!_detOverlay){
     _detOverlay=document.createElement('div');
     _detOverlay.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px 60px';
+    _detOverlay.setAttribute('tabindex','-1');
     _detOverlay.addEventListener('click',e=>{if(e.target===_detOverlay)detClose();});
     document.body.appendChild(_detOverlay);
   }
+  if(_detEscHandler)document.removeEventListener('keydown',_detEscHandler);
+  _detEscHandler=e=>{if(e.key==='Escape')detClose();};
+  document.addEventListener('keydown',_detEscHandler);
   _detOverlay.style.display='flex';
+  _detOverlay.focus();
   _detOverlay.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:700px;padding:36px;position:relative"><div class="empty">Carregando...</div></div>';
   try{
     const r=await fetch(`/api/resposta/${id}`);
@@ -500,20 +511,39 @@ function renderKpis(s){
   </div>`;
 }
 
-async function render(){
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="empty">Carregando...</div>';
+let _renderCtrl=null, _lastActivity=Date.now();
+['mousemove','keydown','mousedown','touchstart'].forEach(ev=>
+  document.addEventListener(ev,()=>_lastActivity=Date.now(),{passive:true})
+);
+
+async function render(trigger){
+  if(_renderCtrl)_renderCtrl.abort();
+  _renderCtrl=new AbortController();
+  const {signal}=_renderCtrl;
+  const isAuto=!trigger;
+  const savedScrollY=window.scrollY;
+  const main=document.getElementById('main');
+  main.style.opacity='0.5';
+  main.style.pointerEvents='none';
   try {
-    const qs = new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem});
-    const qr = new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:state.page,limit:LIMIT});
-    const [sRes,rRes] = await Promise.all([fetch('/api/stats?'+qs),fetch('/api/respostas?'+qr)]);
-    if(sRes.status===401||rRes.status===401){ location.href='/acesso-hub.html'; return; }
-    const [s,r] = await Promise.all([sRes.json(),rRes.json()]);
-    if(!s.ok) throw new Error(s.error);
-    const secoes = s.secoes||[];
-    const secsHtml = secoes.map((sec,i)=>renderSection(sec,i)).join('');
-    const comHtml = renderComments(s.comentarios||[], secoes.length);
-    main.innerHTML = renderKpis(s)+secsHtml+comHtml+renderFilters()+renderTable(r.items||[],r.total||0,state.page);
+    const qs=new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem});
+    const qr=new URLSearchParams({slug:'spa-locc-v1',from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:state.page,limit:LIMIT});
+    const [sRes,rRes]=await Promise.all([fetch('/api/stats?'+qs,{signal}),fetch('/api/respostas?'+qr,{signal})]);
+    if(sRes.status===401||rRes.status===401){location.href='/acesso-hub.html';return;}
+    const [s,r]=await Promise.all([sRes.json(),rRes.json()]);
+    if(!s.ok)throw new Error(s.error);
+    const secoes=s.secoes||[];
+    const secsHtml=secoes.map((sec,i)=>renderSection(sec,i)).join('');
+    const comHtml=renderComments(s.comentarios||[],secoes.length);
+    state.totalPages=Math.ceil((r.total||0)/LIMIT)||1;
+    main.innerHTML=renderKpis(s)+secsHtml+comHtml+renderFilters()+renderTable(r.items||[],r.total||0,state.page);
+    main.style.opacity='';
+    main.style.pointerEvents='';
+    if(isAuto){
+      window.scrollTo({top:savedScrollY,behavior:'instant'});
+    } else {
+      document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
     document.getElementById('btnF')?.addEventListener('click',()=>{
       state.from=document.getElementById('fFrom')?.value||state.from;
       state.to=document.getElementById('fTo')?.value||state.to;
@@ -521,7 +551,13 @@ async function render(){
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ')?.value||'';
       state.page=1;
-      render();
+      render('filter');
+    });
+    document.getElementById('fQ')?.addEventListener('keydown',e=>{
+      if(e.key!=='Enter')return;
+      state.q=document.getElementById('fQ').value||'';
+      state.page=1;
+      render('filter');
     });
     document.querySelectorAll('.chip-x').forEach(x=>x.addEventListener('click',()=>{
       const k=x.dataset.key;
@@ -531,29 +567,32 @@ async function render(){
         state.to=fmt(now); state.from=fmt(new Date(now.getTime()-30*24*3600*1000));
       } else if(k in state)state[k]='';
       state.page=1;
-      render();
+      render('chip');
     }));
-    document.getElementById('pgPrev')?.addEventListener('click',()=>{if(state.page>1){state.page--;render();}});
-    document.getElementById('pgNext')?.addEventListener('click',()=>{state.page++;render();});
-    document.querySelectorAll('.tbl-ver span').forEach(span=>span.addEventListener('click',()=>{
-      const id=parseInt(span.closest('[data-id]')?.dataset.id);
+    document.getElementById('pgPrev')?.addEventListener('click',()=>{if(state.page>1){state.page--;render('page');}});
+    document.getElementById('pgNext')?.addEventListener('click',()=>{if(state.page<state.totalPages){state.page++;render('page');}});
+    document.querySelectorAll('.tbl-row').forEach(row=>row.addEventListener('click',()=>{
+      const id=parseInt(row.dataset.id);
       if(id)openDetail(id);
     }));
   } catch(e) {
+    if(e.name==='AbortError')return;
+    main.style.opacity='';
+    main.style.pointerEvents='';
     const errDiv=document.createElement('div');
     errDiv.className='empty';
     errDiv.innerHTML=`Erro ao carregar: ${esc(e.message)}<br><br>`;
     const retryBtn=document.createElement('button');
     retryBtn.className='btn-gold';
     retryBtn.textContent='Tentar novamente';
-    retryBtn.addEventListener('click',render);
+    retryBtn.addEventListener('click',()=>render('retry'));
     errDiv.appendChild(retryBtn);
     main.innerHTML='';
     main.appendChild(errDiv);
   }
 }
-render();
-setInterval(()=>{ render(); }, 5*60*1000);
+render('init');
+setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
 
 // ── Modal: Nova Pesquisa ──
 {
@@ -645,6 +684,7 @@ setInterval(()=>{ render(); }, 5*60*1000);
           <button type="button" class="radio-opt" data-tipo="lazer"><span class="radio-dot" id="psDotLazer"></span><span><span style="color:var(--fg)">Lazer</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Leisure</span></span></button>
           <button type="button" class="radio-opt" data-tipo="negocios"><span class="radio-dot" id="psDotNegocios"></span><span><span style="color:var(--fg)">Negócios</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Business</span></span></button>
           <button type="button" class="radio-opt" data-tipo="evento"><span class="radio-dot" id="psDotEvento"></span><span><span style="color:var(--fg)">Evento</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Event</span></span></button>
+          <button type="button" class="radio-opt" data-tipo="passante"><span class="radio-dot" id="psDotPassante"></span><span><span style="color:var(--fg)">Passante</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Walk-in</span></span></button>
         </div>
       </section>
       <footer style="margin-bottom:48px">
@@ -726,6 +766,7 @@ setInterval(()=>{ render(); }, 5*60*1000);
     const nome=(document.getElementById('psNome')?.value||'').trim();
     const email=(document.getElementById('psEmail')?.value||'').trim();
     if(!nome||!email){msgEl.textContent='Nome e e-mail são obrigatórios.';msgEl.style.display='block';return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msgEl.textContent='E-mail inválido.';msgEl.style.display='block';return;}
     btn.disabled=true; msgEl.style.display='none';
     try {
       const payload={
