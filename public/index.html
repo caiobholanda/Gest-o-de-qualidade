@@ -369,7 +369,7 @@ async function openDetail(id){
         </div>
         <div style="margin-bottom:32px">
           <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em">04</span><span style="font-weight:500;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--text)">TIPO DE CLIENTE</span></div>
-          <div style="display:flex;gap:28px;flex-wrap:wrap">${['lazer','negocios','evento','passante'].map(t=>rRadio(it.tipo_cliente===t,tipoLabel[t]||t,null)).join('')}</div>
+          <div style="display:flex;gap:28px;flex-wrap:wrap">${['lazer','negocios','evento'].map(t=>rRadio(it.tipo_cliente===t,tipoLabel[t]||t,null)).join('')}</div>
         </div>
       </div>
     </div>`;
@@ -706,7 +706,6 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           <button type="button" class="radio-opt" data-tipo="lazer"><span class="radio-dot" id="psDotLazer"></span><span><span style="color:var(--fg)">Lazer</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Leisure</span></span></button>
           <button type="button" class="radio-opt" data-tipo="negocios"><span class="radio-dot" id="psDotNegocios"></span><span><span style="color:var(--fg)">Negócios</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Business</span></span></button>
           <button type="button" class="radio-opt" data-tipo="evento"><span class="radio-dot" id="psDotEvento"></span><span><span style="color:var(--fg)">Evento</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Event</span></span></button>
-          <button type="button" class="radio-opt" data-tipo="passante"><span class="radio-dot" id="psDotPassante"></span><span><span style="color:var(--fg)">Passante</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Walk-in</span></span></button>
         </div>
       </section>
       <footer style="margin-bottom:48px">
@@ -737,7 +736,6 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     psOverlay.innerHTML=psBuildModal();
     psOverlay.style.display='block';
     document.body.style.overflow='hidden';
-    psOverlay.onclick=e=>{if(e.target===psOverlay)psClose();};
     document.getElementById('psClose')?.addEventListener('click',psClose);
     psOverlay.querySelectorAll('.smiley-btn').forEach(btn=>{
       btn.addEventListener('click',()=>{
