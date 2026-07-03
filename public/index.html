@@ -316,6 +316,7 @@ let _detOverlay=null, _detEscHandler=null;
 function detClose(){
   if(!_detOverlay)return;
   _detOverlay.style.display='none';
+  document.body.style.overflow='';
   if(_detEscHandler){document.removeEventListener('keydown',_detEscHandler);_detEscHandler=null;}
 }
 async function openDetail(id){
@@ -330,6 +331,7 @@ async function openDetail(id){
   document.addEventListener('keydown',_detEscHandler);
   _detOverlay.style.display='block';
   _detOverlay.scrollTop=0;
+  document.body.style.overflow='hidden';
   _detOverlay.focus();
   const closeBtn=`<button id="detCloseBtn" style="background:none;border:1px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:.85rem;display:flex;align-items:center;justify-content:center;flex:none">✕</button>`;
   _detOverlay.innerHTML=`<div style="background:var(--surface);color:var(--text);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;width:100%;max-width:800px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35)"><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border-soft)">${closeBtn}</div><div class="empty" style="padding:60px 24px">Carregando...</div></div>`;
