@@ -296,7 +296,13 @@ updateTs(); setInterval(updateTs, 60000);
 
 const LIMIT=20;
 const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, periodCustom:false };
-// state.from e state.to iniciam vazios = sem filtro de data
+(function(){
+  try {
+    const s=JSON.parse(localStorage.getItem('gq_filters')||'{}');
+    ['from','to','tipo','origem','q','periodCustom'].forEach(k=>{ if(k in s) state[k]=s[k]; });
+    if(s.page) state.page=s.page;
+  } catch(e){}
+})();
 
 function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
 function scoreClass(s){ if(s==='—')return'nenhum'; const n=parseInt(s); if(n>=85)return'alto'; if(n>=60)return'medio'; return'baixo'; }
@@ -541,6 +547,7 @@ let _renderCtrl=null, _lastActivity=Date.now();
 );
 
 async function render(trigger){
+  try { localStorage.setItem('gq_filters',JSON.stringify({from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:state.page,periodCustom:state.periodCustom})); } catch(e){}
   if(_renderCtrl)_renderCtrl.abort();
   _renderCtrl=new AbortController();
   const {signal}=_renderCtrl;
