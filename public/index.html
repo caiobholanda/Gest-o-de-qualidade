@@ -637,7 +637,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     {key:'instalacoes_conveniencia',pt:'Os itens de conveniência (roupões, toalhas, etc) fornecidos durante o tratamento foram suficientes',en:'Were the convenience items (bathrobes, towels, etc.) provided during treatment sufficient?'},
   ];
 
-  let psRatings={}, psRecomenda=null, psTipo=null;
+  let psRatings={}, psRecomenda=null, psTipo=null, psOrigem='hospede';
   const psOverlay = document.createElement('div');
   psOverlay.id = 'psOverlay';
   document.body.appendChild(psOverlay);
@@ -702,6 +702,10 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       </section>
       <section>
         <div class="sec-heading"><span class="sec-num">04</span><span class="sec-title">TIPO DE CLIENTE</span><span class="en sec-title-en">Type of guest</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button type="button" class="radio-opt" data-origem="hospede"><span class="radio-dot on" id="psDotHospede"></span><span style="color:var(--fg)">Hóspede</span></button>
+          <button type="button" class="radio-opt" data-origem="colaborador"><span class="radio-dot" id="psDotColab"></span><span style="color:var(--fg)">Colaborador</span></button>
+        </div>
         <div class="radio-list client-type">
           <button type="button" class="radio-opt" data-tipo="lazer"><span class="radio-dot" id="psDotLazer"></span><span><span style="color:var(--fg)">Lazer</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Leisure</span></span></button>
           <button type="button" class="radio-opt" data-tipo="negocios"><span class="radio-dot" id="psDotNegocios"></span><span><span style="color:var(--fg)">Negócios</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Business</span></span></button>
@@ -732,7 +736,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
   }
 
   function psOpen(){
-    psRatings={}; psRecomenda=null; psTipo=null;
+    psRatings={}; psRecomenda=null; psTipo=null; psOrigem='hospede';
     psOverlay.innerHTML=psBuildModal();
     psOverlay.style.display='block';
     document.body.style.overflow='hidden';
@@ -776,6 +780,15 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         psUpdateProgress();
       });
     });
+    psOverlay.querySelectorAll('[data-origem]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        psOrigem=btn.dataset.origem;
+        psOverlay.querySelectorAll('[data-origem]').forEach(b=>{
+          const dot=b.querySelector('.radio-dot');
+          if(dot)dot.classList.toggle('on',b.dataset.origem===psOrigem);
+        });
+      });
+    });
     document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
   }
 
@@ -803,7 +816,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         recomenda_qual:psRecomenda==='sim'?(document.getElementById('psRecomendaQual')?.value||'').trim()||null:null,
         recomenda_porque:psRecomenda==='nao'?(document.getElementById('psRecomendaPorque')?.value||'').trim()||null:null,
         tipo_cliente:psTipo||'lazer',
-        origem:'hospede',
+        origem:psOrigem||'hospede',
         pesquisa_slug:'spa-locc-v1',
         app_origem:'gestao-qualidade',
       };
