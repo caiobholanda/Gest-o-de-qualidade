@@ -439,9 +439,14 @@ function renderComments(coms, secCount){
   <div class="comment-grid">${cols}</div>`;
 }
 
+function _defaultPeriod(){
+  const now=new Date(),pad=n=>String(n).padStart(2,'0'),fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  return {defFrom:fmt(new Date(now.getTime()-30*24*3600*1000)),defTo:fmt(now)};
+}
 function renderFilters(){
   const chips = [];
-  if(state.from&&state.to) chips.push({l:`Período: ${state.from.split('-').reverse().join('/')} → ${state.to.split('-').reverse().join('/')}`,k:'period'});
+  const {defFrom,defTo}=_defaultPeriod();
+  if(state.from&&state.to&&(state.from!==defFrom||state.to!==defTo)) chips.push({l:`Período: ${state.from.split('-').reverse().join('/')} → ${state.to.split('-').reverse().join('/')}`,k:'period'});
   if(state.tipo) chips.push({l:`Tipo: ${state.tipo}`,k:'tipo'});
   if(state.origem) chips.push({l:`Origem: ${state.origem}`,k:'origem'});
   if(state.q) chips.push({l:`Busca: ${state.q}`,k:'q'});
@@ -567,8 +572,9 @@ async function render(trigger){
       document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
     }
     document.getElementById('btnF')?.addEventListener('click',()=>{
-      state.from=document.getElementById('fFrom')?.value||state.from;
-      state.to=document.getElementById('fTo')?.value||state.to;
+      const {defFrom,defTo}=_defaultPeriod();
+      state.from=document.getElementById('fFrom')?.value||defFrom;
+      state.to=document.getElementById('fTo')?.value||defTo;
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ')?.value||'';
