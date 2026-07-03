@@ -563,7 +563,7 @@ async function render(trigger){
     main.style.pointerEvents='';
     if(isAuto){
       window.scrollTo({top:savedScrollY,behavior:'instant'});
-    } else {
+    } else if(trigger==='filter'||trigger==='chip'||trigger==='page'){
       document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
     }
     document.getElementById('btnF')?.addEventListener('click',()=>{
