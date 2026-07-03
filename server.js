@@ -99,7 +99,7 @@ app.get('/login.html/sso', (req, res) => {
 app.get('/api/logout', (_req, res) => { clearCookie(res); res.redirect('/acesso-hub.html'); });
 
 // API proxy → pesquisa-satisfacao /api/gq/*
-const GQ_ALLOWED_PARAMS = new Set(['slug','from','to','tipo','origem','q','page','limit']);
+const GQ_ALLOWED_PARAMS = new Set(['slug','from','to','tipo','origem','q','page','limit','massagista']);
 async function proxyGQ(req, res, endpoint) {
   try {
     const params = new URLSearchParams();

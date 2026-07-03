@@ -295,7 +295,7 @@ function updateTs() {
 updateTs(); setInterval(updateTs, 60000);
 
 const LIMIT=20;
-const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1 };
+const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, periodCustom:false };
 (function(){
   const now = new Date(), pad = n => String(n).padStart(2,'0');
   const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -445,10 +445,11 @@ function _defaultPeriod(){
 }
 function renderFilters(){
   const chips = [];
-  const {defFrom,defTo}=_defaultPeriod();
-  if(state.from&&state.to&&(state.from!==defFrom||state.to!==defTo)) chips.push({l:`Período: ${state.from.split('-').reverse().join('/')} → ${state.to.split('-').reverse().join('/')}`,k:'period'});
-  if(state.tipo) chips.push({l:`Tipo: ${state.tipo}`,k:'tipo'});
-  if(state.origem) chips.push({l:`Origem: ${state.origem}`,k:'origem'});
+  if(state.periodCustom&&state.from&&state.to) chips.push({l:`Período: ${state.from.split('-').reverse().join('/')} → ${state.to.split('-').reverse().join('/')}`,k:'period'});
+  const _tipoLabel={lazer:'Lazer',negocios:'Negócios',evento:'Evento',passante:'Passante',hospede:'Hóspede'};
+  const _origemLabel={hospede:'Hóspede',colaborador:'Colaborador'};
+  if(state.tipo) chips.push({l:`Tipo: ${_tipoLabel[state.tipo]||state.tipo}`,k:'tipo'});
+  if(state.origem) chips.push({l:`Origem: ${_origemLabel[state.origem]||state.origem}`,k:'origem'});
   if(state.q) chips.push({l:`Busca: ${state.q}`,k:'q'});
   return `<div class="filter-label">Filtros</div>
   <div class="filter-box">
@@ -575,6 +576,7 @@ async function render(trigger){
       const {defFrom,defTo}=_defaultPeriod();
       state.from=document.getElementById('fFrom')?.value||defFrom;
       state.to=document.getElementById('fTo')?.value||defTo;
+      state.periodCustom=(state.from!==defFrom||state.to!==defTo);
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ')?.value||'';
@@ -583,6 +585,12 @@ async function render(trigger){
     });
     document.getElementById('fQ')?.addEventListener('keydown',e=>{
       if(e.key!=='Enter')return;
+      const {defFrom,defTo}=_defaultPeriod();
+      state.from=document.getElementById('fFrom')?.value||defFrom;
+      state.to=document.getElementById('fTo')?.value||defTo;
+      state.periodCustom=(state.from!==defFrom||state.to!==defTo);
+      state.tipo=document.getElementById('fTipo')?.value||'';
+      state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ').value||'';
       state.page=1;
       render('filter');
@@ -593,6 +601,7 @@ async function render(trigger){
         const now=new Date(),pad=n=>String(n).padStart(2,'0');
         const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
         state.to=fmt(now); state.from=fmt(new Date(now.getTime()-30*24*3600*1000));
+        state.periodCustom=false;
       } else if(k in state)state[k]='';
       state.page=1;
       render('chip');
