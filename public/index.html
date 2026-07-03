@@ -296,11 +296,7 @@ updateTs(); setInterval(updateTs, 60000);
 
 const LIMIT=20;
 const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, periodCustom:false };
-(function(){
-  const now = new Date(), pad = n => String(n).padStart(2,'0');
-  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  state.from = state.to = fmt(now);
-})();
+// state.from e state.to iniciam vazios = sem filtro de data
 
 function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
 function scoreClass(s){ if(s==='—')return'nenhum'; const n=parseInt(s); if(n>=85)return'alto'; if(n>=60)return'medio'; return'baixo'; }
@@ -573,10 +569,9 @@ async function render(trigger){
       document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
     }
     document.getElementById('btnF')?.addEventListener('click',()=>{
-      const {defFrom}=_defaultPeriod();
-      const d=document.getElementById('fDate')?.value||defFrom;
+      const d=document.getElementById('fDate')?.value||'';
       state.from=state.to=d;
-      state.periodCustom=(d!==defFrom);
+      state.periodCustom=!!d;
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ')?.value||'';
@@ -585,10 +580,9 @@ async function render(trigger){
     });
     document.getElementById('fQ')?.addEventListener('keydown',e=>{
       if(e.key!=='Enter')return;
-      const {defFrom}=_defaultPeriod();
-      const d=document.getElementById('fDate')?.value||defFrom;
+      const d=document.getElementById('fDate')?.value||'';
       state.from=state.to=d;
-      state.periodCustom=(d!==defFrom);
+      state.periodCustom=!!d;
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ').value||'';
@@ -598,8 +592,7 @@ async function render(trigger){
     document.querySelectorAll('.chip-x').forEach(x=>x.addEventListener('click',()=>{
       const k=x.dataset.key;
       if(k==='period'){
-        const {defFrom,defTo}=_defaultPeriod();
-        state.from=defFrom; state.to=defTo;
+        state.from=state.to='';
         state.periodCustom=false;
       } else if(k in state)state[k]='';
       state.page=1;
