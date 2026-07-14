@@ -369,6 +369,7 @@ async function openDetail(id){
           <div style="font-size:.82rem;color:var(--muted2)">${esc(it.email||'—')} · ${esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente||'—')} · ${esc(dtFmt(it.submitted_at))}</div>
           ${it.nome_massoterapeuta?`<div style="font-size:.8rem;color:var(--muted);margin-top:10px">Massoterapeuta: <strong style="color:var(--text)">${esc(it.nome_massoterapeuta)}</strong>${it.tratamento_realizado?` &nbsp;·&nbsp; Tratamento: <strong style="color:var(--text)">${esc(it.tratamento_realizado)}</strong>`:''}</div>`:''}
           ${it.controle_interno?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Controle interno: <strong style="color:var(--text)">${esc(it.controle_interno)}</strong></div>`:''}
+          ${it.inserido_por?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Inserido por: <strong style="color:var(--text)">${esc(it.inserido_por)}</strong> em ${it.submitted_at?dtFmt(it.submitted_at)+' '+it.submitted_at.slice(11,16):'—'}</div>`:''}
         </div>
         ${rSec('01','SERVIÇOS',_SEC1,it.servicos_comentario)}
         ${rSec('02','INSTALAÇÕES',_SEC2,it.instalacoes_comentario)}
@@ -466,7 +467,7 @@ function renderFilters(){
   <div class="filter-box">
     <div class="filter-group">
       <span class="fl">Data</span>
-      <div class="fi"><input type="date" id="fDate" value="${state.from}"></div>
+      <div class="fi"><input type="date" id="fDate" value="${state.from}" max="${psToday()}"></div>
     </div>
     <div class="filter-group">
       <span class="fl">Origem</span>
@@ -698,7 +699,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           <div class="field"><label><span class="field-label-pt">Controle interno</span></label><input type="text" id="psControleInterno" autocomplete="off" placeholder="Nº do questionário físico" maxlength="20"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div><div class="ps-field-err" id="psEmailErr">E-mail inválido.</div></div>
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999" maxlength="19"><div class="fill"></div><div class="ps-field-err" id="psTelErr">Telefone inválido. Ex: 85 99999-9999 ou +55 85 99999-9999</div></div>
-          <div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="psData" value="${psToday()}"><div class="fill"></div></div>
+          <div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="psData" value="${psToday()}" max="${psToday()}"><div class="fill"></div></div>
           <div class="field ps-combo"><label><span class="field-label-pt">Tratamento realizado</span></label><input type="text" id="psTratamento" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psTratamentoList" style="display:none"></div></div>
           <div class="field field-full ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
         </div>
@@ -919,6 +920,8 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
     if(!psValidateEmail()){msgEl.textContent='E-mail inválido.';msgEl.style.display='block';return;}
     if(!psValidateTel()){msgEl.textContent='Telefone inválido. Ex: 85 99999-9999';msgEl.style.display='block';return;}
     if(!psValidateApto()){msgEl.textContent='Corrija o Nº do Apto antes de enviar.';msgEl.style.display='block';return;}
+    const _dataTrat=(document.getElementById('psData')?.value||'').trim();
+    if(_dataTrat&&_dataTrat>psToday()){msgEl.textContent='A data do tratamento não pode ser futura.';msgEl.style.display='block';return;}
     btn.disabled=true; msgEl.style.display='none';
     try {
       const payload={

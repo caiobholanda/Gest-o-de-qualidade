@@ -137,11 +137,17 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
   if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
   if (!b.email?.trim()) return res.status(400).json({ ok: false, error: 'E-mail obrigatório' });
   if (!['hospede', 'colaborador'].includes(b.origem)) return res.status(400).json({ ok: false, error: 'Origem inválida' });
+  if (b.data_tratamento) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (b.data_tratamento > today) return res.status(400).json({ ok: false, error: 'Data do tratamento não pode ser futura' });
+  }
+  const decoded = jwt.decode(req.gqToken);
+  const inserido_por = decoded?.username || null;
   try {
     const r = await fetchWithTimeout(`${PESQUISA_URL}/api/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${req.gqToken}` },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify({ ...req.body, inserido_por }),
     });
     const data = await r.json();
     res.status(r.status).json(data);
