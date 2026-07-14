@@ -694,7 +694,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       <section>
         <div class="field-grid">
           <div class="field"><label><span class="field-label-pt">Nome</span> <span class="field-label-en">/ Name</span></label><input type="text" id="psNome" autocomplete="off"><div class="fill"></div></div>
-          <div class="field"><label><span class="field-label-pt">Nº do Apto</span> <span class="field-label-en">/ Room number</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201"><div class="fill"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
+          <div class="field"><label><span class="field-label-pt">Nº do Apto</span> <span class="field-label-en">/ Room number</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span> <span class="field-label-en">/ E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span> <span class="field-label-en">/ Phone</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">Data</span> <span class="field-label-en">/ Date</span></label><input type="date" id="psData" value="${psToday()}"><div class="fill"></div></div>
