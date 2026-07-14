@@ -467,7 +467,7 @@ function renderFilters(){
   <div class="filter-box">
     <div class="filter-group">
       <span class="fl">Data</span>
-      <div class="fi"><input type="date" id="fDate" value="${state.from}" max="${psToday()}"></div>
+      <div class="fi"><input type="date" id="fDate" value="${state.from}" max="${new Date().toISOString().slice(0,10)}"></div>
     </div>
     <div class="filter-group">
       <span class="fl">Origem</span>
