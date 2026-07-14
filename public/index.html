@@ -784,7 +784,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         if(errEl)errEl.style.display='none';
       }));
     }
-    inp.addEventListener('focus',()=>showList(inp.value));
+    inp.addEventListener('focus',()=>{ if(!startOnly||inp.value.trim())showList(inp.value); });
     inp.addEventListener('input',()=>showList(inp.value));
     inp.addEventListener('blur',()=>setTimeout(()=>{lst.style.display='none';},150));
   }
