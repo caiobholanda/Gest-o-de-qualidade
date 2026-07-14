@@ -210,7 +210,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 #psModal .submit-btn:hover:not(:disabled)::after{transform:scaleX(1)}
 #psModal .submit-err{color:var(--err);font-size:13.5px;text-align:center;display:none}
 #psModal .form-foot{font-size:15px;line-height:1.7;color:var(--fg-2);text-align:center}
-#psModal .page-foot{text-align:center;font-size:11.5px;color:var(--border);line-height:1.8;margin-top:32px}
+#psModal .page-foot{text-align:center;font-size:11.5px;color:var(--muted);line-height:1.8;margin-top:32px}
 @media(max-width:680px){
   #psModal .form-wrap{padding:32px 18px 60px}
   #psModal .field-grid{grid-template-columns:1fr;gap:26px}
@@ -698,7 +698,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           <div class="field ps-combo"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-dropdown" id="psAptoList" style="display:none"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
           <div class="field"><label><span class="field-label-pt">Controle interno</span></label><input type="text" id="psControleInterno" inputmode="numeric" autocomplete="off" placeholder="Nº do questionário físico" maxlength="20"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div><div class="ps-field-err" id="psEmailErr">E-mail inválido.</div></div>
-          <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999" maxlength="19"><div class="fill"></div><div class="ps-field-err" id="psTelErr">Telefone inválido. Ex: 85 99999-9999 ou +55 85 99999-9999</div></div>
+          <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div><div class="ps-field-err" id="psTelErr">Use o formato (85) 99999-9999 (local) ou +55 85 99999-9999 (internacional)</div></div>
           <div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="psData" value="${psToday()}" max="${psToday()}"><div class="fill"></div></div>
           <div class="field ps-combo"><label><span class="field-label-pt">Tratamento realizado</span></label><input type="text" id="psTratamento" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psTratamentoList" style="display:none"></div></div>
           <div class="field field-full ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
@@ -820,8 +820,14 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     const val=(document.getElementById('psTel')?.value||'').trim();
     const errEl=document.getElementById('psTelErr');
     if(!val){ if(errEl)errEl.style.display='none'; return true; }
-    const digits=(val.replace(/\D/g,'')).length;
-    const ok=digits>=10&&digits<=13;
+    let ok;
+    if(val.startsWith('+')){
+      const d=val.slice(1).replace(/\D/g,'');
+      ok=d.length>=8&&d.length<=15;
+    } else {
+      const d=val.replace(/\D/g,'');
+      ok=d.length===10||d.length===11;
+    }
     if(errEl)errEl.style.display=ok?'none':'block';
     return ok;
   }
