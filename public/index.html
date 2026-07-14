@@ -155,10 +155,10 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 #psModal .progress-inner{max-width:720px;margin:0 auto;display:flex;gap:8px}
 #psModal .trace{height:2px;flex:1;background:var(--bg-alt);overflow:hidden}
 #psModal .tf{height:100%;background:var(--ui);width:0;transition:width .4s cubic-bezier(0.16,1,0.3,1)}
-#psModal .form-wrap{max-width:720px;margin:0 auto;padding:84px 24px 90px}
-@media(min-width:768px){#psModal .form-wrap{max-width:860px;padding:96px 40px 110px}}
-#psModal .form-wrap>section,#psModal .form-wrap>header,#psModal .form-wrap>footer{margin-bottom:92px}
-@media(min-width:768px){#psModal .form-wrap>section{margin-bottom:108px}}
+#psModal .form-wrap{max-width:720px;margin:0 auto;padding:52px 24px 56px}
+@media(min-width:768px){#psModal .form-wrap{max-width:860px;padding:60px 40px 72px}}
+#psModal .form-wrap>section,#psModal .form-wrap>header,#psModal .form-wrap>footer{margin-bottom:48px}
+@media(min-width:768px){#psModal .form-wrap>section{margin-bottom:60px}}
 #psModal .form-title{font-weight:500;font-size:28px;color:var(--fg);letter-spacing:.01em;margin:0 0 22px;text-align:center}
 @media(max-width:600px){#psModal .form-title{font-size:23px}}
 #psModal .form-intro{font-size:14.5px;line-height:1.75;color:var(--fg-2);max-width:620px;margin:0 auto 14px;text-align:center}
@@ -174,7 +174,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 #psModal .field input::placeholder{color:var(--border)}
 #psModal .fill{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ui-soft);transform:scaleX(0);transform-origin:center;transition:transform .5s cubic-bezier(0.16,1,0.3,1)}
 #psModal .field:focus-within .fill{transform:scaleX(1)}
-#psModal .comment-field{margin-top:46px}
+#psModal .comment-field{margin-top:24px}
 #psModal .sec-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 14px;margin-bottom:26px}
 #psModal .sec-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ui);letter-spacing:.1em}
 #psModal .sec-title{font-weight:500;font-size:17px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg)}
@@ -186,7 +186,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 #psModal .scale-legend-label{display:flex;flex-direction:column;align-items:center;color:#fff;font-size:11.5px;font-weight:500;line-height:1.2}
 @media(max-width:600px){#psModal .scale-bar-legend{gap:10px}}
 #psModal .rating-list{display:flex;flex-direction:column}
-#psModal .rating-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 0;border-bottom:1px solid var(--bg-alt)}
+#psModal .rating-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 0;border-bottom:1px solid var(--bg-alt)}
 #psModal .rating-text{flex:1;line-height:1.55}
 #psModal .rating-smileys{display:flex;gap:6px;flex:none}
 #psModal .smiley-btn{display:flex;align-items:center;justify-content:center;padding:6px;border:1px solid transparent;border-radius:9999px;background:none;cursor:pointer;transition:border-color .35s cubic-bezier(0.16,1,0.3,1)}
@@ -672,13 +672,13 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
   }
 
   function psScaleBar(){
-    const items=RATINGS.map(r=>`<div class="scale-legend-item">${psSmiley(r.type,false,30,'#FFFFFF')}<div class="scale-legend-label"><span>${r.pt}</span><span style="color:rgba(255,255,255,.8);font-size:10.5px;font-style:italic">${r.en}</span></div></div>`).join('');
-    return `<div class="scale-bar"><div class="scale-bar-title"><span>Como você classifica:</span><span style="color:rgba(255,255,255,.85);font-size:13px;font-style:italic">Your rating:</span></div><div class="scale-bar-legend">${items}</div></div>`;
+    const items=RATINGS.map(r=>`<div class="scale-legend-item">${psSmiley(r.type,false,30,'#FFFFFF')}<div class="scale-legend-label"><span>${r.pt}</span></div></div>`).join('');
+    return `<div class="scale-bar"><div class="scale-bar-title"><span>Como você classifica:</span></div><div class="scale-bar-legend">${items}</div></div>`;
   }
 
   function psRatingRow(q){
     const btns=RATINGS.map(r=>`<button type="button" class="smiley-btn" data-qkey="${q.key}" data-type="${r.type}" data-val="${r.key}" aria-label="${r.pt}">${psSmiley(r.type,false,36)}</button>`).join('');
-    return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${esc(q.pt)}</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">${esc(q.en)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;
+    return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${esc(q.pt)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;
   }
 
   function psToday(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
@@ -689,54 +689,51 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       <header>
         <h1 class="form-title">Formulário de Feedback de Serviço</h1>
         <p class="form-intro">Para que possamos continuar nos aperfeiçoando, gostaríamos que você respondesse as perguntas abaixo assinalando a opção apropriada. Apreciamos seu feedback.</p>
-        <p class="form-intro en">Share your experience with us. Client Feedback Form. In order to continue improving our services, we would like you to answer the following questions by selecting the appropriate checkbox. We appreciate your feedback.</p>
       </header>
       <section>
         <div class="field-grid">
-          <div class="field"><label><span class="field-label-pt">Nome</span> <span class="field-label-en">/ Name</span></label><input type="text" id="psNome" autocomplete="off"><div class="fill"></div></div>
-          <div class="field"><label><span class="field-label-pt">Nº do Apto</span> <span class="field-label-en">/ Room number</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
-          <div class="field"><label><span class="field-label-pt">E-mail</span> <span class="field-label-en">/ E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div><div class="ps-field-err" id="psEmailErr">E-mail inválido.</div></div>
-          <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span> <span class="field-label-en">/ Phone</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999"><div class="fill"></div></div>
-          <div class="field"><label><span class="field-label-pt">Data</span> <span class="field-label-en">/ Date</span></label><input type="date" id="psData" value="${psToday()}"><div class="fill"></div></div>
-          <div class="field ps-combo"><label><span class="field-label-pt">Tratamento realizado</span> <span class="field-label-en">/ Spa treatment provided</span></label><input type="text" id="psTratamento" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psTratamentoList" style="display:none"></div></div>
-          <div class="field field-full ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span> <span class="field-label-en">/ Massage therapist's name</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
+          <div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="psNome" autocomplete="off"><div class="fill"></div></div>
+          <div class="field"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
+          <div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div><div class="ps-field-err" id="psEmailErr">E-mail inválido.</div></div>
+          <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999"><div class="fill"></div></div>
+          <div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="psData" value="${psToday()}"><div class="fill"></div></div>
+          <div class="field ps-combo"><label><span class="field-label-pt">Tratamento realizado</span></label><input type="text" id="psTratamento" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psTratamentoList" style="display:none"></div></div>
+          <div class="field field-full ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
         </div>
       </section>
       <section>
-        <div class="sec-heading" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><span style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span><span class="en sec-title-en">Services</span></span><button type="button" id="psMarkAllBtn" class="btn-mark-all">Marcar tudo Ótimo</button></div>
+        <div class="sec-heading" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><span style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span></span><button type="button" id="psMarkAllBtn" class="btn-mark-all">Marcar tudo Ótimo</button></div>
         ${psScaleBar()}
         <div class="rating-list">${SEC1_QS.map(psRatingRow).join('')}</div>
-        <div class="field comment-field"><label><span class="field-label-pt">Comentário e sugestões adicionais</span> <span class="field-label-en">/ Additional comments:</span></label><input type="text" id="psComSec1" placeholder="Opcional…"><div class="fill"></div></div>
+        <div class="field comment-field"><label><span class="field-label-pt">Comentário e sugestões adicionais</span></label><input type="text" id="psComSec1" placeholder="Opcional…"><div class="fill"></div></div>
       </section>
       <section>
-        <div class="sec-heading"><span class="sec-num">02</span><span class="sec-title">INSTALAÇÕES</span><span class="en sec-title-en">Facilities</span></div>
+        <div class="sec-heading"><span class="sec-num">02</span><span class="sec-title">INSTALAÇÕES</span></div>
         ${psScaleBar()}
         <div class="rating-list">${SEC2_QS.map(psRatingRow).join('')}</div>
-        <div class="field comment-field"><label><span class="field-label-pt">Comentário sobre as instalações</span> <span class="field-label-en">/ Additional comments:</span></label><input type="text" id="psComSec2" placeholder="Opcional…"><div class="fill"></div></div>
+        <div class="field comment-field"><label><span class="field-label-pt">Comentário sobre as instalações</span></label><input type="text" id="psComSec2" placeholder="Opcional…"><div class="fill"></div></div>
       </section>
       <section>
-        <div class="sec-heading"><span class="sec-num">03</span><span class="sec-title" style="font-size:14px">VOCÊ RECOMENDARIA ALGUM TRATAMENTO EM PARTICULAR?</span><span class="en sec-title-en" style="font-size:12px">Would you recommend any particular treatment?</span></div>
+        <div class="sec-heading"><span class="sec-num">03</span><span class="sec-title" style="font-size:14px">VOCÊ RECOMENDARIA ALGUM TRATAMENTO EM PARTICULAR?</span></div>
         <div class="radio-list">
-          <div><button type="button" class="radio-opt" id="psRadioSim"><span class="radio-dot" id="psDotSim"></span><span><span style="color:var(--fg)">Sim</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Yes</span></span></button>
-          <div class="inline-reveal" id="psRevSim" style="display:none"><div class="field"><input type="text" id="psRecomendaQual" placeholder="Qual? / Which?"><div class="fill"></div></div></div></div>
-          <div><button type="button" class="radio-opt" id="psRadioNao"><span class="radio-dot" id="psDotNao"></span><span><span style="color:var(--fg)">Não</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ No</span></span></button>
-          <div class="inline-reveal" id="psRevNao" style="display:none"><div class="field"><input type="text" id="psRecomendaPorque" placeholder="Porque? / Why?"><div class="fill"></div></div></div></div>
+          <div><button type="button" class="radio-opt" id="psRadioSim"><span class="radio-dot" id="psDotSim"></span><span><span style="color:var(--fg)">Sim</span></span></button>
+          <div class="inline-reveal" id="psRevSim" style="display:none"><div class="field"><input type="text" id="psRecomendaQual" placeholder="Qual tratamento?"><div class="fill"></div></div></div></div>
+          <div><button type="button" class="radio-opt" id="psRadioNao"><span class="radio-dot" id="psDotNao"></span><span><span style="color:var(--fg)">Não</span></span></button>
+          <div class="inline-reveal" id="psRevNao" style="display:none"><div class="field"><input type="text" id="psRecomendaPorque" placeholder="Por quê?"><div class="fill"></div></div></div></div>
         </div>
       </section>
       <section>
-        <div class="sec-heading"><span class="sec-num">04</span><span class="sec-title">TIPO DE CLIENTE</span><span class="en sec-title-en">Type of guest</span></div>
+        <div class="sec-heading"><span class="sec-num">04</span><span class="sec-title">TIPO DE CLIENTE</span></div>
 <div class="radio-list client-type">
-          <button type="button" class="radio-opt" data-tipo="lazer"><span class="radio-dot" id="psDotLazer"></span><span><span style="color:var(--fg)">Lazer</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Leisure</span></span></button>
-          <button type="button" class="radio-opt" data-tipo="negocios"><span class="radio-dot" id="psDotNegocios"></span><span><span style="color:var(--fg)">Negócios</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Business</span></span></button>
-          <button type="button" class="radio-opt" data-tipo="evento"><span class="radio-dot" id="psDotEvento"></span><span><span style="color:var(--fg)">Evento</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">/ Event</span></span></button>
+          <button type="button" class="radio-opt" data-tipo="lazer"><span class="radio-dot" id="psDotLazer"></span><span><span style="color:var(--fg)">Lazer</span></span></button>
+          <button type="button" class="radio-opt" data-tipo="negocios"><span class="radio-dot" id="psDotNegocios"></span><span><span style="color:var(--fg)">Negócios</span></span></button>
+          <button type="button" class="radio-opt" data-tipo="evento"><span class="radio-dot" id="psDotEvento"></span><span><span style="color:var(--fg)">Evento</span></span></button>
         </div>
       </section>
       <footer style="margin-bottom:48px">
         <div class="form-foot"><p><em>Obrigado por contribuir com o nosso sistema de melhoria.</em><br>
-        <span style="font-style:italic;color:var(--fg-3);font-size:13px">Thank you for taking the time to evaluate us.</span><br>
         <em>Atenciosamente,</em><br>
-        <strong style="color:var(--gold);font-weight:500;font-style:normal">Equipe do Gran SPA by L'Occitane</strong>
-        <span style="font-style:italic;color:var(--fg-3);font-size:13px;display:block">Gran SPA by L'Occitane team</span></p></div>
+        <strong style="color:var(--gold);font-weight:500;font-style:normal">Equipe do Gran SPA by L'Occitane</strong></p></div>
       </footer>
       <div class="submit-wrap">
         <button type="button" class="submit-btn" id="psSubmitBtn">ENVIAR AVALIAÇÃO</button>
