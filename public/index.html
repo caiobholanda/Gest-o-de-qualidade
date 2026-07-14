@@ -766,13 +766,13 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     psUpdateProgress();
   }
 
-  function psBindCombo(inputId,listId,items){
+  function psBindCombo(inputId,listId,items,startOnly){
     const inp=document.getElementById(inputId);
     const lst=document.getElementById(listId);
     if(!inp||!lst||!items.length)return;
     function showList(filter){
       const q=(filter||'').toLowerCase().trim();
-      const matches=q?items.filter(n=>n.toLowerCase().includes(q)):items;
+      const matches=q?items.filter(n=>startOnly?n.toLowerCase().startsWith(q):n.toLowerCase().includes(q)):items;
       if(!matches.length){lst.innerHTML=`<div class="ps-dropdown-empty">Nenhum resultado</div>`;lst.style.display='block';return;}
       lst.innerHTML=matches.map(n=>`<div class="ps-dropdown-item">${esc(n)}</div>`).join('');
       lst.style.display='block';
@@ -780,6 +780,8 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         e.preventDefault();
         inp.value=el.textContent;
         lst.style.display='none';
+        const errEl=document.getElementById(inputId+'Err');
+        if(errEl)errEl.style.display='none';
       }));
     }
     inp.addEventListener('focus',()=>showList(inp.value));
@@ -872,7 +874,8 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       });
     });
     ['psNome','psEmail'].forEach(id=>document.getElementById(id)?.addEventListener('input',psUpdateProgress));
-    document.getElementById('psApto')?.addEventListener('input',()=>{ psValidateApto(); psUpdateProgress(); });
+    document.getElementById('psApto')?.addEventListener('input',()=>{ psUpdateProgress(); });
+    document.getElementById('psApto')?.addEventListener('blur',()=>setTimeout(()=>psValidateApto(),200));
     document.getElementById('psTel')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d+\s()\-]/g,''); psValidateTel(); });
     document.getElementById('psEmail')?.addEventListener('input',()=>{ psValidateEmail(); psUpdateProgress(); });
     document.getElementById('psRadioSim')?.addEventListener('click',()=>{
@@ -907,7 +910,7 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
       if(!document.getElementById('psMasso'))return;
       psBindCombo('psMasso','psMassoList',psMassos);
       psBindCombo('psTratamento','psTratamentoList',psTratamentos);
-      psBindCombo('psApto','psAptoList',psAptos.map(String));
+      psBindCombo('psApto','psAptoList',psAptos.map(String),true);
     });
   }
 
