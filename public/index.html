@@ -249,6 +249,15 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
   .tbl-ver{display:none}
   .tbl-wrap{border-radius:10px}
 }
+#psModal .btn-mark-all{display:inline-flex;align-items:center;gap:8px;background:none;border:1.5px solid var(--bord-s);border-radius:9999px;padding:9px 22px;font-size:13px;font-weight:500;color:var(--gold-s);cursor:pointer;transition:all .25s;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:.04em}
+#psModal .btn-mark-all:hover{background:var(--gold-d);border-color:var(--gold-d);color:#fff}
+#psModal .mark-all-wrap{display:flex;justify-content:flex-end;margin-bottom:38px;margin-top:-50px}
+#psModal .ps-combo{position:relative}
+#psModal .ps-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg-surf);border:1px solid var(--bord-s);border-radius:9px;box-shadow:0 8px 28px rgba(0,0,0,.2);max-height:220px;overflow-y:auto;z-index:30}
+#psModal .ps-dropdown-item{padding:10px 16px;font-size:14.5px;color:var(--fg);cursor:pointer;transition:background .15s;border-bottom:1px solid var(--bg-alt)}
+#psModal .ps-dropdown-item:last-child{border-bottom:none}
+#psModal .ps-dropdown-item:hover{background:var(--gold-d);color:#fff}
+#psModal .ps-dropdown-empty{padding:10px 16px;font-size:13.5px;color:var(--fg-3);font-style:italic}
 </style>
 </head>
 <body data-theme="light">
@@ -651,6 +660,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
   ];
 
   let psRatings={}, psRecomenda=null, psTipo=null;
+  let psMassos=[], psTratamentos=[];
   const psOverlay = document.createElement('div');
   psOverlay.id = 'psOverlay';
   document.body.appendChild(psOverlay);
@@ -671,7 +681,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${esc(q.pt)}</span> <span style="font-style:italic;color:var(--fg-3);font-size:13px">${esc(q.en)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;
   }
 
-  function psToday(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`;}
+  function psToday(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
 
   function psBuildModal(){
     return `<div id="psModal"><div class="ps-sticky-hdr"><div class="ps-sticky-top"><button type="button" class="ps-close" id="psClose">✕</button></div><div class="progress-inner"><div class="trace"><div class="tf" id="psTf1"></div></div><div class="trace"><div class="tf" id="psTf2"></div></div><div class="trace"><div class="tf" id="psTf3"></div></div><div class="trace"><div class="tf" id="psTf4"></div></div></div></div>
@@ -687,11 +697,12 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           <div class="field"><label><span class="field-label-pt">Nº do Apto</span> <span class="field-label-en">/ Room number</span></label><input type="text" id="psApto" autocomplete="off"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span> <span class="field-label-en">/ E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span> <span class="field-label-en">/ Phone</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999"><div class="fill"></div></div>
-          <div class="field"><label><span class="field-label-pt">Data</span> <span class="field-label-en">/ Date</span></label><input type="text" id="psData" value="${psToday()}"><div class="fill"></div></div>
-          <div class="field"><label><span class="field-label-pt">Tratamento realizado</span> <span class="field-label-en">/ Spa treatment provided</span></label><input type="text" id="psTratamento" autocomplete="off"><div class="fill"></div></div>
-          <div class="field field-full"><label><span class="field-label-pt">Nome da massoterapeuta</span> <span class="field-label-en">/ Massage therapist's name</span></label><input type="text" id="psMasso" autocomplete="off"><div class="fill"></div></div>
+          <div class="field"><label><span class="field-label-pt">Data</span> <span class="field-label-en">/ Date</span></label><input type="date" id="psData" value="${psToday()}"><div class="fill"></div></div>
+          <div class="field ps-combo"><label><span class="field-label-pt">Tratamento realizado</span> <span class="field-label-en">/ Spa treatment provided</span></label><input type="text" id="psTratamento" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psTratamentoList" style="display:none"></div></div>
+          <div class="field field-full ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span> <span class="field-label-en">/ Massage therapist's name</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
         </div>
       </section>
+      <div class="mark-all-wrap"><button type="button" id="psMarkAllBtn" class="btn-mark-all">Marcar tudo Ótimo</button></div>
       <section>
         <div class="sec-heading"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span><span class="en sec-title-en">Services</span></div>
         ${psScaleBar()}
@@ -744,6 +755,56 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     [idOk,s1Ok,s2Ok,s34Ok].forEach((done,i)=>{const tf=document.getElementById(`psTf${i+1}`);if(tf)tf.style.width=done?'100%':'0';});
   }
 
+  function psMarkAllOtimo(){
+    [...SEC1_QS,...SEC2_QS].forEach(q=>{
+      psRatings[q.key]='otimo';
+      psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${q.key}"]`).forEach(b=>{
+        const sel=b.dataset.val==='otimo';
+        b.classList.toggle('selected',sel);
+        b.innerHTML=psSmiley(b.dataset.type,sel,36);
+      });
+    });
+    psUpdateProgress();
+  }
+
+  function psBindCombo(inputId,listId,items){
+    const inp=document.getElementById(inputId);
+    const lst=document.getElementById(listId);
+    if(!inp||!lst||!items.length)return;
+    function showList(filter){
+      const q=(filter||'').toLowerCase().trim();
+      const matches=q?items.filter(n=>n.toLowerCase().includes(q)):items;
+      if(!matches.length){lst.innerHTML=`<div class="ps-dropdown-empty">Nenhum resultado</div>`;lst.style.display='block';return;}
+      lst.innerHTML=matches.map(n=>`<div class="ps-dropdown-item">${esc(n)}</div>`).join('');
+      lst.style.display='block';
+      lst.querySelectorAll('.ps-dropdown-item').forEach(el=>el.addEventListener('mousedown',e=>{
+        e.preventDefault();
+        inp.value=el.textContent;
+        lst.style.display='none';
+      }));
+    }
+    inp.addEventListener('focus',()=>showList(inp.value));
+    inp.addEventListener('input',()=>showList(inp.value));
+    inp.addEventListener('blur',()=>setTimeout(()=>{lst.style.display='none';},150));
+  }
+
+  async function psLoadLists(){
+    try {
+      if(!psMassos.length){
+        const r=await fetch('/api/massagistas');
+        const d=await r.json();
+        psMassos=(d.items||[]).map(m=>m.nome).filter(Boolean);
+      }
+    } catch(e){console.warn('[GQ] massagistas:',e);}
+    try {
+      if(!psTratamentos.length){
+        const r=await fetch('/api/tratamentos');
+        const d=await r.json();
+        psTratamentos=(d.items||[]).map(t=>t.nome).filter(Boolean);
+      }
+    } catch(e){console.warn('[GQ] tratamentos:',e);}
+  }
+
   function psOpen(){
     psRatings={}; psRecomenda=null; psTipo=null;
     psOverlay.innerHTML=psBuildModal();
@@ -753,12 +814,20 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     psOverlay.querySelectorAll('.smiley-btn').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const qkey=btn.dataset.qkey, val=btn.dataset.val;
-        psRatings[qkey]=val;
-        psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{
-          const sel=b.dataset.val===val;
-          b.classList.toggle('selected',sel);
-          b.innerHTML=psSmiley(b.dataset.type,sel,36);
-        });
+        if(psRatings[qkey]===val){
+          delete psRatings[qkey];
+          psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{
+            b.classList.remove('selected');
+            b.innerHTML=psSmiley(b.dataset.type,false,36);
+          });
+        } else {
+          psRatings[qkey]=val;
+          psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{
+            const sel=b.dataset.val===val;
+            b.classList.toggle('selected',sel);
+            b.innerHTML=psSmiley(b.dataset.type,sel,36);
+          });
+        }
         psUpdateProgress();
       });
     });
@@ -790,6 +859,12 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       });
     });
 document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
+    document.getElementById('psMarkAllBtn')?.addEventListener('click',psMarkAllOtimo);
+    psLoadLists().then(()=>{
+      if(!document.getElementById('psMasso'))return;
+      psBindCombo('psMasso','psMassoList',psMassos);
+      psBindCombo('psTratamento','psTratamentoList',psTratamentos);
+    });
   }
 
   function psClose(){psOverlay.style.display='none';document.body.style.overflow='';}

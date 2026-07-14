@@ -150,6 +150,26 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
   }
 });
 
+app.get('/api/massagistas', requireSession, async (req, res) => {
+  try {
+    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/massagistas-ativas`);
+    const data = await r.json();
+    res.status(r.status).json(data);
+  } catch (e) {
+    res.status(502).json({ ok: false, error: 'Erro ao buscar massagistas' });
+  }
+});
+
+app.get('/api/tratamentos', requireSession, async (req, res) => {
+  try {
+    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/tipos-massagem-ativos`);
+    const data = await r.json();
+    res.status(r.status).json(data);
+  } catch (e) {
+    res.status(502).json({ ok: false, error: 'Erro ao buscar tratamentos' });
+  }
+});
+
 // Root e index.html → dashboard (requires session)
 app.get('/', requireSession, (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
