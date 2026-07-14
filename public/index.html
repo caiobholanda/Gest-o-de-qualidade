@@ -795,7 +795,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         const r=await fetch('/api/massagistas');
         const d=await r.json();
         psMassos=(d.items||[])
-          .filter(m=>!m.funcao||!m.funcao.toLowerCase().includes('recep'))
+          .filter(m=>m.funcao&&m.funcao.toLowerCase().includes('massot'))
           .map(m=>m.nome).filter(Boolean);
       }
     } catch(e){console.warn('[GQ] massagistas:',e);}
