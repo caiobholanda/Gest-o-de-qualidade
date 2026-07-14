@@ -695,7 +695,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       <section>
         <div class="field-grid">
           <div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="psNome" autocomplete="off"><div class="fill"></div></div>
-          <div class="field"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
+          <div class="field ps-combo"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-dropdown" id="psAptoList" style="display:none"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
           <div class="field"><label><span class="field-label-pt">Controle interno</span></label><input type="text" id="psControleInterno" autocomplete="off" placeholder="Nº do questionário físico" maxlength="20"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div><div class="ps-field-err" id="psEmailErr">E-mail inválido.</div></div>
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999" maxlength="19"><div class="fill"></div><div class="ps-field-err" id="psTelErr">Telefone inválido. Ex: 85 99999-9999 ou +55 85 99999-9999</div></div>
@@ -705,7 +705,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         </div>
       </section>
       <section>
-        <div class="sec-heading" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><span style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span></span><button type="button" id="psMarkAllBtn" class="btn-mark-all">Marcar tudo Ótimo</button></div>
+        <div class="sec-heading" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><span style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span></span><div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span><button type="button" class="btn-mark-all ps-mark-all" data-nota="otimo">Ótimo</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="bom">Bom</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="regular">Regular</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="ruim">Ruim</button></div></div>
         ${psScaleBar()}
         <div class="rating-list">${SEC1_QS.map(psRatingRow).join('')}</div>
         <div class="field comment-field"><label><span class="field-label-pt">Comentário e sugestões adicionais</span></label><input type="text" id="psComSec1" placeholder="Opcional…"><div class="fill"></div></div>
@@ -754,11 +754,11 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     [idOk,s1Ok,s2Ok,s34Ok].forEach((done,i)=>{const tf=document.getElementById(`psTf${i+1}`);if(tf)tf.style.width=done?'100%':'0';});
   }
 
-  function psMarkAllOtimo(){
+  function psMarkAll(nota){
     [...SEC1_QS,...SEC2_QS].forEach(q=>{
-      psRatings[q.key]='otimo';
+      psRatings[q.key]=nota;
       psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${q.key}"]`).forEach(b=>{
-        const sel=b.dataset.val==='otimo';
+        const sel=b.dataset.val===nota;
         b.classList.toggle('selected',sel);
         b.innerHTML=psSmiley(b.dataset.type,sel,36);
       });
@@ -902,11 +902,12 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       });
     });
 document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
-    document.getElementById('psMarkAllBtn')?.addEventListener('click',psMarkAllOtimo);
+    psOverlay.querySelectorAll('.ps-mark-all').forEach(btn=>btn.addEventListener('click',()=>psMarkAll(btn.dataset.nota)));
     psLoadLists().then(()=>{
       if(!document.getElementById('psMasso'))return;
       psBindCombo('psMasso','psMassoList',psMassos);
       psBindCombo('psTratamento','psTratamentoList',psTratamentos);
+      psBindCombo('psApto','psAptoList',psAptos.map(String));
     });
   }
 
