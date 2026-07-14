@@ -368,6 +368,7 @@ async function openDetail(id){
           <div style="font-weight:500;font-size:1.3rem;color:var(--text);margin-bottom:5px">${esc(it.nome||'Sem nome')}</div>
           <div style="font-size:.82rem;color:var(--muted2)">${esc(it.email||'—')} · ${esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente||'—')} · ${esc(dtFmt(it.submitted_at))}</div>
           ${it.nome_massoterapeuta?`<div style="font-size:.8rem;color:var(--muted);margin-top:10px">Massoterapeuta: <strong style="color:var(--text)">${esc(it.nome_massoterapeuta)}</strong>${it.tratamento_realizado?` &nbsp;·&nbsp; Tratamento: <strong style="color:var(--text)">${esc(it.tratamento_realizado)}</strong>`:''}</div>`:''}
+          ${it.controle_interno?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Controle interno: <strong style="color:var(--text)">${esc(it.controle_interno)}</strong></div>`:''}
         </div>
         ${rSec('01','SERVIÇOS',_SEC1,it.servicos_comentario)}
         ${rSec('02','INSTALAÇÕES',_SEC2,it.instalacoes_comentario)}
@@ -694,6 +695,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         <div class="field-grid">
           <div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="psNome" autocomplete="off"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
+          <div class="field"><label><span class="field-label-pt">Controle interno</span></label><input type="text" id="psControleInterno" autocomplete="off" placeholder="Nº do questionário físico" maxlength="20"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div><div class="ps-field-err" id="psEmailErr">E-mail inválido.</div></div>
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999" maxlength="19"><div class="fill"></div><div class="ps-field-err" id="psTelErr">Telefone inválido. Ex: 85 99999-9999 ou +55 85 99999-9999</div></div>
           <div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="psData" value="${psToday()}"><div class="fill"></div></div>
@@ -922,6 +924,7 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
       const payload={
         nome,email,
         apto:(document.getElementById('psApto')?.value||'').trim()||null,
+        controle_interno:(document.getElementById('psControleInterno')?.value||'').trim()||null,
         telefone:(document.getElementById('psTel')?.value||'').trim()||null,
         data_tratamento:(document.getElementById('psData')?.value||'').trim()||null,
         tratamento_realizado:(document.getElementById('psTratamento')?.value||'').trim()||null,
@@ -943,7 +946,7 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
       msgEl.textContent='Pesquisa enviada com sucesso! ✓';
       msgEl.style.color='#15705A';
       msgEl.style.display='block';
-      setTimeout(()=>{psClose();render();},2000);
+      setTimeout(()=>{render();psOpen();},1800);
     } catch(e){
       msgEl.textContent=`Erro: ${e.message}`;
       msgEl.style.color='var(--danger)';
