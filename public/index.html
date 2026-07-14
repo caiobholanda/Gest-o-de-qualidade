@@ -864,6 +864,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     });
     ['psNome','psEmail'].forEach(id=>document.getElementById(id)?.addEventListener('input',psUpdateProgress));
     document.getElementById('psApto')?.addEventListener('input',()=>{ psValidateApto(); psUpdateProgress(); });
+    document.getElementById('psTel')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d+\s()\-]/g,''); });
     document.getElementById('psEmail')?.addEventListener('input',()=>{ psValidateEmail(); psUpdateProgress(); });
     document.getElementById('psRadioSim')?.addEventListener('click',()=>{
       psRecomenda='sim';
