@@ -150,6 +150,16 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
   }
 });
 
+app.get('/api/quartos', requireSession, async (req, res) => {
+  try {
+    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/quartos`);
+    const data = await r.json();
+    res.status(r.status).json(data);
+  } catch (e) {
+    res.status(502).json({ ok: false, error: 'Erro ao buscar quartos' });
+  }
+});
+
 app.get('/api/massagistas', requireSession, async (req, res) => {
   try {
     const r = await fetchWithTimeout(`${PESQUISA_URL}/api/massagistas-ativas`);

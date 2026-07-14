@@ -249,9 +249,9 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
   .tbl-ver{display:none}
   .tbl-wrap{border-radius:10px}
 }
-#psModal .btn-mark-all{display:inline-flex;align-items:center;gap:8px;background:none;border:1.5px solid var(--bord-s);border-radius:9999px;padding:9px 22px;font-size:13px;font-weight:500;color:var(--gold-s);cursor:pointer;transition:all .25s;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:.04em}
+#psModal .btn-mark-all{display:inline-flex;align-items:center;gap:6px;background:none;border:1.5px solid var(--bord-s);border-radius:9999px;padding:7px 18px;font-size:12px;font-weight:500;color:var(--gold-s);cursor:pointer;transition:all .25s;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:.04em;flex-shrink:0}
 #psModal .btn-mark-all:hover{background:var(--gold-d);border-color:var(--gold-d);color:#fff}
-#psModal .mark-all-wrap{display:flex;justify-content:flex-end;margin-bottom:38px;margin-top:-50px}
+#psModal .ps-field-err{font-size:11.5px;color:var(--err);margin-top:5px;display:none;line-height:1.3}
 #psModal .ps-combo{position:relative}
 #psModal .ps-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg-surf);border:1px solid var(--bord-s);border-radius:9px;box-shadow:0 8px 28px rgba(0,0,0,.2);max-height:220px;overflow-y:auto;z-index:30}
 #psModal .ps-dropdown-item{padding:10px 16px;font-size:14.5px;color:var(--fg);cursor:pointer;transition:background .15s;border-bottom:1px solid var(--bg-alt)}
@@ -660,7 +660,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
   ];
 
   let psRatings={}, psRecomenda=null, psTipo=null;
-  let psMassos=[], psTratamentos=[];
+  let psMassos=[], psTratamentos=[], psAptos=[];
   const psOverlay = document.createElement('div');
   psOverlay.id = 'psOverlay';
   document.body.appendChild(psOverlay);
@@ -694,7 +694,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       <section>
         <div class="field-grid">
           <div class="field"><label><span class="field-label-pt">Nome</span> <span class="field-label-en">/ Name</span></label><input type="text" id="psNome" autocomplete="off"><div class="fill"></div></div>
-          <div class="field"><label><span class="field-label-pt">Nº do Apto</span> <span class="field-label-en">/ Room number</span></label><input type="text" id="psApto" autocomplete="off"><div class="fill"></div></div>
+          <div class="field"><label><span class="field-label-pt">Nº do Apto</span> <span class="field-label-en">/ Room number</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201"><div class="fill"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span> <span class="field-label-en">/ E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span> <span class="field-label-en">/ Phone</span></label><input type="tel" id="psTel" placeholder="+55 (85) 9 9999-9999"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">Data</span> <span class="field-label-en">/ Date</span></label><input type="date" id="psData" value="${psToday()}"><div class="fill"></div></div>
@@ -702,9 +702,8 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           <div class="field field-full ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span> <span class="field-label-en">/ Massage therapist's name</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
         </div>
       </section>
-      <div class="mark-all-wrap"><button type="button" id="psMarkAllBtn" class="btn-mark-all">Marcar tudo Ótimo</button></div>
       <section>
-        <div class="sec-heading"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span><span class="en sec-title-en">Services</span></div>
+        <div class="sec-heading" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><span style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span><span class="en sec-title-en">Services</span></span><button type="button" id="psMarkAllBtn" class="btn-mark-all">Marcar tudo Ótimo</button></div>
         ${psScaleBar()}
         <div class="rating-list">${SEC1_QS.map(psRatingRow).join('')}</div>
         <div class="field comment-field"><label><span class="field-label-pt">Comentário e sugestões adicionais</span> <span class="field-label-en">/ Additional comments:</span></label><input type="text" id="psComSec1" placeholder="Opcional…"><div class="fill"></div></div>
@@ -793,7 +792,9 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       if(!psMassos.length){
         const r=await fetch('/api/massagistas');
         const d=await r.json();
-        psMassos=(d.items||[]).map(m=>m.nome).filter(Boolean);
+        psMassos=(d.items||[])
+          .filter(m=>!m.funcao||!m.funcao.toLowerCase().includes('recep'))
+          .map(m=>m.nome).filter(Boolean);
       }
     } catch(e){console.warn('[GQ] massagistas:',e);}
     try {
@@ -803,6 +804,26 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
         psTratamentos=(d.items||[]).map(t=>t.nome).filter(Boolean);
       }
     } catch(e){console.warn('[GQ] tratamentos:',e);}
+    try {
+      if(!psAptos.length){
+        const r=await fetch('/api/quartos');
+        const d=await r.json();
+        psAptos=(d.items||[]).map(q=>q.numero).filter(Boolean);
+      }
+    } catch(e){console.warn('[GQ] quartos:',e);}
+  }
+
+  function psNormApto(v){ return v.replace(/\D/g,'').padStart(4,'0'); }
+
+  function psValidateApto(){
+    const val=(document.getElementById('psApto')?.value||'').trim();
+    const errEl=document.getElementById('psAptoErr');
+    if(!val){ if(errEl)errEl.style.display='none'; return true; }
+    if(!psAptos.length){ if(errEl)errEl.style.display='none'; return true; }
+    const norm=psNormApto(val);
+    const ok=psAptos.includes(norm);
+    if(errEl)errEl.style.display=ok?'none':'block';
+    return ok;
   }
 
   function psOpen(){
@@ -832,6 +853,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       });
     });
     ['psNome','psEmail'].forEach(id=>document.getElementById(id)?.addEventListener('input',psUpdateProgress));
+    document.getElementById('psApto')?.addEventListener('input',()=>{ psValidateApto(); psUpdateProgress(); });
     document.getElementById('psRadioSim')?.addEventListener('click',()=>{
       psRecomenda='sim';
       document.getElementById('psDotSim')?.classList.add('on');
@@ -875,6 +897,7 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
     const email=(document.getElementById('psEmail')?.value||'').trim();
     if(!nome||!email){msgEl.textContent='Nome e e-mail são obrigatórios.';msgEl.style.display='block';return;}
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msgEl.textContent='E-mail inválido.';msgEl.style.display='block';return;}
+    if(!psValidateApto()){msgEl.textContent='Corrija o Nº do Apto antes de enviar.';msgEl.style.display='block';return;}
     btn.disabled=true; msgEl.style.display='none';
     try {
       const payload={
