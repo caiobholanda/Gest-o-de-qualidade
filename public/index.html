@@ -856,6 +856,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
   function psOpen(){
     psRatings={}; psRecomenda=null; psTipo=null;
     psOverlay.innerHTML=psBuildModal();
+    psOverlay.scrollTop=0;
     psOverlay.style.display='block';
     document.body.style.overflow='hidden';
     document.getElementById('psClose')?.addEventListener('click',psClose);
