@@ -695,7 +695,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       <section>
         <div class="field-grid">
           <div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="psNome" autocomplete="off"><div class="fill"></div></div>
-          <div class="field ps-combo"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4"><div class="fill"></div><div class="ps-dropdown" id="psAptoList" style="display:none"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
+          <div class="field ps-combo"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="psApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4" inputmode="numeric"><div class="fill"></div><div class="ps-dropdown" id="psAptoList" style="display:none"></div><div class="ps-field-err" id="psAptoErr">Apartamento não encontrado no hotel.</div></div>
           <div class="field"><label><span class="field-label-pt">Controle interno</span></label><input type="text" id="psControleInterno" inputmode="numeric" autocomplete="off" placeholder="Nº do questionário físico" maxlength="20"><div class="fill"></div></div>
           <div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="psEmail" autocomplete="off"><div class="fill"></div><div class="ps-field-err" id="psEmailErr">E-mail inválido.</div></div>
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div><div class="ps-field-err" id="psTelErr">Use o formato (85) 99999-9999 (local) ou +55 85 99999-9999 (internacional)</div></div>
@@ -881,7 +881,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       });
     });
     ['psNome','psEmail'].forEach(id=>document.getElementById(id)?.addEventListener('input',psUpdateProgress));
-    document.getElementById('psApto')?.addEventListener('input',()=>{ psUpdateProgress(); });
+    document.getElementById('psApto')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,''); psUpdateProgress(); });
     document.getElementById('psApto')?.addEventListener('blur',()=>setTimeout(()=>psValidateApto(),200));
     document.getElementById('psControleInterno')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,''); });
     document.getElementById('psTel')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d+\s()\-]/g,''); psValidateTel(); });
