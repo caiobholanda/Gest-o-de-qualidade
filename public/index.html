@@ -145,6 +145,24 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 .btn-nova-pesquisa{font-family:'Helvetica Neue',Arial,sans-serif;font-size:.78rem;font-weight:600;color:#ECE4D2;background:var(--gold);border:none;border-radius:8px;padding:7px 16px;cursor:pointer;transition:background .2s;letter-spacing:.04em}
 .btn-nova-pesquisa:hover{background:var(--gold-dark)}
 #psOverlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;overflow-y:auto}
+#pickerOverlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:24px}
+#pickerOverlay.open{display:flex}
+#pickerModal{background:#ECE4D2;border-radius:16px;padding:32px 28px 24px;width:100%;max-width:480px;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative}
+[data-theme="dark"] #pickerModal{background:#202C28;color:#ECE4D2}
+#pickerModal .picker-title{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#9C5843;margin:0 0 20px}
+[data-theme="dark"] #pickerModal .picker-title{color:#C4916A}
+#pickerModal .picker-close{position:absolute;top:16px;right:16px;background:none;border:1px solid rgba(0,0,0,.15);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;color:#666;line-height:1}
+[data-theme="dark"] #pickerModal .picker-close{border-color:rgba(255,255,255,.15);color:#aaa}
+#pickerModal .picker-list{display:flex;flex-direction:column;gap:6px}
+#pickerModal .picker-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-radius:10px;border:1.5px solid rgba(156,88,67,.2);background:none;cursor:pointer;text-align:left;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;color:#1A1A1A;transition:background .18s,border-color .18s}
+[data-theme="dark"] #pickerModal .picker-item{border-color:rgba(196,145,106,.2);color:#ECE4D2}
+#pickerModal .picker-item:hover:not(.picker-soon){background:rgba(156,88,67,.08);border-color:#9C5843}
+[data-theme="dark"] #pickerModal .picker-item:hover:not(.picker-soon){background:rgba(196,145,106,.1);border-color:#C4916A}
+#pickerModal .picker-item.picker-soon{cursor:default;opacity:.5}
+#pickerModal .picker-badge{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9C5843;background:rgba(156,88,67,.1);border-radius:4px;padding:2px 7px;white-space:nowrap;flex-shrink:0}
+[data-theme="dark"] #pickerModal .picker-badge{color:#C4916A;background:rgba(196,145,106,.12)}
+#pickerModal .picker-arrow{color:#9C5843;flex-shrink:0;font-size:14px}
+[data-theme="dark"] #pickerModal .picker-arrow{color:#C4916A}
 .score.warn{color:var(--warn);background:var(--warn-dim)}
 #psModal{--bg:#ECE4D2;--bg-alt:#E3DACC;--bg-surf:#F5EFE2;--fg:#1A1A1A;--fg-2:#4A4A4A;--fg-3:#6B6B6B;--fg-4:#9B9B9B;--border:#B8B8B8;--bord-s:#C8B89A;--gold:#9C5843;--gold-s:#996442;--gold-d:#7A4334;--ui:#9C5843;--ui-soft:#996442;--ui-dark:#7A4334;--err:#B85450;background:var(--bg);color:var(--fg);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;width:100%;max-width:820px;margin:0 auto;box-shadow:0 24px 80px rgba(0,0,0,.35);position:relative}
 [data-theme="dark"] #psModal{--bg:#202C28;--bg-alt:#293630;--bg-surf:#2F3D38;--fg:#ECE4D2;--fg-2:#C8B89A;--fg-3:#8A7B6A;--fg-4:#6A5E56;--border:#3F524B;--bord-s:#4A5E57;--gold:#C4916A;--gold-s:#B87A52;--gold-d:#B87060;--ui:#C4916A;--ui-soft:#B87A52;--ui-dark:#B87060}
@@ -155,16 +173,16 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 #psModal .progress-inner{max-width:720px;margin:0 auto;display:flex;gap:8px}
 #psModal .trace{height:2px;flex:1;background:var(--bg-alt);overflow:hidden}
 #psModal .tf{height:100%;background:var(--ui);width:0;transition:width .4s cubic-bezier(0.16,1,0.3,1)}
-#psModal .form-wrap{max-width:720px;margin:0 auto;padding:52px 24px 56px}
-@media(min-width:768px){#psModal .form-wrap{max-width:860px;padding:60px 40px 72px}}
-#psModal .form-wrap>section,#psModal .form-wrap>header,#psModal .form-wrap>footer{margin-bottom:48px}
-@media(min-width:768px){#psModal .form-wrap>section{margin-bottom:60px}}
-#psModal .form-title{font-weight:500;font-size:28px;color:var(--fg);letter-spacing:.01em;margin:0 0 22px;text-align:center}
+#psModal .form-wrap{max-width:720px;margin:0 auto;padding:24px 24px 36px}
+@media(min-width:768px){#psModal .form-wrap{max-width:860px;padding:28px 40px 44px}}
+#psModal .form-wrap>section,#psModal .form-wrap>header,#psModal .form-wrap>footer{margin-bottom:16px}
+@media(min-width:768px){#psModal .form-wrap>section{margin-bottom:20px}}
+#psModal .form-title{font-weight:500;font-size:24px;color:var(--fg);letter-spacing:.01em;margin:0 0 14px;text-align:center}
 @media(max-width:600px){#psModal .form-title{font-size:23px}}
 #psModal .form-intro{font-size:14.5px;line-height:1.75;color:var(--fg-2);max-width:620px;margin:0 auto 14px;text-align:center}
 #psModal .form-intro.en{font-size:13px;color:var(--fg-3);font-style:italic}
 #psModal .en{font-style:italic;color:var(--fg-3)}
-#psModal .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px 40px}
+#psModal .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 28px}
 #psModal .field-full{grid-column:1/-1}
 #psModal .field{position:relative}
 #psModal .field label{display:block;margin-bottom:5px;line-height:1.3}
@@ -174,10 +192,10 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 #psModal .field input::placeholder{color:var(--border)}
 #psModal .fill{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ui-soft);transform:scaleX(0);transform-origin:center;transition:transform .5s cubic-bezier(0.16,1,0.3,1)}
 #psModal .field:focus-within .fill{transform:scaleX(1)}
-#psModal .comment-field{margin-top:24px}
-#psModal .sec-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 14px;margin-bottom:26px}
-#psModal .sec-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ui);letter-spacing:.1em}
-#psModal .sec-title{font-weight:500;font-size:17px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg)}
+#psModal .comment-field{margin-top:6px}
+#psModal .sec-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 10px;margin-bottom:8px}
+#psModal .sec-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ui);letter-spacing:.1em}
+#psModal .sec-title{font-weight:500;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg)}
 #psModal .sec-title-en{font-size:14px;letter-spacing:.08em}
 #psModal .scale-bar{background:var(--gold);min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 22px;flex-wrap:wrap;margin-bottom:8px}
 #psModal .scale-bar-title{color:#fff;font-weight:500;font-size:16px;display:flex;flex-direction:column;line-height:1.25}
@@ -186,22 +204,22 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
 #psModal .scale-legend-label{display:flex;flex-direction:column;align-items:center;color:#fff;font-size:11.5px;font-weight:500;line-height:1.2}
 @media(max-width:600px){#psModal .scale-bar-legend{gap:10px}}
 #psModal .rating-list{display:flex;flex-direction:column}
-#psModal .rating-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 0;border-bottom:1px solid var(--bg-alt)}
+#psModal .rating-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:3px 0;border-bottom:1px solid var(--bg-alt)}
 #psModal .rating-text{flex:1;line-height:1.55}
 #psModal .rating-smileys{display:flex;gap:6px;flex:none}
-#psModal .smiley-btn{display:flex;align-items:center;justify-content:center;padding:6px;border:1px solid transparent;border-radius:9999px;background:none;cursor:pointer;transition:border-color .35s cubic-bezier(0.16,1,0.3,1)}
+#psModal .smiley-btn{display:flex;align-items:center;justify-content:center;padding:3px;border:1px solid transparent;border-radius:9999px;background:none;cursor:pointer;transition:border-color .35s cubic-bezier(0.16,1,0.3,1)}
 #psModal .smiley-btn:hover{border-color:var(--ui-soft)}
 #psModal .smiley-btn.selected{border-color:var(--gold)}
 #psModal .smiley-btn.selected svg{animation:psSmBounce .25s cubic-bezier(0.16,1,0.3,1)}
 @keyframes psSmBounce{0%{transform:translateY(0)}45%{transform:translateY(-3px)}100%{transform:translateY(0)}}
-#psModal .radio-list{display:flex;flex-direction:column;gap:16px}
-#psModal .radio-opt{display:flex;align-items:flex-start;gap:14px;background:none;border:0;cursor:pointer;font-size:16px;color:var(--fg);padding:6px 0;text-align:left;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.5;width:100%}
+#psModal .radio-list{display:flex;flex-direction:column;gap:1px}
+#psModal .radio-opt{display:flex;align-items:flex-start;gap:14px;background:none;border:0;cursor:pointer;font-size:16px;color:var(--fg);padding:1px 0;text-align:left;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.5;width:100%}
 #psModal .radio-dot{width:18px;height:18px;border-radius:9999px;border:1.5px solid var(--border);position:relative;flex:none;margin-top:2px;transition:border-color .35s cubic-bezier(0.16,1,0.3,1)}
 #psModal .radio-dot.on{border-color:var(--ui)}
 #psModal .radio-dot.on::after{content:'';position:absolute;inset:3px;border-radius:9999px;background:var(--ui);animation:psDotIn .25s cubic-bezier(0.16,1,0.3,1)}
 @keyframes psDotIn{from{transform:scale(0)}to{transform:scale(1)}}
 #psModal .inline-reveal{margin:10px 0 6px 30px;max-width:440px}
-#psModal .client-type{display:flex;gap:44px;flex-wrap:wrap}
+#psModal .client-type{display:flex;gap:10px;flex-wrap:wrap}
 #psModal .submit-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:56px;gap:14px}
 #psModal .submit-btn{position:relative;overflow:hidden;height:56px;width:280px;max-width:100%;background:var(--ui);color:#fff;border:0;cursor:pointer;font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;transition:background-color .4s cubic-bezier(0.16,1,0.3,1),opacity .3s}
 #psModal .submit-btn:hover:not(:disabled){background:var(--ui-dark)}
@@ -216,7 +234,7 @@ body{background:radial-gradient(1100px 560px at 12% -4%,var(--grad1),transparent
   #psModal .field-grid{grid-template-columns:1fr;gap:26px}
   #psModal .rating-row{flex-direction:column;align-items:flex-start;gap:14px}
   #psModal .rating-smileys{gap:14px}
-  #psModal .client-type{flex-direction:column;gap:12px}
+  #psModal .client-type{flex-direction:column;gap:4px}
   #psModal .scale-bar-legend{gap:10px}
 }
 @media(max-width:480px){
@@ -679,7 +697,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
   }
 
   function psRatingRow(q){
-    const btns=RATINGS.map(r=>`<button type="button" class="smiley-btn" data-qkey="${q.key}" data-type="${r.type}" data-val="${r.key}" aria-label="${r.pt}">${psSmiley(r.type,false,36)}</button>`).join('');
+    const btns=RATINGS.map(r=>`<button type="button" class="smiley-btn" data-qkey="${q.key}" data-type="${r.type}" data-val="${r.key}" aria-label="${r.pt}">${psSmiley(r.type,false,30)}</button>`).join('');
     return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${esc(q.pt)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;
   }
 
@@ -690,7 +708,6 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
     <div class="form-wrap">
       <header>
         <h1 class="form-title">Formulário de Feedback de Serviço</h1>
-        <p class="form-intro">Para que possamos continuar nos aperfeiçoando, gostaríamos que você respondesse as perguntas abaixo assinalando a opção apropriada. Apreciamos seu feedback.</p>
       </header>
       <section>
         <div class="field-grid">
@@ -701,18 +718,17 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           <div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="psTel" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div><div class="ps-field-err" id="psTelErr">Use o formato (85) 99999-9999 (local) ou +55 85 99999-9999 (internacional)</div></div>
           <div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="psData" value="${psToday()}" max="${psToday()}"><div class="fill"></div></div>
           <div class="field ps-combo"><label><span class="field-label-pt">Tratamento realizado</span></label><input type="text" id="psTratamento" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psTratamentoList" style="display:none"></div></div>
-          <div class="field field-full ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
+          <div class="field ps-combo"><label><span class="field-label-pt">Nome da massoterapeuta</span></label><input type="text" id="psMasso" autocomplete="off" placeholder="Digite para filtrar…"><div class="fill"></div><div class="ps-dropdown" id="psMassoList" style="display:none"></div></div>
         </div>
       </section>
+      <div style="display:flex;align-items:center;gap:5px;padding:8px 20px 4px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span><button type="button" class="btn-mark-all ps-mark-all" data-nota="otimo">Ótimo</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="bom">Bom</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="regular">Regular</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="ruim">Ruim</button></div>
       <section>
-        <div class="sec-heading" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><span style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span></span><div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span><button type="button" class="btn-mark-all ps-mark-all" data-nota="otimo">Ótimo</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="bom">Bom</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="regular">Regular</button><button type="button" class="btn-mark-all ps-mark-all" data-nota="ruim">Ruim</button></div></div>
-        ${psScaleBar()}
+        <div class="sec-heading"><span class="sec-num">01</span><span class="sec-title">SERVIÇOS</span></div>
         <div class="rating-list">${SEC1_QS.map(psRatingRow).join('')}</div>
         <div class="field comment-field"><label><span class="field-label-pt">Comentário e sugestões adicionais</span></label><input type="text" id="psComSec1" placeholder="Opcional…"><div class="fill"></div></div>
       </section>
       <section>
         <div class="sec-heading"><span class="sec-num">02</span><span class="sec-title">INSTALAÇÕES</span></div>
-        ${psScaleBar()}
         <div class="rating-list">${SEC2_QS.map(psRatingRow).join('')}</div>
         <div class="field comment-field"><label><span class="field-label-pt">Comentário sobre as instalações</span></label><input type="text" id="psComSec2" placeholder="Opcional…"><div class="fill"></div></div>
       </section>
@@ -733,16 +749,10 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           <button type="button" class="radio-opt" data-tipo="evento"><span class="radio-dot" id="psDotEvento"></span><span><span style="color:var(--fg)">Evento</span></span></button>
         </div>
       </section>
-      <footer style="margin-bottom:48px">
-        <div class="form-foot"><p><em>Obrigado por contribuir com o nosso sistema de melhoria.</em><br>
-        <em>Atenciosamente,</em><br>
-        <strong style="color:var(--gold);font-weight:500;font-style:normal">Equipe do Gran SPA by L'Occitane</strong></p></div>
-      </footer>
       <div class="submit-wrap">
         <button type="button" class="submit-btn" id="psSubmitBtn">ENVIAR AVALIAÇÃO</button>
         <div id="psMsg" class="submit-err"></div>
       </div>
-      <p class="page-foot">Hotel Gran Marquise · Av. Beira Mar, 3980 · Fortaleza-CE · (85) 4006-5000 · www.granmarquise.com.br</p>
     </div></div>`;
   }
 
@@ -760,7 +770,7 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
       psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${q.key}"]`).forEach(b=>{
         const sel=b.dataset.val===nota;
         b.classList.toggle('selected',sel);
-        b.innerHTML=psSmiley(b.dataset.type,sel,36);
+        b.innerHTML=psSmiley(b.dataset.type,sel,30);
       });
     });
     psUpdateProgress();
@@ -867,14 +877,14 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
           delete psRatings[qkey];
           psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{
             b.classList.remove('selected');
-            b.innerHTML=psSmiley(b.dataset.type,false,36);
+            b.innerHTML=psSmiley(b.dataset.type,false,30);
           });
         } else {
           psRatings[qkey]=val;
           psOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{
             const sel=b.dataset.val===val;
             b.classList.toggle('selected',sel);
-            b.innerHTML=psSmiley(b.dataset.type,sel,36);
+            b.innerHTML=psSmiley(b.dataset.type,sel,30);
           });
         }
         psUpdateProgress();
@@ -970,8 +980,175 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
     }
   }
 
-  document.getElementById('btnNovaPesquisa')?.addEventListener('click',psOpen);
+  // Picker de pesquisa
+  const PESQUISAS = [
+    { label: 'Pesquisa geral da qualidade', active: true, action: 'geral' },
+    { label: 'Pesquisa geral da qualidade Gran Class', active: true, action: 'geral-granclass' },
+    { label: 'Pesquisa PDVs', active: true, action: 'pdvs' },
+    { label: 'Pesquisa PDVs Gran Class', active: true, action: 'pdvs-granclass' },
+    { label: 'Pesquisa Gran SPA', active: true, action: 'spa' },
+    { label: 'Pesquisa de Eventos Sociais Cliente', active: true, action: 'eventos-cliente' },
+    { label: 'Pesquisa de Eventos Sociais Parceiros', active: true, action: 'eventos-cerimonialista' },
+    { label: 'Pesquisa de Eventos Corporativos', active: true, action: 'eventos-corporativos' },
+  ];
+  const pickerOverlay = document.createElement('div');
+  pickerOverlay.id = 'pickerOverlay';
+  pickerOverlay.innerHTML = `<div id="pickerModal">
+    <button class="picker-close" id="pickerClose">✕</button>
+    <div class="picker-title">Selecionar pesquisa</div>
+    <div class="picker-list">${PESQUISAS.map((p,i)=>`<button class="picker-item${p.active?'':' picker-soon'}" data-idx="${i}">
+      <span>${p.label}</span>
+      ${p.active?'<span class="picker-arrow">→</span>':'<span class="picker-badge">Em breve</span>'}
+    </button>`).join('')}</div>
+  </div>`;
+  document.body.appendChild(pickerOverlay);
+  function pickerOpen(){ pickerOverlay.classList.add('open'); }
+  function pickerClose(){ pickerOverlay.classList.remove('open'); }
+  document.getElementById('pickerClose').addEventListener('click', pickerClose);
+  pickerOverlay.querySelectorAll('.picker-item').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const idx = parseInt(btn.dataset.idx);
+      const p = PESQUISAS[idx];
+      if(!p.active) return;
+      pickerClose();
+      if(p.action==='spa') psOpen();
+      else if(window._openers?.[p.action]) window._openers[p.action]();
+    });
+  });
+  document.getElementById('btnNovaPesquisa')?.addEventListener('click', pickerOpen);
 }
+
+// ── Modal: Pesquisa Geral da Qualidade / Gran Class ──
+{
+  const GQ_R=[{key:'otimo',pt:'Ótimo',type:'great'},{key:'bom',pt:'Bom',type:'good'},{key:'regular',pt:'Regular',type:'fair'},{key:'ruim',pt:'Ruim',type:'poor'}];
+  const GQ_M={great:'M11.5 23 Q20 33 28.5 23',good:'M12.5 24.5 Q20 29.5 27.5 24.5',fair:'M13 26 H27',poor:'M12.5 28.5 Q20 22.5 27.5 28.5'};
+  function gqE(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function gqSm(type,filled,size){const c=filled?'#fff':'#9A9A9A',f=filled?'var(--gold)':'none';return `<svg viewBox="0 0 40 40" width="${size}" height="${size}" fill="none"><circle cx="20" cy="20" r="17" fill="${f}" stroke="${c}" stroke-width="2"/><circle cx="14.6" cy="16.4" r="1.7" fill="${c}"/><circle cx="25.4" cy="16.4" r="1.7" fill="${c}"/><path d="${GQ_M[type]}" stroke="${c}" stroke-width="2" stroke-linecap="round"/></svg>`;}
+  function gqDay(){return new Date().toISOString().slice(0,10);}
+  const GQ_S1=[{key:'rec_acolhimento',pt:'Acolhimento e cordialidade da recepção'},{key:'rec_checkin',pt:'Agilidade no processo de check-in'},{key:'rec_informacoes',pt:'Informações prestadas sobre o hotel e serviços'},{key:'rec_estacionamento',pt:'Facilidade de estacionamento'},{key:'rec_concierge',pt:'Facilidades do Concierge'}];
+  const GQ_S2=[{key:'apt_limpeza',pt:'Limpeza e conservação do apartamento'},{key:'apt_cama',pt:'Qualidade e conforto da cama e roupa de cama'},{key:'apt_manutencao',pt:'Manutenção e funcionamento dos equipamentos'},{key:'apt_climatizacao',pt:'Climatização do apartamento'},{key:'apt_facilidades',pt:'Facilidades do apartamento (TV, telefone, cofre)'}];
+  const GQ_S3=[{key:'cafe_qualidade',pt:'Qualidade dos alimentos'},{key:'cafe_variedade',pt:'Variedade do cardápio'},{key:'cafe_cortesia',pt:'Cortesia e agilidade dos colaboradores'},{key:'cafe_apresentacao',pt:'Apresentação dos alimentos'}];
+  const GQ_S4=[{key:'qto_qualidade',pt:'Qualidade do cardápio'},{key:'qto_variedade',pt:'Variedade dos alimentos'},{key:'qto_cortesia',pt:'Cortesia e agilidade dos colaboradores'},{key:'qto_apresentacao',pt:'Apresentação dos alimentos / Embalagem'}];
+  let gqRatings={},gqTipo=null,gqVariant='geral';
+  const gqOverlay=document.createElement('div');
+  gqOverlay.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;overflow-y:auto';
+  document.body.appendChild(gqOverlay);
+  function gqRow(q){const btns=GQ_R.map(r=>`<button type="button" class="smiley-btn" data-qkey="${q.key}" data-type="${r.type}" data-val="${r.key}" aria-label="${r.pt}">${gqSm(r.type,false,30)}</button>`).join('');return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${gqE(q.pt)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;}
+  function gqTopBar(){const k=[...GQ_S1,...GQ_S2,...GQ_S3,...GQ_S4].map(q=>q.key).join(',');return `<div style="display:flex;align-items:center;gap:5px;padding:8px 20px 4px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span>${GQ_R.map(r=>`<button type="button" class="btn-mark-all gq-mark-all" data-nota="${r.key}" data-sec="${k}">${r.pt}</button>`).join('')}</div>`;}
+  function gqSec(num,title,qs,cid){return `<section><div class="sec-heading"><span class="sec-num">${num}</span><span class="sec-title">${gqE(title)}</span></div><div class="rating-list">${qs.map(gqRow).join('')}</div>${cid?`<div class="field comment-field"><label><span class="field-label-pt">Comentário</span></label><input type="text" id="${cid}" placeholder="Opcional…"><div class="fill"></div></div>`:''}</section>`;}
+  function gqBuild(){const gc=gqVariant==='geral-granclass';const t=gc?'Pesquisa Geral da Qualidade · Gran Class':'Pesquisa Geral da Qualidade';return `<div id="psModal"><div class="ps-sticky-hdr"><div class="ps-sticky-top"><button type="button" class="ps-close" id="gqClose">✕</button></div><div class="progress-inner"><div class="trace"><div class="tf" id="gqTf1"></div></div><div class="trace"><div class="tf" id="gqTf2"></div></div><div class="trace"><div class="tf" id="gqTf3"></div></div><div class="trace"><div class="tf" id="gqTf4"></div></div></div></div><div class="form-wrap"><header><h1 class="form-title">${gqE(t)}</h1></header><section><div class="field-grid"><div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="gqNome" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="gqEmail" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="gqTel" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="gqApto" autocomplete="off" placeholder="Ex: 1201" maxlength="4" inputmode="numeric"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Check-in</span></label><input type="date" id="gqCheckIn" max="${gqDay()}"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Check-out</span></label><input type="date" id="gqCheckOut" max="${gqDay()}"><div class="fill"></div></div></div></section>${gqTopBar()}${gqSec('01','RECEPÇÃO / CHECK-IN',GQ_S1,'gqComRec')}${gqSec('02','APARTAMENTO',GQ_S2,'gqComApt')}${gqSec('03','CAFÉ DA MANHÃ',GQ_S3,'gqComCafe')}${gqSec('04','SERVIÇO DE QUARTO',GQ_S4,'gqComQto')}<section><div class="sec-heading"><span class="sec-num">05</span><span class="sec-title">TIPO DE VISITA</span></div><div class="radio-list client-type"><button type="button" class="radio-opt" data-gqtipo="lazer"><span class="radio-dot" id="gqDotLazer"></span><span style="color:var(--fg)">Lazer</span></button><button type="button" class="radio-opt" data-gqtipo="negocios"><span class="radio-dot" id="gqDotNegocios"></span><span style="color:var(--fg)">Negócios</span></button><button type="button" class="radio-opt" data-gqtipo="evento"><span class="radio-dot" id="gqDotEvento"></span><span style="color:var(--fg)">Evento</span></button><button type="button" class="radio-opt" data-gqtipo="outro"><span class="radio-dot" id="gqDotOutro"></span><span style="color:var(--fg)">Outro</span></button></div></section><div class="submit-wrap"><button type="button" class="submit-btn" id="gqSubmitBtn">ENVIAR AVALIAÇÃO</button><div id="gqMsg" class="submit-err"></div></div></div></div>`;}
+  function gqProg(){const nome=(document.getElementById('gqNome')?.value||'').trim();const all=[...GQ_S1,...GQ_S2,...GQ_S3,...GQ_S4];const rated=all.filter(q=>gqRatings[q.key]).length;[!!nome,rated>=(GQ_S1.length+GQ_S2.length),rated>=all.length,!!gqTipo].forEach((d,i)=>{const tf=document.getElementById(`gqTf${i+1}`);if(tf)tf.style.width=d?'100%':'0';});const b=document.getElementById('gqSubmitBtn');if(b)b.disabled=!nome;}
+  function gqMarkAll(nota,keys){keys.forEach(k=>{gqRatings[k]=nota;gqOverlay.querySelectorAll(`.smiley-btn[data-qkey="${k}"]`).forEach(b=>{const s=b.dataset.val===nota;b.classList.toggle('selected',s);b.innerHTML=gqSm(b.dataset.type,s,30);});});gqProg();}
+  function gqClose(){gqOverlay.style.display='none';document.body.style.overflow='';}
+  async function gqSubmit(){const btn=document.getElementById('gqSubmitBtn'),msg=document.getElementById('gqMsg');const nome=(document.getElementById('gqNome')?.value||'').trim();if(!nome){msg.textContent='Nome obrigatório.';msg.style.display='block';return;}btn.disabled=true;msg.style.display='none';try{const p={nome,email:(document.getElementById('gqEmail')?.value||'').trim()||null,telefone:(document.getElementById('gqTel')?.value||'').trim()||null,apto:(document.getElementById('gqApto')?.value||'').trim()||null,check_in:(document.getElementById('gqCheckIn')?.value||'')||null,check_out:(document.getElementById('gqCheckOut')?.value||'')||null,tipo_visita:gqTipo||null,tipo_pesquisa:gqVariant,com_recepcao:(document.getElementById('gqComRec')?.value||'').trim()||null,com_apartamento:(document.getElementById('gqComApt')?.value||'').trim()||null,com_cafe:(document.getElementById('gqComCafe')?.value||'').trim()||null,com_quarto:(document.getElementById('gqComQto')?.value||'').trim()||null,...gqRatings};const r=await fetch('/api/nova-resposta-geral',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await r.json();if(!d.ok)throw new Error(d.error||'Erro ao enviar');msg.textContent='Pesquisa enviada com sucesso! ✓';msg.style.color='#15705A';msg.style.display='block';setTimeout(()=>gqOpen(gqVariant),1800);}catch(e){msg.textContent=`Erro: ${e.message}`;msg.style.color='var(--danger)';msg.style.display='block';btn.disabled=false;}}
+  function gqOpen(variant){gqRatings={};gqTipo=null;gqVariant=variant||'geral';gqOverlay.innerHTML=gqBuild();gqOverlay.scrollTop=0;gqOverlay.style.display='block';document.body.style.overflow='hidden';document.getElementById('gqClose')?.addEventListener('click',gqClose);gqOverlay.querySelectorAll('.smiley-btn').forEach(btn=>{btn.addEventListener('click',()=>{const qkey=btn.dataset.qkey,val=btn.dataset.val;if(gqRatings[qkey]===val){delete gqRatings[qkey];gqOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{b.classList.remove('selected');b.innerHTML=gqSm(b.dataset.type,false,30);});}else{gqRatings[qkey]=val;gqOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{const s=b.dataset.val===val;b.classList.toggle('selected',s);b.innerHTML=gqSm(b.dataset.type,s,30);});}gqProg();});});gqOverlay.querySelectorAll('[data-gqtipo]').forEach(btn=>{btn.addEventListener('click',()=>{gqTipo=btn.dataset.gqtipo;gqOverlay.querySelectorAll('[data-gqtipo]').forEach(b=>{const dot=b.querySelector('.radio-dot');if(dot)dot.classList.toggle('on',b.dataset.gqtipo===gqTipo);});gqProg();});});gqOverlay.querySelectorAll('.gq-mark-all').forEach(btn=>{btn.addEventListener('click',()=>gqMarkAll(btn.dataset.nota,btn.dataset.sec.split(',')));});document.getElementById('gqNome')?.addEventListener('input',gqProg);document.getElementById('gqSubmitBtn')?.addEventListener('click',gqSubmit);gqProg();}
+  window._openers=window._openers||{};
+  window._openers['geral']=()=>gqOpen('geral');
+  window._openers['geral-granclass']=()=>gqOpen('geral-granclass');
+}
+
+// ── Modal: Pesquisa PDVs / Gran Class ──
+{
+  const PDV_R=[{key:'otimo',pt:'Ótimo',type:'great'},{key:'bom',pt:'Bom',type:'good'},{key:'regular',pt:'Regular',type:'fair'},{key:'ruim',pt:'Ruim',type:'poor'}];
+  const PDV_M={great:'M11.5 23 Q20 33 28.5 23',good:'M12.5 24.5 Q20 29.5 27.5 24.5',fair:'M13 26 H27',poor:'M12.5 28.5 Q20 22.5 27.5 28.5'};
+  function pdvE(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function pdvSm(type,filled,size){const c=filled?'#fff':'#9A9A9A',f=filled?'var(--gold)':'none';return `<svg viewBox="0 0 40 40" width="${size}" height="${size}" fill="none"><circle cx="20" cy="20" r="17" fill="${f}" stroke="${c}" stroke-width="2"/><circle cx="14.6" cy="16.4" r="1.7" fill="${c}"/><circle cx="25.4" cy="16.4" r="1.7" fill="${c}"/><path d="${PDV_M[type]}" stroke="${c}" stroke-width="2" stroke-linecap="round"/></svg>`;}
+  const PDV_LOCAIS=['Restaurante Mangostin','Restaurante Mucuripe (almoço)','Restaurante Mucuripe (jantar)','Bar da Piscina','Lobby Bar'];
+  const PDV_S1=[{key:'alim_qualidade',pt:'Qualidade dos alimentos'},{key:'alim_variedade',pt:'Variedade do cardápio'},{key:'alim_cortesia',pt:'Cortesia dos colaboradores'},{key:'alim_agilidade',pt:'Agilidade dos colaboradores'},{key:'alim_apresentacao',pt:'Apresentação dos alimentos'}];
+  const PDV_S2=[{key:'inst_infraestrutura',pt:'Infraestrutura do ambiente'},{key:'inst_limpeza',pt:'Limpeza do restaurante/bar e banheiros'},{key:'inst_conforto',pt:'Conforto do ambiente'},{key:'inst_wifi',pt:'Serviço de Wi-Fi'}];
+  const PDV_S3=[{key:'ger_experiencia',pt:'Sua experiência conosco'},{key:'ger_expectativas',pt:'Suas expectativas em relação ao que foi oferecido'}];
+  let pdvRatings={},pdvTipo=null,pdvLocais=new Set(),pdvVariant='pdvs';
+  const pdvOverlay=document.createElement('div');
+  pdvOverlay.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;overflow-y:auto';
+  document.body.appendChild(pdvOverlay);
+  function pdvRow(q){const btns=PDV_R.map(r=>`<button type="button" class="smiley-btn" data-qkey="${q.key}" data-type="${r.type}" data-val="${r.key}" aria-label="${r.pt}">${pdvSm(r.type,false,30)}</button>`).join('');return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${pdvE(q.pt)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;}
+  function pdvTopBar(){const k=[...PDV_S1,...PDV_S2,...PDV_S3].map(q=>q.key).join(',');return `<div style="display:flex;align-items:center;gap:5px;padding:8px 20px 4px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span>${PDV_R.map(r=>`<button type="button" class="btn-mark-all pdv-mark-all" data-nota="${r.key}" data-sec="${k}">${r.pt}</button>`).join('')}</div>`;}
+  function pdvSec(num,title,qs,cid){return `<section><div class="sec-heading"><span class="sec-num">${num}</span><span class="sec-title">${pdvE(title)}</span></div><div class="rating-list">${qs.map(pdvRow).join('')}</div>${cid?`<div class="field comment-field"><label><span class="field-label-pt">Comentário</span></label><input type="text" id="${cid}" placeholder="Opcional…"><div class="fill"></div></div>`:''}</section>`;}
+  function pdvBuild(){const gc=pdvVariant==='pdvs-granclass';const t=gc?'Pesquisa PDVs · Gran Class':'Pesquisa PDVs';const locHtml=PDV_LOCAIS.map((l,i)=>`<button type="button" class="radio-opt pdv-loc" data-pdvloc="${i}"><span class="pdv-chk" id="pdvChk${i}" style="width:14px;height:14px;border:1.5px solid var(--bord-s);border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s"></span><span style="color:var(--fg)">${pdvE(l)}</span></button>`).join('');return `<div id="psModal"><div class="ps-sticky-hdr"><div class="ps-sticky-top"><button type="button" class="ps-close" id="pdvClose">✕</button></div><div class="progress-inner"><div class="trace"><div class="tf" id="pdvTf1"></div></div><div class="trace"><div class="tf" id="pdvTf2"></div></div><div class="trace"><div class="tf" id="pdvTf3"></div></div></div></div><div class="form-wrap"><header><h1 class="form-title">${pdvE(t)}</h1></header><section><div class="sec-heading"><span class="sec-num">00</span><span class="sec-title">LOCAL DA VISITA</span><button type="button" class="btn-mark-all pdv-loc-all" style="flex-shrink:0;margin-left:8px">Marcar todos</button></div><div class="radio-list" style="gap:2px">${locHtml}</div></section><section><div class="field-grid"><div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="pdvNome" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="pdvEmail" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Tel / WhatsApp</span></label><input type="tel" id="pdvTel" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Nº do Apto</span></label><input type="text" id="pdvApto" autocomplete="off" placeholder="Opcional" maxlength="4" inputmode="numeric"><div class="fill"></div></div></div></section>${pdvTopBar()}${pdvSec('01','SERVIÇO DE ALIMENTOS E BEBIDAS',PDV_S1,'pdvComAlim')}${pdvSec('02','INSTALAÇÕES E SERVIÇOS',PDV_S2,'pdvComInst')}${pdvSec('03','AVALIAÇÃO GERAL',PDV_S3,null)}<section><div class="sec-heading"><span class="sec-num">04</span><span class="sec-title">TIPO DE CLIENTE</span></div><div class="radio-list client-type"><button type="button" class="radio-opt" data-pdvtipo="hospede"><span class="radio-dot" id="pdvDotHosp"></span><span style="color:var(--fg)">Hóspede</span></button><button type="button" class="radio-opt" data-pdvtipo="passante"><span class="radio-dot" id="pdvDotPass"></span><span style="color:var(--fg)">Passante</span></button></div></section><section><div class="field"><label><span class="field-label-pt">Comentários e sugestões</span></label><input type="text" id="pdvComGeral" placeholder="Opcional…"><div class="fill"></div></div></section><div class="submit-wrap"><button type="button" class="submit-btn" id="pdvSubmitBtn">ENVIAR AVALIAÇÃO</button><div id="pdvMsg" class="submit-err"></div></div></div></div>`;}
+  function pdvProg(){const nome=(document.getElementById('pdvNome')?.value||'').trim();const all=[...PDV_S1,...PDV_S2,...PDV_S3];const rated=all.filter(q=>pdvRatings[q.key]).length;[!!nome&&pdvLocais.size>0,rated>=(PDV_S1.length+PDV_S2.length),rated>=all.length].forEach((d,i)=>{const tf=document.getElementById(`pdvTf${i+1}`);if(tf)tf.style.width=d?'100%':'0';});const b=document.getElementById('pdvSubmitBtn');if(b)b.disabled=!nome;}
+  function pdvMarkAll(nota,keys){keys.forEach(k=>{pdvRatings[k]=nota;pdvOverlay.querySelectorAll(`.smiley-btn[data-qkey="${k}"]`).forEach(b=>{const s=b.dataset.val===nota;b.classList.toggle('selected',s);b.innerHTML=pdvSm(b.dataset.type,s,30);});});pdvProg();}
+  function pdvClose(){pdvOverlay.style.display='none';document.body.style.overflow='';}
+  async function pdvSubmit(){const btn=document.getElementById('pdvSubmitBtn'),msg=document.getElementById('pdvMsg');const nome=(document.getElementById('pdvNome')?.value||'').trim();if(!nome){msg.textContent='Nome obrigatório.';msg.style.display='block';return;}btn.disabled=true;msg.style.display='none';try{const p={nome,email:(document.getElementById('pdvEmail')?.value||'').trim()||null,telefone:(document.getElementById('pdvTel')?.value||'').trim()||null,apto:(document.getElementById('pdvApto')?.value||'').trim()||null,locais:pdvLocais.size>0?[...pdvLocais].map(i=>PDV_LOCAIS[i]).join(', '):null,tipo_cliente:pdvTipo||null,tipo_pesquisa:pdvVariant,com_alimentos:(document.getElementById('pdvComAlim')?.value||'').trim()||null,com_instalacoes:(document.getElementById('pdvComInst')?.value||'').trim()||null,com_geral:(document.getElementById('pdvComGeral')?.value||'').trim()||null,...pdvRatings};const r=await fetch('/api/nova-resposta-pdvs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await r.json();if(!d.ok)throw new Error(d.error||'Erro ao enviar');msg.textContent='Pesquisa enviada com sucesso! ✓';msg.style.color='#15705A';msg.style.display='block';setTimeout(()=>pdvOpen(pdvVariant),1800);}catch(e){msg.textContent=`Erro: ${e.message}`;msg.style.color='var(--danger)';msg.style.display='block';btn.disabled=false;}}
+  function pdvOpen(variant){pdvRatings={};pdvTipo=null;pdvLocais=new Set();pdvVariant=variant||'pdvs';pdvOverlay.innerHTML=pdvBuild();pdvOverlay.scrollTop=0;pdvOverlay.style.display='block';document.body.style.overflow='hidden';document.getElementById('pdvClose')?.addEventListener('click',pdvClose);pdvOverlay.querySelectorAll('.smiley-btn').forEach(btn=>{btn.addEventListener('click',()=>{const qkey=btn.dataset.qkey,val=btn.dataset.val;if(pdvRatings[qkey]===val){delete pdvRatings[qkey];pdvOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{b.classList.remove('selected');b.innerHTML=pdvSm(b.dataset.type,false,30);});}else{pdvRatings[qkey]=val;pdvOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{const s=b.dataset.val===val;b.classList.toggle('selected',s);b.innerHTML=pdvSm(b.dataset.type,s,30);});}pdvProg();});});pdvOverlay.querySelector('.pdv-loc-all')?.addEventListener('click',()=>{PDV_LOCAIS.forEach((_,i)=>{pdvLocais.add(i);const chk=pdvOverlay.querySelector(`#pdvChk${i}`);if(chk){chk.style.background='var(--gold)';chk.style.borderColor='var(--gold)';chk.innerHTML='<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2 2L8 1" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';}});pdvProg();});pdvOverlay.querySelectorAll('.pdv-loc').forEach(btn=>{btn.addEventListener('click',()=>{const i=parseInt(btn.dataset.pdvloc);if(pdvLocais.has(i))pdvLocais.delete(i);else pdvLocais.add(i);const chk=btn.querySelector('.pdv-chk');if(chk){const on=pdvLocais.has(i);chk.style.background=on?'var(--gold)':'';chk.style.borderColor=on?'var(--gold)':'var(--bord-s)';chk.innerHTML=on?'<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2 2L8 1" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';}pdvProg();});});pdvOverlay.querySelectorAll('[data-pdvtipo]').forEach(btn=>{btn.addEventListener('click',()=>{pdvTipo=btn.dataset.pdvtipo;pdvOverlay.querySelectorAll('[data-pdvtipo]').forEach(b=>{const dot=b.querySelector('.radio-dot');if(dot)dot.classList.toggle('on',b.dataset.pdvtipo===pdvTipo);});pdvProg();});});pdvOverlay.querySelectorAll('.pdv-mark-all').forEach(btn=>{btn.addEventListener('click',()=>pdvMarkAll(btn.dataset.nota,btn.dataset.sec.split(',')));});document.getElementById('pdvNome')?.addEventListener('input',pdvProg);document.getElementById('pdvSubmitBtn')?.addEventListener('click',pdvSubmit);pdvProg();}
+  window._openers=window._openers||{};
+  window._openers['pdvs']=()=>pdvOpen('pdvs');
+  window._openers['pdvs-granclass']=()=>pdvOpen('pdvs-granclass');
+}
+
+// ── Modal: Pesquisa de Eventos Sociais (Cliente + Parceiros) ──
+{
+  const EV_M={great:'M11.5 23 Q20 33 28.5 23',good:'M12.5 24.5 Q20 29.5 27.5 24.5',fair:'M13 26 H27',poor:'M12.5 28.5 Q20 22.5 27.5 28.5'};
+  function evE(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function evSm(type,filled,size){const c=filled?'#fff':'#9A9A9A',f=filled?'var(--gold)':'none';return `<svg viewBox="0 0 40 40" width="${size}" height="${size}" fill="none"><circle cx="20" cy="20" r="17" fill="${f}" stroke="${c}" stroke-width="2"/><circle cx="14.6" cy="16.4" r="1.7" fill="${c}"/><circle cx="25.4" cy="16.4" r="1.7" fill="${c}"/><path d="${EV_M[type]}" stroke="${c}" stroke-width="2" stroke-linecap="round"/></svg>`;}
+  function evDay(){return new Date().toISOString().slice(0,10);}
+  const EV_CLI_R=[{key:'muitobom',pt:'Muito Bom',type:'great'},{key:'bom',pt:'Bom',type:'good'},{key:'regular',pt:'Regular',type:'fair'},{key:'ruim',pt:'Ruim',type:'poor'}];
+  const EV_CER_R=[{key:'otimo',pt:'Ótimo',type:'great'},{key:'bom',pt:'Bom',type:'good'},{key:'regular',pt:'Regular',type:'fair'},{key:'ruim',pt:'Ruim',type:'poor'}];
+  const EV_S1=[{key:'ev_servicos',pt:'Como você avalia os serviços do Hotel?'},{key:'ev_equipamentos',pt:'Os equipamentos funcionaram corretamente?'}];
+  const EV_S2=[{key:'com_cortesia',pt:'Cortesia (demonstra educação e cordialidade)'},{key:'com_receptividade',pt:'Receptividade (responde de acordo com o solicitado)'},{key:'com_qualidade',pt:'Qualidade (rápida e eficaz)'},{key:'com_presteza',pt:'Presteza (atende as solicitações em 48H)'}];
+  const EV_S3=[{key:'op_agilidade',pt:'Agilidade (pronto atendimento durante o evento)'},{key:'op_desenvolvimento',pt:'Desenvolvimento (execução do serviço para todos)'},{key:'op_pontualidade',pt:'Pontualidade'},{key:'op_expectativa',pt:'Expectativa (serviços executados de acordo com o acordado)'}];
+  const EV_S4_CLI=[{key:'ab_apresentacao',pt:'Apresentação dos alimentos'},{key:'ab_qualidade',pt:'Qualidade dos alimentos'},{key:'ab_variedade',pt:'Variedade dos alimentos'}];
+  const EV_S4_CER=[{key:'ab_apresentacao',pt:'Apresentação dos alimentos'},{key:'ab_qualidade',pt:'Qualidade dos alimentos'},{key:'ab_variedade',pt:'Variedade dos alimentos'},{key:'ab_quantidade',pt:'Quantidade dos alimentos'},{key:'ab_horario',pt:'Serviço de A&B entregue no horário'}];
+  const EV_S5_CLI=[{key:'inf_conforto',pt:'Conforto e conservação dos ambientes'},{key:'inf_temperatura',pt:'Temperatura do espaço estava agradável?'},{key:'inf_iluminacao',pt:'Iluminação do espaço estava ideal?'},{key:'inf_limpeza',pt:'Limpeza das salas e banheiros'},{key:'inf_acesso',pt:'Indicação de acesso aos espaços de eventos'},{key:'inf_internet',pt:'Serviço de Internet'},{key:'inf_manobristas',pt:'Serviço de manobristas'},{key:'inf_allug',pt:'Serviço de equipamentos ALLUG'}];
+  const EV_S5_CER=[{key:'inf_conforto',pt:'Conforto e conservação dos ambientes, estava conforme esperado?'},{key:'inf_temperatura',pt:'Temperatura do espaço estava agradável?'},{key:'inf_iluminacao',pt:'Iluminação do espaço estava ideal?'},{key:'inf_limpeza',pt:'Limpeza das salas e banheiros foram realizadas?'},{key:'inf_acesso',pt:'Indicação de acesso aos espaços de eventos está conforme esperado?'},{key:'inf_manobristas',pt:'Serviço de manobristas, atendeu suas expectativas?'},{key:'inf_montagem',pt:'O salão se encontrava com a montagem solicitada?'},{key:'inf_material',pt:'Existiu agilidade, no recebimento do material do evento?'}];
+  let evRatings={},evInfra={},evVariant='eventos-cliente';
+  const evOverlay=document.createElement('div');
+  evOverlay.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;overflow-y:auto';
+  document.body.appendChild(evOverlay);
+  function evRow(q,ratings){const btns=ratings.map(r=>`<button type="button" class="smiley-btn" data-qkey="${q.key}" data-type="${r.type}" data-val="${r.key}" aria-label="${r.pt}">${evSm(r.type,false,30)}</button>`).join('');return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${evE(q.pt)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;}
+  function evTopBarCli(){const k=[...EV_S1,...EV_S2,...EV_S3,...EV_S4_CLI,...EV_S5_CLI].map(q=>q.key).join(',');return `<div style="display:flex;align-items:center;gap:5px;padding:8px 20px 4px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span>${EV_CLI_R.map(r=>`<button type="button" class="btn-mark-all ev-mark-all" data-nota="${r.key}" data-sec="${k}">${r.pt}</button>`).join('')}</div>`;}
+  function evTopBarCer(){const k=[...EV_S1,...EV_S2,...EV_S3,...EV_S4_CER].map(q=>q.key).join(',');return `<div style="display:flex;align-items:center;gap:5px;padding:8px 20px 4px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span>${EV_CER_R.map(r=>`<button type="button" class="btn-mark-all ev-mark-all" data-nota="${r.key}" data-sec="${k}">${r.pt}</button>`).join('')}</div>`;}
+  function evRatingSec(num,title,qs,ratings,cid){return `<section><div class="sec-heading"><span class="sec-num">${num}</span><span class="sec-title">${evE(title)}</span></div><div class="rating-list">${qs.map(q=>evRow(q,ratings)).join('')}</div>${cid?`<div class="field comment-field"><label><span class="field-label-pt">Comentário</span></label><input type="text" id="${cid}" placeholder="Opcional…"><div class="fill"></div></div>`:''}</section>`;}
+  function evSnRow(q){return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${evE(q.pt)}</span></div><div style="display:flex;gap:12px;flex:none"><button type="button" class="btn-mark-all ev-sn-btn" data-qkey="${q.key}" data-val="sim" style="min-width:44px">Sim</button><button type="button" class="btn-mark-all ev-sn-btn" data-qkey="${q.key}" data-val="nao" style="min-width:44px">Não</button></div></div>`;}
+  function evSnGeral(qkey,label){return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${evE(label)}</span></div><div style="display:flex;gap:12px;flex:none"><button type="button" class="btn-mark-all ev-sn-btn" data-qkey="${qkey}" data-val="sim" style="min-width:44px">Sim</button><button type="button" class="btn-mark-all ev-sn-btn" data-qkey="${qkey}" data-val="nao" style="min-width:44px">Não</button></div></div>`;}
+  function evFields(extra2Tel){return `<section><div class="field-grid"><div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="evData" max="${evDay()}"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Empresa</span></label><input type="text" id="evEmpresa" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="evNome" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Telefone</span></label><input type="tel" id="evTel" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div></div>${extra2Tel?'<div class="field"><label><span class="field-label-pt">Telefone 2</span></label><input type="tel" id="evTel2" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div></div>':''}<div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="evEmail" autocomplete="off"><div class="fill"></div></div></div></section>`;}
+  function evHdr(title){return `<div id="psModal"><div class="ps-sticky-hdr"><div class="ps-sticky-top"><button type="button" class="ps-close" id="evClose">✕</button></div><div class="progress-inner"><div class="trace"><div class="tf" id="evTf1"></div></div><div class="trace"><div class="tf" id="evTf2"></div></div><div class="trace"><div class="tf" id="evTf3"></div></div><div class="trace"><div class="tf" id="evTf4"></div></div></div></div><div class="form-wrap"><header><h1 class="form-title">${evE(title)}</h1></header>`;}
+  function evBuildCli(){return evHdr('Pesquisa de Eventos Sociais · Cliente')+evFields(true)+evTopBarCli()+evRatingSec('01','DURANTE O EVENTO',EV_S1,EV_CLI_R,null)+evRatingSec('02','ATENDIMENTO COMERCIAL',EV_S2,EV_CLI_R,null)+evRatingSec('03','ATENDIMENTO OPERAÇÃO',EV_S3,EV_CLI_R,null)+evRatingSec('04','ALIMENTOS E BEBIDAS',EV_S4_CLI,EV_CLI_R,null)+evRatingSec('05','INFRA-ESTRUTURA DOS ESPAÇOS DE EVENTOS',EV_S5_CLI,EV_CLI_R,null)+`<section><div class="sec-heading"><span class="sec-num">06</span><span class="sec-title">AVALIAÇÃO GERAL</span></div><div class="rating-list">${evSnGeral('ev_expectativas','Suas expectativas em relação ao evento foram atendidas?')}${evSnGeral('ev_voltaria','Você voltaria a realizar eventos em nosso hotel?')}</div></section><section><div class="field"><label><span class="field-label-pt">Comentários, sugestões ou algo que chamou atenção</span></label><input type="text" id="evComentarios" placeholder="Opcional…"><div class="fill"></div></div></section><div class="submit-wrap"><button type="button" class="submit-btn" id="evSubmitBtn">ENVIAR AVALIAÇÃO</button><div id="evMsg" class="submit-err"></div></div></div></div>`;}
+  function evBuildCer(){return evHdr('Pesquisa de Eventos Sociais · Parceiros')+evFields(false)+evTopBarCer()+evRatingSec('01','DURANTE O EVENTO',EV_S1,EV_CER_R,null)+evRatingSec('02','ATENDIMENTO COMERCIAL',EV_S2,EV_CER_R,null)+evRatingSec('03','ATENDIMENTO OPERAÇÃO',EV_S3,EV_CER_R,null)+evRatingSec('04','ALIMENTOS E BEBIDAS',EV_S4_CER,EV_CER_R,null)+`<section><div class="sec-heading" style="justify-content:space-between;align-items:center"><span style="display:flex;align-items:baseline;gap:10px"><span class="sec-num">05</span><span class="sec-title">INFRA-ESTRUTURA DOS ESPAÇOS</span></span><div style="display:flex;gap:5px;align-items:center"><span style="font-size:11px;color:var(--muted);white-space:nowrap">Marcar tudo:</span><button type="button" class="btn-mark-all ev-sn-all" data-val="sim">Sim</button><button type="button" class="btn-mark-all ev-sn-all" data-val="nao">Não</button></div></div><div class="rating-list">${EV_S5_CER.map(evSnRow).join('')}</div><div class="field comment-field"><label><span class="field-label-pt">Se alguma resposta for negativa, por quê?</span></label><input type="text" id="evInfraNeg" placeholder="Opcional…"><div class="fill"></div></div></section><section><div class="sec-heading"><span class="sec-num">06</span><span class="sec-title">AVALIAÇÃO GERAL</span></div><div class="rating-list">${evSnGeral('ev_expectativas','Suas expectativas em relação ao evento foram atendidas?')}${evSnGeral('ev_voltaria','Você voltaria a realizar eventos em nosso hotel?')}</div></section><section><div class="field"><label><span class="field-label-pt">Em que podemos melhorar?</span></label><input type="text" id="evMelhorar" placeholder="Opcional…"><div class="fill"></div></div></section><section><div class="field"><label><span class="field-label-pt">Comentários</span></label><input type="text" id="evComentarios" placeholder="Opcional…"><div class="fill"></div></div></section><div class="submit-wrap"><button type="button" class="submit-btn" id="evSubmitBtn">ENVIAR AVALIAÇÃO</button><div id="evMsg" class="submit-err"></div></div></div></div>`;}
+  function evProg(){const nome=(document.getElementById('evNome')?.value||'').trim();const isCer=evVariant==='eventos-cerimonialista';const s4=isCer?EV_S4_CER:EV_S4_CLI;const allQ=[...EV_S1,...EV_S2,...EV_S3,...s4];const rated=allQ.filter(q=>evRatings[q.key]).length;const s5Keys=isCer?EV_S5_CER.map(q=>q.key):EV_S5_CLI.map(q=>q.key);const s5done=isCer?s5Keys.filter(k=>evInfra[k]).length:s5Keys.filter(k=>evRatings[k]).length;[!!nome,rated>=(EV_S1.length+EV_S2.length),rated>=allQ.length&&s5done>0,!!(evInfra['ev_expectativas']||evRatings['ev_expectativas'])].forEach((d,i)=>{const tf=document.getElementById(`evTf${i+1}`);if(tf)tf.style.width=d?'100%':'0';});const b=document.getElementById('evSubmitBtn');if(b)b.disabled=!nome;}
+  function evMarkAll(nota,keys){keys.forEach(k=>{evRatings[k]=nota;evOverlay.querySelectorAll(`.smiley-btn[data-qkey="${k}"]`).forEach(b=>{const s=b.dataset.val===nota;b.classList.toggle('selected',s);b.innerHTML=evSm(b.dataset.type,s,30);});});evProg();}
+  function evMarkSN(k,val){evInfra[k]=val;evOverlay.querySelectorAll(`.ev-sn-btn[data-qkey="${k}"]`).forEach(b=>{const active=b.dataset.val===val;b.style.background=active?'var(--gold)':'';b.style.color=active?'#fff':'';});evProg();}
+  function evMarkAllSN(val){const keys=evVariant==='eventos-cerimonialista'?EV_S5_CER.map(q=>q.key):[];keys.forEach(k=>evMarkSN(k,val));}
+  function evClose(){evOverlay.style.display='none';document.body.style.overflow='';}
+  async function evSubmit(){const btn=document.getElementById('evSubmitBtn'),msg=document.getElementById('evMsg');const nome=(document.getElementById('evNome')?.value||'').trim();if(!nome){msg.textContent='Nome obrigatório.';msg.style.display='block';return;}btn.disabled=true;msg.style.display='none';try{const p={nome,email:(document.getElementById('evEmail')?.value||'').trim()||null,telefone:(document.getElementById('evTel')?.value||'').trim()||null,telefone2:(document.getElementById('evTel2')?.value||'').trim()||null,empresa:(document.getElementById('evEmpresa')?.value||'').trim()||null,data_evento:(document.getElementById('evData')?.value||'')||null,tipo_pesquisa:evVariant,ev_expectativas:evInfra['ev_expectativas']||null,ev_voltaria:evInfra['ev_voltaria']||null,infra_negativo:(document.getElementById('evInfraNeg')?.value||'').trim()||null,melhorar:(document.getElementById('evMelhorar')?.value||'').trim()||null,comentarios:(document.getElementById('evComentarios')?.value||'').trim()||null,...evRatings,...Object.fromEntries(Object.entries(evInfra).filter(([k])=>!['ev_expectativas','ev_voltaria'].includes(k)))};const r=await fetch('/api/nova-resposta-eventos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await r.json();if(!d.ok)throw new Error(d.error||'Erro ao enviar');msg.textContent='Pesquisa enviada com sucesso! ✓';msg.style.color='#15705A';msg.style.display='block';setTimeout(()=>evOpen(evVariant),1800);}catch(e){msg.textContent=`Erro: ${e.message}`;msg.style.color='var(--danger)';msg.style.display='block';btn.disabled=false;}}
+  function evOpen(variant){evRatings={};evInfra={};evVariant=variant||'eventos-cliente';evOverlay.innerHTML=variant==='eventos-cerimonialista'?evBuildCer():evBuildCli();evOverlay.scrollTop=0;evOverlay.style.display='block';document.body.style.overflow='hidden';document.getElementById('evClose')?.addEventListener('click',evClose);evOverlay.querySelectorAll('.smiley-btn').forEach(btn=>{btn.addEventListener('click',()=>{const qkey=btn.dataset.qkey,val=btn.dataset.val;if(evRatings[qkey]===val){delete evRatings[qkey];evOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{b.classList.remove('selected');b.innerHTML=evSm(b.dataset.type,false,30);});}else{evRatings[qkey]=val;evOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{const s=b.dataset.val===val;b.classList.toggle('selected',s);b.innerHTML=evSm(b.dataset.type,s,30);});}evProg();});});evOverlay.querySelectorAll('.ev-mark-all').forEach(btn=>{btn.addEventListener('click',()=>evMarkAll(btn.dataset.nota,btn.dataset.sec.split(',')));});evOverlay.querySelectorAll('.ev-sn-btn').forEach(btn=>{btn.addEventListener('click',()=>evMarkSN(btn.dataset.qkey,btn.dataset.val));});evOverlay.querySelectorAll('.ev-sn-all').forEach(btn=>{btn.addEventListener('click',()=>evMarkAllSN(btn.dataset.val));});document.getElementById('evNome')?.addEventListener('input',evProg);document.getElementById('evSubmitBtn')?.addEventListener('click',evSubmit);evProg();}
+  window._openers=window._openers||{};
+  window._openers['eventos-cliente']=()=>evOpen('eventos-cliente');
+  window._openers['eventos-cerimonialista']=()=>evOpen('eventos-cerimonialista');
+}
+
+// ── Modal: Pesquisa de Eventos Corporativos ──
+{
+  const EC_R=[{key:'otimo',pt:'Ótimo',type:'great'},{key:'bom',pt:'Bom',type:'good'},{key:'regular',pt:'Regular',type:'fair'},{key:'amelhorar',pt:'A Melhorar',type:'poor'}];
+  const EC_M={great:'M11.5 23 Q20 33 28.5 23',good:'M12.5 24.5 Q20 29.5 27.5 24.5',fair:'M13 26 H27',poor:'M12.5 28.5 Q20 22.5 27.5 28.5'};
+  function ecE(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function ecSm(type,filled,size){const c=filled?'#fff':'#9A9A9A',f=filled?'var(--gold)':'none';return `<svg viewBox="0 0 40 40" width="${size}" height="${size}" fill="none"><circle cx="20" cy="20" r="17" fill="${f}" stroke="${c}" stroke-width="2"/><circle cx="14.6" cy="16.4" r="1.7" fill="${c}"/><circle cx="25.4" cy="16.4" r="1.7" fill="${c}"/><path d="${EC_M[type]}" stroke="${c}" stroke-width="2" stroke-linecap="round"/></svg>`;}
+  function ecDay(){return new Date().toISOString().slice(0,10);}
+  const EC_S1=[{key:'ev_servicos',pt:'Como você avalia os serviços do Hotel?'},{key:'ev_equipamentos',pt:'Os equipamentos funcionaram corretamente?'}];
+  const EC_S2=[{key:'com_cortesia',pt:'Cortesia (demonstra educação e cordialidade)'},{key:'com_receptividade',pt:'Receptividade (responde de acordo com o solicitado)'},{key:'com_qualidade',pt:'Qualidade do serviço (atende as solicitações em até 48h)'}];
+  const EC_S3=[{key:'op_agilidade',pt:'Agilidade (pronto atendimento durante o evento)'},{key:'op_desenvolvimento',pt:'Desenvolvimento (execução do serviço para todos)'},{key:'op_pontualidade',pt:'Pontualidade'},{key:'op_expectativa',pt:'Expectativa (serviços executados de acordo com o acordado)'}];
+  const EC_S4=[{key:'ab_apresentacao',pt:'Apresentação dos alimentos'},{key:'ab_qualidade',pt:'Qualidade dos alimentos'},{key:'ab_fidelidade',pt:'Fidelidade dos alimentos (entregue conforme acordado)'}];
+  const EC_S5=[{key:'inf_conforto',pt:'Conforto e conservação dos ambientes'},{key:'inf_temperatura',pt:'Temperatura do espaço estava agradável'},{key:'inf_iluminacao',pt:'Iluminação do espaço estava ideal'},{key:'inf_limpeza',pt:'Limpeza das salas e banheiros'},{key:'inf_acesso',pt:'Indicação de acesso aos espaços de eventos'}];
+  const EC_S6=[{key:'wifi_apresentacao',pt:'Apresentação / instrução do serviço'},{key:'wifi_facilidade',pt:'Facilidade da conexão'},{key:'wifi_sinal',pt:'Qualidade do sinal'},{key:'wifi_velocidade',pt:'Velocidade do serviço'}];
+  const EC_S7=[{key:'ter_manobristas',pt:'Serviço de manobristas'},{key:'ter_allug',pt:'Serviço de equipamentos da empresa ALLUG'},{key:'ter_celular',pt:'Qualidade do sinal de dados e de voz do celular'}];
+  let ecRatings={},ecInfra={};
+  const ecOverlay=document.createElement('div');
+  ecOverlay.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;overflow-y:auto';
+  document.body.appendChild(ecOverlay);
+  function ecRow(q){const btns=EC_R.map(r=>`<button type="button" class="smiley-btn" data-qkey="${q.key}" data-type="${r.type}" data-val="${r.key}" aria-label="${r.pt}">${ecSm(r.type,false,30)}</button>`).join('');return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${ecE(q.pt)}</span></div><div class="rating-smileys" role="group">${btns}</div></div>`;}
+  function ecTopBar(){const k=[...EC_S1,...EC_S2,...EC_S3,...EC_S4,...EC_S5,...EC_S6,...EC_S7].map(q=>q.key).join(',');return `<div style="display:flex;align-items:center;gap:5px;padding:8px 20px 4px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);letter-spacing:.03em;white-space:nowrap">Marcar tudo:</span>${EC_R.map(r=>`<button type="button" class="btn-mark-all ec-mark-all" data-nota="${r.key}" data-sec="${k}">${r.pt}</button>`).join('')}</div>`;}
+  function ecSec(num,title,qs,note){return `<section><div class="sec-heading"><span class="sec-num">${num}</span><span class="sec-title">${ecE(title)}</span></div>${note?`<p style="font-size:11px;color:var(--muted);margin:2px 0 6px;padding:0 2px;font-style:italic">${ecE(note)}</p>`:''}<div class="rating-list">${qs.map(ecRow).join('')}</div></section>`;}
+  function ecSnGeral(qkey,label){return `<div class="rating-row"><div class="rating-text"><span style="color:var(--fg);font-size:15.5px">${ecE(label)}</span></div><div style="display:flex;gap:12px;flex:none"><button type="button" class="btn-mark-all ec-sn-btn" data-qkey="${qkey}" data-val="sim" style="min-width:44px">Sim</button><button type="button" class="btn-mark-all ec-sn-btn" data-qkey="${qkey}" data-val="nao" style="min-width:44px">Não</button></div></div>`;}
+  function ecBuild(){return `<div id="psModal"><div class="ps-sticky-hdr"><div class="ps-sticky-top"><button type="button" class="ps-close" id="ecClose">✕</button></div><div class="progress-inner"><div class="trace"><div class="tf" id="ecTf1"></div></div><div class="trace"><div class="tf" id="ecTf2"></div></div><div class="trace"><div class="tf" id="ecTf3"></div></div><div class="trace"><div class="tf" id="ecTf4"></div></div></div></div><div class="form-wrap"><header><h1 class="form-title">Pesquisa de Eventos Corporativos</h1></header><section><div class="field-grid"><div class="field"><label><span class="field-label-pt">Data</span></label><input type="date" id="ecData" max="${ecDay()}"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Nome</span></label><input type="text" id="ecNome" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">E-mail</span></label><input type="email" id="ecEmail" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Telefone</span></label><input type="tel" id="ecTel" placeholder="(85) 9 9999-9999" maxlength="19"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Empresa</span></label><input type="text" id="ecEmpresa" autocomplete="off"><div class="fill"></div></div><div class="field"><label><span class="field-label-pt">Evento</span></label><input type="text" id="ecEvento" autocomplete="off" placeholder="Nome do evento"><div class="fill"></div></div></div></section>${ecTopBar()}${ecSec('01','DURANTE O EVENTO',EC_S1,null)}${ecSec('02','NEGOCIAÇÃO PRÉ-EVENTO (Atendimento Comercial)',EC_S2,'Assinalar caso não tenha tido contato com a equipe Comercial')}${ecSec('03','ATENDIMENTO OPERAÇÃO',EC_S3,null)}${ecSec('04','ALIMENTOS E BEBIDAS',EC_S4,null)}${ecSec('05','INFRAESTRUTURA DOS ESPAÇOS DE EVENTOS',EC_S5,null)}${ecSec('06','SERVIÇO DE INTERNET WI-FI',EC_S6,null)}${ecSec('07','SERVIÇOS DE TERCEIROS',EC_S7,null)}<section><div class="sec-heading"><span class="sec-num">08</span><span class="sec-title">AVALIAÇÃO GERAL</span></div><div class="rating-list">${ecSnGeral('ec_expectativas','Suas expectativas em relação ao evento foram atendidas?')}${ecSnGeral('ec_voltaria','Você voltaria a realizar eventos em nosso hotel?')}</div></section><section><div class="field"><label><span class="field-label-pt">Gentileza justificar quando a nota for Bom, Regular ou A Melhorar</span></label><input type="text" id="ecJustificativa" placeholder="Opcional…"><div class="fill"></div></div></section><section><div class="field"><label><span class="field-label-pt">Comentário, Sugestões e/ou Elogios</span></label><input type="text" id="ecComentarios" placeholder="Opcional…"><div class="fill"></div></div></section><div class="submit-wrap"><button type="button" class="submit-btn" id="ecSubmitBtn">ENVIAR AVALIAÇÃO</button><div id="ecMsg" class="submit-err"></div></div></div></div>`;}
+  function ecProg(){const nome=(document.getElementById('ecNome')?.value||'').trim();const allQ=[...EC_S1,...EC_S2,...EC_S3,...EC_S4];const rated=allQ.filter(q=>ecRatings[q.key]).length;const lateRated=[...EC_S5,...EC_S6,...EC_S7].filter(q=>ecRatings[q.key]).length;[!!nome,rated>=(EC_S1.length+EC_S2.length),rated>=allQ.length,lateRated>0||(!!ecInfra['ec_expectativas']||!!ecInfra['ec_voltaria'])].forEach((d,i)=>{const tf=document.getElementById(`ecTf${i+1}`);if(tf)tf.style.width=d?'100%':'0';});const b=document.getElementById('ecSubmitBtn');if(b)b.disabled=!nome;}
+  function ecMarkAll(nota,keys){keys.forEach(k=>{ecRatings[k]=nota;ecOverlay.querySelectorAll(`.smiley-btn[data-qkey="${k}"]`).forEach(b=>{const s=b.dataset.val===nota;b.classList.toggle('selected',s);b.innerHTML=ecSm(b.dataset.type,s,30);});});ecProg();}
+  function ecMarkSN(k,val){ecInfra[k]=val;ecOverlay.querySelectorAll(`.ec-sn-btn[data-qkey="${k}"]`).forEach(b=>{const active=b.dataset.val===val;b.style.background=active?'var(--gold)':'';b.style.color=active?'#fff':'';});ecProg();}
+  function ecClose(){ecOverlay.style.display='none';document.body.style.overflow='';}
+  async function ecSubmit(){const btn=document.getElementById('ecSubmitBtn'),msg=document.getElementById('ecMsg');const nome=(document.getElementById('ecNome')?.value||'').trim();if(!nome){msg.textContent='Nome obrigatório.';msg.style.display='block';return;}btn.disabled=true;msg.style.display='none';try{const p={nome,email:(document.getElementById('ecEmail')?.value||'').trim()||null,telefone:(document.getElementById('ecTel')?.value||'').trim()||null,empresa:(document.getElementById('ecEmpresa')?.value||'').trim()||null,evento:(document.getElementById('ecEvento')?.value||'').trim()||null,data_evento:(document.getElementById('ecData')?.value||'')||null,tipo_pesquisa:'eventos-corporativos',ec_expectativas:ecInfra['ec_expectativas']||null,ec_voltaria:ecInfra['ec_voltaria']||null,justificativa:(document.getElementById('ecJustificativa')?.value||'').trim()||null,comentarios:(document.getElementById('ecComentarios')?.value||'').trim()||null,...ecRatings};const r=await fetch('/api/nova-resposta-eventos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await r.json();if(!d.ok)throw new Error(d.error||'Erro ao enviar');msg.textContent='Pesquisa enviada com sucesso! ✓';msg.style.color='#15705A';msg.style.display='block';setTimeout(()=>ecOpen(),1800);}catch(e){msg.textContent=`Erro: ${e.message}`;msg.style.color='var(--danger)';msg.style.display='block';btn.disabled=false;}}
+  function ecOpen(){ecRatings={};ecInfra={};ecOverlay.innerHTML=ecBuild();ecOverlay.scrollTop=0;ecOverlay.style.display='block';document.body.style.overflow='hidden';document.getElementById('ecClose')?.addEventListener('click',ecClose);ecOverlay.querySelectorAll('.smiley-btn').forEach(btn=>{btn.addEventListener('click',()=>{const qkey=btn.dataset.qkey,val=btn.dataset.val;if(ecRatings[qkey]===val){delete ecRatings[qkey];ecOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{b.classList.remove('selected');b.innerHTML=ecSm(b.dataset.type,false,30);});}else{ecRatings[qkey]=val;ecOverlay.querySelectorAll(`.smiley-btn[data-qkey="${qkey}"]`).forEach(b=>{const s=b.dataset.val===val;b.classList.toggle('selected',s);b.innerHTML=ecSm(b.dataset.type,s,30);});}ecProg();});});ecOverlay.querySelectorAll('.ec-mark-all').forEach(btn=>{btn.addEventListener('click',()=>ecMarkAll(btn.dataset.nota,btn.dataset.sec.split(',')));});ecOverlay.querySelectorAll('.ec-sn-btn').forEach(btn=>{btn.addEventListener('click',()=>ecMarkSN(btn.dataset.qkey,btn.dataset.val));});document.getElementById('ecNome')?.addEventListener('input',ecProg);document.getElementById('ecSubmitBtn')?.addEventListener('click',ecSubmit);ecProg();}
+  window._openers=window._openers||{};
+  window._openers['eventos-corporativos']=()=>ecOpen();
+}
+
 })();
 </script>
 </body>

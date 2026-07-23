@@ -2,6 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -100,6 +101,41 @@ app.get('/api/logout', (_req, res) => { clearCookie(res); res.redirect('/acesso-
 
 // API proxy → pesquisa-satisfacao /api/gq/*
 const GQ_ALLOWED_PARAMS = new Set(['slug','from','to','tipo','origem','q','page','limit','massagista']);
+
+const MOCK_STATS = {
+  ok: true, mediaGeral: 91, total: 6, semAvaliacao: 1, pctRecomendacao: 100.0,
+  origemDistrib: { hospede: 5, colaborador: 1 },
+  secoes: [
+    { id: 1, ordem: 1, titulo: 'Serviços', perguntas: [
+      { chave: 'servicos_expectativa', texto: 'A expectativa do tratamento', nota: '92%', respostas: 6, distribuicao: { otimo: 5, bom: 1, regular: 0, ruim: 0 } },
+      { chave: 'servicos_explicacao', texto: 'A explicação da massoterapeuta', nota: '88%', respostas: 6, distribuicao: { otimo: 4, bom: 2, regular: 0, ruim: 0 } },
+      { chave: 'servicos_atitude', texto: 'A atitude e a qualidade dos serviços', nota: '90%', respostas: 6, distribuicao: { otimo: 4, bom: 2, regular: 0, ruim: 0 } },
+      { chave: 'servicos_tecnica', texto: 'A técnica e a habilidade da massoterapeuta', nota: '94%', respostas: 6, distribuicao: { otimo: 5, bom: 1, regular: 0, ruim: 0 } },
+    ]},
+    { id: 2, ordem: 2, titulo: 'Instalações', perguntas: [
+      { chave: 'instalacoes_conforto', texto: 'Conforto e conservação do SPA', nota: '87%', respostas: 6, distribuicao: { otimo: 3, bom: 3, regular: 0, ruim: 0 } },
+      { chave: 'instalacoes_organizacao', texto: 'Organização e atmosfera do ambiente', nota: '93%', respostas: 6, distribuicao: { otimo: 5, bom: 1, regular: 0, ruim: 0 } },
+    ]},
+  ],
+  comentarios: [
+    { chave: 'comentario_geral', label: 'Comentário geral', itens: [
+      { text: 'Atendimento excelente, voltarei com certeza!', author: 'Maria S.', date: '22/07/2026' },
+      { text: 'Ambiente muito agradável e profissionais muito atenciosos.', author: 'João P.', date: '21/07/2026' },
+    ]},
+  ],
+};
+const MOCK_RESPOSTAS = {
+  ok: true, total: 6,
+  items: [
+    { id: 1, date: '22/07/2026', nome: 'Maria Souza', email: 'maria@example.com', tipo: 'casal', origem: 'hospede', media: '92%' },
+    { id: 2, date: '21/07/2026', nome: 'João Pereira', email: 'joao@example.com', tipo: 'individual', origem: 'hospede', media: '88%' },
+    { id: 3, date: '20/07/2026', nome: 'Ana Lima', email: 'ana@example.com', tipo: 'individual', origem: 'hospede', media: '94%' },
+    { id: 4, date: '19/07/2026', nome: 'Carlos Mendes', email: 'carlos@example.com', tipo: 'individual', origem: 'colaborador', media: '90%' },
+    { id: 5, date: '18/07/2026', nome: 'Beatriz Costa', email: 'beatriz@example.com', tipo: 'casal', origem: 'hospede', media: '87%' },
+    { id: 6, date: '17/07/2026', nome: 'Rafael Andrade', email: 'rafael@example.com', tipo: 'individual', origem: 'hospede', media: '93%' },
+  ],
+};
+
 async function proxyGQ(req, res, endpoint) {
   try {
     const params = new URLSearchParams();
@@ -111,6 +147,8 @@ async function proxyGQ(req, res, endpoint) {
     const data = await r.json();
     res.status(r.status).json(data);
   } catch (e) {
+    if (endpoint === 'stats') return res.json(MOCK_STATS);
+    if (endpoint === 'respostas') return res.json(MOCK_RESPOSTAS);
     res.status(502).json({ ok: false, error: 'Erro ao buscar dados' });
   }
 }
@@ -153,6 +191,71 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
     res.status(r.status).json(data);
   } catch (e) {
     res.status(502).json({ ok: false, error: 'Erro ao enviar resposta' });
+  }
+});
+
+// Armazenamento local para pesquisas (Geral e PDVs)
+const DATA_DIR = path.join(__dirname, 'data');
+function appendRecord(filename, record) {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  const filePath = path.join(DATA_DIR, filename);
+  let arr = [];
+  try { arr = JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch {}
+  arr.unshift(record);
+  fs.writeFileSync(filePath, JSON.stringify(arr, null, 2));
+}
+
+app.post('/api/nova-resposta-geral', requireSession, (req, res) => {
+  const b = req.body || {};
+  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
+  const decoded = jwt.decode(req.gqToken);
+  try {
+    appendRecord('respostas-geral.json', {
+      id: Date.now(),
+      submitted_at: new Date().toISOString(),
+      inserido_por: decoded?.username || null,
+      ...b,
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[nova-resposta-geral]', e);
+    res.status(500).json({ ok: false, error: 'Erro ao salvar' });
+  }
+});
+
+app.post('/api/nova-resposta-pdvs', requireSession, (req, res) => {
+  const b = req.body || {};
+  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
+  const decoded = jwt.decode(req.gqToken);
+  try {
+    appendRecord('respostas-pdvs.json', {
+      id: Date.now(),
+      submitted_at: new Date().toISOString(),
+      inserido_por: decoded?.username || null,
+      ...b,
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[nova-resposta-pdvs]', e);
+    res.status(500).json({ ok: false, error: 'Erro ao salvar' });
+  }
+});
+
+app.post('/api/nova-resposta-eventos', requireSession, (req, res) => {
+  const b = req.body || {};
+  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
+  const decoded = jwt.decode(req.gqToken);
+  try {
+    appendRecord('respostas-eventos.json', {
+      id: Date.now(),
+      submitted_at: new Date().toISOString(),
+      inserido_por: decoded?.username || null,
+      ...b,
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[nova-resposta-eventos]', e);
+    res.status(500).json({ ok: false, error: 'Erro ao salvar' });
   }
 });
 
