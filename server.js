@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { inserirResposta } from './db.js';
+import { inserirResposta, listarRespostas, contarRespostas } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -277,6 +277,30 @@ app.get('/api/tratamentos', requireSession, async (req, res) => {
     res.status(r.status).json(data);
   } catch (e) {
     res.status(502).json({ ok: false, error: 'Erro ao buscar tratamentos' });
+  }
+});
+
+app.get('/api/stats-local', requireSession, (_req, res) => {
+  try { res.json({ ok: true, items: contarRespostas() }); }
+  catch (e) { console.error('[stats-local]', e); res.status(500).json({ ok: false, error: 'Erro' }); }
+});
+
+app.get('/api/respostas-local', requireSession, (req, res) => {
+  const TIPOS = new Set(['geral', 'pdvs', 'eventos']);
+  const tipo = TIPOS.has(req.query.tipo) ? req.query.tipo : null;
+  try {
+    const result = listarRespostas({
+      tipo,
+      from: req.query.from || null,
+      to:   req.query.to   || null,
+      q:    req.query.q    || null,
+      page:  Math.max(1, parseInt(req.query.page)  || 1),
+      limit: Math.min(50, Math.max(1, parseInt(req.query.limit) || 20)),
+    });
+    res.json({ ok: true, ...result });
+  } catch (e) {
+    console.error('[respostas-local]', e);
+    res.status(500).json({ ok: false, error: 'Erro ao buscar respostas' });
   }
 });
 

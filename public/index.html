@@ -97,11 +97,13 @@ body{
   backdrop-filter:blur(24px)
 }
 .tab{
-  padding:13px 0 11px;
+  padding:13px 0 11px;margin-right:28px;
   font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gold);border-bottom:2px solid var(--gold);
-  margin-bottom:-1px;cursor:pointer
+  color:var(--muted);border-bottom:2px solid transparent;
+  margin-bottom:-1px;cursor:pointer;transition:color .18s,border-color .18s
 }
+.tab.tab-active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab:hover:not(.tab-active){color:var(--gold-dark)}
 
 /* ── Layout ── */
 .main{max-width:1260px;margin:0 auto;padding:52px 48px 100px}
@@ -425,7 +427,12 @@ body{
   </div>
 </header>
 
-<div class="tabs"><div class="tab">Gran SPA · Avaliações</div></div>
+<div class="tabs">
+  <div class="tab tab-active" data-tab="spa">Gran SPA</div>
+  <div class="tab" data-tab="geral">Geral da Qualidade</div>
+  <div class="tab" data-tab="pdvs">PDVs</div>
+  <div class="tab" data-tab="eventos">Eventos</div>
+</div>
 
 <main class="main" id="main"><div class="empty">Carregando...</div></main>
 
@@ -699,12 +706,109 @@ function renderKpis(s){
   </div>`;
 }
 
+function renderLocalFilters(){
+  return `<div class="filter-label">Filtros</div>
+  <div class="filter-box">
+    <div class="filter-group">
+      <span class="fl">Data</span>
+      <div class="fi"><input type="date" id="fDate" value="${state.from}" max="${new Date().toISOString().slice(0,10)}"></div>
+    </div>
+    <div class="filter-group filter-flex">
+      <span class="fl">Busca</span>
+      <div class="fi">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+        <input type="text" id="fQ" placeholder="Nome, empresa…" value="${esc(state.q)}" style="flex:1">
+      </div>
+    </div>
+    <button class="btn-gold" id="btnF">Filtrar</button>
+  </div>
+  <div class="chips" id="chips"></div>`;
+}
+
+function renderLocalTable(rows,total,page){
+  const tipoBadge=t=>{
+    if(!t||t===activeTab)return activeTab==='eventos'?'Evento':'—';
+    if(t==='geral-granclass'||t==='pdvs-granclass')return '★ Gran Class';
+    if(t==='eventos-cliente')return 'Social · Cliente';
+    if(t==='eventos-cerimonialista')return 'Social · Parceiros';
+    if(t==='eventos-corporativos')return 'Corporativo';
+    return t;
+  };
+  const rHtml=rows.map(r=>`<div class="tbl-row">
+    <div class="tbl-date">${esc(r.date)}</div>
+    <div class="tbl-nome">${esc(r.nome)}</div>
+    <div class="tbl-email">${esc(r.email)}</div>
+    <div class="tbl-tipo"><span>${esc(tipoBadge(r.tipo_pesquisa))}</span></div>
+    <div class="tbl-orig" style="font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.inserido_por)}</div>
+    <div></div><div></div>
+  </div>`).join('');
+  const totalPages=Math.ceil(total/LIMIT)||1;
+  const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
+    <button class="btn-icon" id="pgPrev" ${page<=1?'disabled':''} style="${page<=1?'opacity:.4;cursor:default':''}">← Anterior</button>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)">Página ${page} de ${totalPages}</span>
+    <button class="btn-icon" id="pgNext" ${page>=totalPages?'disabled':''} style="${page>=totalPages?'opacity:.4;cursor:default':''}">Próxima →</button>
+  </div>`:'';
+  return `<div class="tbl-hdr"><div class="tbl-title">Avaliações</div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
+  <div class="tbl-wrap">
+    <div class="tbl-head"><div>Data</div><div>Nome</div><div>E-mail / Empresa</div><div>Tipo</div><div>Inserido por</div><div></div><div></div></div>
+    ${rHtml||'<div class="empty">Nenhuma avaliação encontrada</div>'}
+  </div>${pgHtml}`;
+}
+
+async function renderLocal(trigger){
+  if(_renderCtrl)_renderCtrl.abort();
+  _renderCtrl=new AbortController();
+  const {signal}=_renderCtrl;
+  const isAuto=!trigger;
+  const savedScrollY=window.scrollY;
+  const main=document.getElementById('main');
+  main.style.opacity='0.5';main.style.pointerEvents='none';
+  try{
+    const qs=new URLSearchParams({tipo:activeTab,from:state.from||'',to:state.to||'',q:state.q||'',page:state.page,limit:LIMIT});
+    const res=await fetch('/api/respostas-local?'+qs,{signal});
+    if(res.status===401){location.href='/acesso-hub.html';return;}
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error);
+    state.totalPages=Math.ceil((data.total||0)/LIMIT)||1;
+    const labels={geral:'Geral da Qualidade',pdvs:'PDVs',eventos:'Eventos'};
+    main.innerHTML=`<div class="kpis-hdr"><div class="eyebrow">${labels[activeTab]||activeTab}</div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);max-width:560px;margin-bottom:52px">
+        <div class="kpi hero"><div class="kpi-label">Total de avaliações</div><div><div class="kpi-hero-val">${data.total}<span></span></div><div class="kpi-hero-line"></div></div></div>
+        <div class="kpi"><div class="kpi-label">Nesta página</div><div class="kpi-val">${data.items.length}<span>/${LIMIT}</span></div></div>
+        <div class="kpi"><div class="kpi-label">Páginas</div><div class="kpi-val">${state.totalPages}</div></div>
+      </div>`+renderLocalFilters()+renderLocalTable(data.items||[],data.total||0,state.page);
+    main.style.opacity='';main.style.pointerEvents='';
+    if(isAuto)window.scrollTo({top:savedScrollY,behavior:'instant'});
+    else if(trigger==='filter'||trigger==='page')document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
+    document.getElementById('btnF')?.addEventListener('click',()=>{
+      state.from=state.to=document.getElementById('fDate')?.value||'';
+      state.periodCustom=!!state.from;
+      state.q=document.getElementById('fQ')?.value||'';
+      state.page=1;render('filter');
+    });
+    document.getElementById('fQ')?.addEventListener('keydown',e=>{
+      if(e.key!=='Enter')return;
+      state.from=state.to=document.getElementById('fDate')?.value||'';
+      state.periodCustom=!!state.from;
+      state.q=document.getElementById('fQ').value||'';
+      state.page=1;render('filter');
+    });
+    document.getElementById('pgPrev')?.addEventListener('click',()=>{if(state.page>1){state.page--;render('page');}});
+    document.getElementById('pgNext')?.addEventListener('click',()=>{if(state.page<state.totalPages){state.page++;render('page');}});
+  }catch(e){
+    if(e.name==='AbortError')return;
+    main.style.opacity='';main.style.pointerEvents='';
+    main.innerHTML=`<div class="empty">Erro: ${esc(e.message)}</div>`;
+  }
+}
+
 let _renderCtrl=null, _lastActivity=Date.now();
 ['mousemove','keydown','mousedown','touchstart'].forEach(ev=>
   document.addEventListener(ev,()=>_lastActivity=Date.now(),{passive:true})
 );
 
 async function render(trigger){
+  if(activeTab!=='spa')return renderLocal(trigger);
   try { localStorage.setItem('gq_filters',JSON.stringify({from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:state.page,periodCustom:state.periodCustom})); } catch(e){}
   if(_renderCtrl)_renderCtrl.abort();
   _renderCtrl=new AbortController();
@@ -785,6 +889,16 @@ async function render(trigger){
     main.appendChild(errDiv);
   }
 }
+let activeTab='spa';
+document.querySelectorAll('.tab[data-tab]').forEach(t=>{
+  t.addEventListener('click',()=>{
+    if(activeTab===t.dataset.tab)return;
+    activeTab=t.dataset.tab;
+    document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.toggle('tab-active',x.dataset.tab===activeTab));
+    state.page=1;state.from=state.to='';state.tipo=state.origem=state.q='';state.periodCustom=false;
+    render('tab');
+  });
+});
 render('init');
 setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
 

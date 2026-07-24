@@ -81,4 +81,32 @@ export function contarRespostas() {
   return db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta GROUP BY tipo`).all();
 }
 
+export function listarRespostas({ tipo = null, from = null, to = null, q = null, page = 1, limit = 20 } = {}) {
+  const conds = [], args = [];
+  if (tipo) { conds.push('tipo = ?'); args.push(tipo); }
+  if (from) { conds.push("substr(submitted_at,1,10) >= ?"); args.push(from); }
+  if (to)   { conds.push("substr(submitted_at,1,10) <= ?"); args.push(to); }
+  if (q)    { conds.push("(payload LIKE ? OR inserido_por LIKE ?)"); args.push(`%${q}%`, `%${q}%`); }
+  const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+  const total = db.prepare(`SELECT COUNT(*) AS n FROM resposta ${where}`).get(...args).n;
+  const offset = (page - 1) * limit;
+  const rows = db.prepare(`SELECT id, tipo, submitted_at, inserido_por, payload FROM resposta ${where} ORDER BY submitted_at DESC, id DESC LIMIT ? OFFSET ?`).all(...args, limit, offset);
+  return {
+    total,
+    items: rows.map(r => {
+      let p = {};
+      try { p = JSON.parse(r.payload); } catch {}
+      return {
+        id: r.id,
+        tipo: r.tipo,
+        date: r.submitted_at.slice(0, 10).split('-').reverse().join('/'),
+        nome: p.nome || p.empresa || '—',
+        email: p.email || p.empresa || '—',
+        tipo_pesquisa: p.tipo_pesquisa || r.tipo,
+        inserido_por: r.inserido_por || '—',
+      };
+    }),
+  };
+}
+
 export default db;
