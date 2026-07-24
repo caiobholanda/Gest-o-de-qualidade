@@ -112,4 +112,12 @@ export function listarRespostas({ tipo = null, from = null, to = null, q = null,
   };
 }
 
+export function buscarResposta(id) {
+  const row = db.prepare('SELECT id, tipo, submitted_at, inserido_por, payload FROM resposta WHERE id = ?').get(id);
+  if (!row) return null;
+  let payload = {};
+  try { payload = JSON.parse(row.payload); } catch {}
+  return { id: row.id, tipo: row.tipo, submitted_at: row.submitted_at, inserido_por: row.inserido_por, payload };
+}
+
 export default db;

@@ -570,6 +570,62 @@ async function openDetail(id){
   }
 }
 
+async function openLocalDetail(id){
+  if(!_detOverlay){
+    _detOverlay=document.createElement('div');
+    _detOverlay.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);overflow-y:auto;padding:40px 16px 80px';
+    _detOverlay.setAttribute('tabindex','-1');
+    document.body.appendChild(_detOverlay);
+  }
+  if(_detEscHandler)document.removeEventListener('keydown',_detEscHandler);
+  _detEscHandler=e=>{if(e.key==='Escape')detClose();};
+  document.addEventListener('keydown',_detEscHandler);
+  _detOverlay.style.display='block';
+  _detOverlay.scrollTop=0;
+  document.body.style.overflow='hidden';
+  _detOverlay.focus();
+  const closeBtn=`<button id="detCloseBtn" style="background:none;border:1px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:.85rem;display:flex;align-items:center;justify-content:center;flex:none">✕</button>`;
+  _detOverlay.innerHTML=`<div style="background:var(--surface);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;width:100%;max-width:760px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35)"><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border-soft)">${closeBtn}</div><div class="empty" style="padding:60px 24px">Carregando...</div></div>`;
+  _detOverlay.querySelector('#detCloseBtn')?.addEventListener('click',detClose);
+  try{
+    const r=await fetch(`/api/resposta-local/${id}`);
+    const data=await r.json();
+    if(!data.ok)throw new Error(data.error||'Erro');
+    const it=data.item, p=it.payload||{};
+    const dtFmt=s=>s?s.slice(0,10).split('-').reverse().join('/'):'—';
+    const LABELS={nome:'Nome',empresa:'Empresa',quarto:'Quarto',email:'E-mail',data_tratamento:'Data do tratamento',tipo_pesquisa:'Tipo de pesquisa',atendimento:'Atendimento',qualidade:'Qualidade',ambiente:'Ambiente',preco:'Preço / custo-benefício',limpeza:'Limpeza',organizacao:'Organização',produto:'Produto / comida',servico:'Serviço',rapidez:'Rapidez no atendimento',cordialidade:'Cordialidade',apresentacao:'Apresentação',nota:'Nota geral',recomendaria:'Recomendaria?',comentario:'Comentário',observacoes:'Observações',obs:'Observações',nome_evento:'Nome do evento',data_evento:'Data do evento',contato:'Contato',telefone:'Telefone'};
+    const SKIP=new Set(['tipo','tipo_pesquisa','app_origem','fonte_id','inserido_por']);
+    const RATING={otimo:'⬤ Ótimo',bom:'⬤ Bom',regular:'⬤ Regular',ruim:'⬤ À Melhorar'};
+    const RATING_COLOR={otimo:'var(--success)',bom:'var(--gold)',regular:'var(--warn)',ruim:'var(--danger)'};
+    const rows=Object.entries(p).filter(([k,v])=>!SKIP.has(k)&&v!=null&&v!=='').map(([k,v])=>{
+      const label=LABELS[k]||k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+      const isRating=v in RATING;
+      const display=isRating?`<span style="color:${RATING_COLOR[v]};font-weight:600">${RATING[v]}</span>`:esc(String(v));
+      return `<div style="display:flex;gap:16px;padding:11px 0;border-bottom:1px solid var(--border-soft);align-items:flex-start">
+        <span style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;min-width:170px;flex-shrink:0;padding-top:3px">${esc(label)}</span>
+        <span style="font-size:.9rem;color:var(--text);line-height:1.5">${display}</span>
+      </div>`;
+    }).join('');
+    const tipoLabel={'geral':'Geral da Qualidade','geral-granclass':'Geral Gran Class','pdvs':'PDVs','pdvs-granclass':'PDV Gran Class','eventos':'Eventos','eventos-cliente':'Eventos Social','eventos-cerimonialista':'Eventos Cerimonialista','eventos-corporativos':'Eventos Corporativo'};
+    _detOverlay.innerHTML=`<div style="background:var(--surface);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;width:100%;max-width:760px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35)">
+      <div style="position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border-soft);padding:12px 24px 10px;display:flex;align-items:center;justify-content:space-between">
+        <div><span class="eyebrow">Avaliação #${id}</span><span style="margin-left:10px;font-size:.7rem;color:var(--gold);font-weight:600">${esc(tipoLabel[p.tipo_pesquisa||it.tipo]||p.tipo_pesquisa||it.tipo)}</span></div>${closeBtn}
+      </div>
+      <div style="padding:28px 32px 60px">
+        <div style="margin-bottom:24px">
+          <div style="font-weight:500;font-size:1.2rem;color:var(--text);margin-bottom:4px">${esc(p.nome||p.empresa||'Sem nome')}</div>
+          <div style="font-size:.78rem;color:var(--muted2)">${esc(dtFmt(it.submitted_at))}${it.inserido_por?' · Inserido por <strong>'+esc(it.inserido_por)+'</strong>':''}</div>
+        </div>
+        ${rows||'<div class="empty" style="padding:20px 0">Sem campos registrados</div>'}
+      </div>
+    </div>`;
+    _detOverlay.querySelector('#detCloseBtn')?.addEventListener('click',detClose);
+  }catch(e){
+    _detOverlay.innerHTML=`<div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:0 auto;padding:36px;text-align:center"><div class="empty">Erro ao carregar: ${esc(e.message)}</div><button class="btn-gold" style="margin:16px auto;display:block" id="detCloseBtn2">Fechar</button></div>`;
+    _detOverlay.querySelector('#detCloseBtn2')?.addEventListener('click',detClose);
+  }
+}
+
 function buildSegs(dist){
   const {otimo=0,bom=0,regular=0,ruim=0}=dist, tot=otimo+bom+regular+ruim||1, segs=[];
   if(otimo)segs.push({w:otimo/tot*100,bg:'var(--success)',tip:`Ótimo: ${otimo}`});
@@ -758,7 +814,7 @@ function renderLocalTable(rows,total,page){
     if(t==='eventos-corporativos')return 'Corporativo';
     return t;
   };
-  const rHtml=rows.map(r=>`<div class="tbl-row">
+  const rHtml=rows.map(r=>`<div class="tbl-row" data-id="${r.id}" style="cursor:pointer">
     <div class="tbl-date">${esc(r.date)}</div>
     <div class="tbl-nome">${esc(r.nome)}</div>
     <div class="tbl-email">${esc(r.email)}</div>
@@ -948,6 +1004,9 @@ async function renderLocal(trigger){
     });
     document.getElementById('pgPrev')?.addEventListener('click',()=>{if(state.page>1){state.page--;render('page');}});
     document.getElementById('pgNext')?.addEventListener('click',()=>{if(state.page<state.totalPages){state.page++;render('page');}});
+    document.querySelectorAll('.tbl-row[data-id]').forEach(row=>{
+      row.addEventListener('click',()=>{const id=parseInt(row.dataset.id);if(id)openLocalDetail(id);});
+    });
   }catch(e){
     if(e.name==='AbortError')return;
     main.style.opacity='';main.style.pointerEvents='';
@@ -1010,7 +1069,7 @@ async function renderOverviewTable(containerEl){
       if(t==='eventos-corporativos')return'Corporativo';
       return t||'—';
     };
-    const rows=items.map(r=>`<div class="tbl-row">
+    const rows=items.map(r=>`<div class="tbl-row" data-id="${r.id}" data-src="${r._src}" style="cursor:pointer">
       <div class="tbl-date">${esc(r.date)}</div>
       <div class="tbl-nome">${esc(r.nome)}</div>
       <div class="tbl-email">${esc(r.email||'—')}</div>
@@ -1031,6 +1090,14 @@ async function renderOverviewTable(containerEl){
     </div>${pgHtml}`;
     containerEl.querySelector('#ovPgPrev')?.addEventListener('click',()=>{if(ovState.page>1){ovState.page--;renderOverviewTable(containerEl);}});
     containerEl.querySelector('#ovPgNext')?.addEventListener('click',()=>{if(ovState.page<ovState.totalPages){ovState.page++;renderOverviewTable(containerEl);}});
+    containerEl.querySelectorAll('.tbl-row[data-id]').forEach(row=>{
+      row.addEventListener('click',()=>{
+        const id=parseInt(row.dataset.id);
+        if(!id)return;
+        if(row.dataset.src==='spa')openDetail(id);
+        else openLocalDetail(id);
+      });
+    });
   }catch(e){
     containerEl.innerHTML=`<div class="empty">Erro: ${esc(e.message)}</div>`;
   }

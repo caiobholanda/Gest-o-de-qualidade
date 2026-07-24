@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { inserirResposta, listarRespostas, contarRespostas } from './db.js';
+import { inserirResposta, listarRespostas, contarRespostas, buscarResposta } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -277,6 +277,19 @@ app.get('/api/tratamentos', requireSession, async (req, res) => {
     res.status(r.status).json(data);
   } catch (e) {
     res.status(502).json({ ok: false, error: 'Erro ao buscar tratamentos' });
+  }
+});
+
+app.get('/api/resposta-local/:id', requireSession, (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ ok: false, error: 'ID inválido' });
+  try {
+    const item = buscarResposta(id);
+    if (!item) return res.status(404).json({ ok: false, error: 'Não encontrado' });
+    res.json({ ok: true, item });
+  } catch(e) {
+    console.error('[resposta-local]', e);
+    res.status(500).json({ ok: false, error: 'Erro' });
   }
 });
 
