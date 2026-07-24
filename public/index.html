@@ -609,7 +609,93 @@ async function openLocalDetail(id){
     if(!data.ok)throw new Error(data.error||'Erro');
     const it=data.item, p=it.payload||{};
     const dtFmt=s=>s?s.slice(0,10).split('-').reverse().join('/'):'—';
-    const LABELS={nome:'Nome',empresa:'Empresa',quarto:'Quarto',email:'E-mail',data_tratamento:'Data do tratamento',tipo_pesquisa:'Tipo de pesquisa',atendimento:'Atendimento',qualidade:'Qualidade',ambiente:'Ambiente',preco:'Preço / custo-benefício',limpeza:'Limpeza',organizacao:'Organização',produto:'Produto / comida',servico:'Serviço',rapidez:'Rapidez no atendimento',cordialidade:'Cordialidade',apresentacao:'Apresentação',nota:'Nota geral',recomendaria:'Recomendaria?',comentario:'Comentário',observacoes:'Observações',obs:'Observações',controle_interno:'Nº do questionário físico',nome_evento:'Nome do evento',data_evento:'Data do evento',contato:'Contato',telefone:'Telefone'};
+    const LABELS={
+      nome:'Nome',empresa:'Empresa',email:'E-mail',cel:'Cel',telefone:'Telefone',telefone2:'Telefone 2',
+      quarto:'Nº do Apto',apto:'Nº do Apto',controle_interno:'Nº do questionário',
+      check_in:'Data Check-in',cidade:'Cidade/Estado',data:'Data',evento:'Evento',locais:'Local da Visita',
+      tipo_cliente:'Sobre você',tratamento:'Tratamento realizado',masso:'Massoterapeuta',tel:'Tel / WhatsApp',
+      data_tratamento:'Data do tratamento',nome_evento:'Nome do evento',data_evento:'Data do evento',contato:'Contato',
+      // Geral - Recepção
+      rec_checkinout:'Check-in / Check-out',rec_recepcao:'Atendimento e cortesia da Recepção',
+      rec_concierge:'Atendimento e cortesia do Concierge',rec_mensageiros:'Atendimento dos Mensageiros',
+      rec_guestservice:'Atendimento Guest Service',rec_fitness:'Fitness Center',
+      // Geral - Apartamento
+      apto_governanca:'Atendimento da Governança',apto_limpeza:'Limpeza e arrumação do apartamento',
+      apto_enxoval:'Qualidade do enxoval',apto_conforto:'Conforto e conservação do apartamento',
+      apto_banheiro:'Instalações do banheiro',apto_equipamentos:'Equipamentos do apartamento',
+      apto_manutencao:'Atendimento da Manutenção',apto_wifi:'Serviço de Wi-Fi (apartamento)',
+      // Geral - Café da Manhã
+      cafe_qualidade:'Qualidade dos alimentos (café)',cafe_variedade:'Variedade do buffet',
+      cafe_cortesia:'Cortesia e agilidade dos colaboradores (café)',cafe_apresentacao:'Apresentação dos alimentos (café)',
+      // Geral - Serviço de Quarto
+      qto_qualidade:'Qualidade do cardápio (quarto)',qto_variedade:'Variedade do cardápio (quarto)',
+      qto_cortesia:'Cortesia e agilidade dos colaboradores (quarto)',qto_apresentacao:'Apresentação dos alimentos (quarto)',
+      qto_cafe:'Café da manhã no apartamento',
+      // Geral - Avaliação
+      motive_visita:'Motivo da Visita',avaliacao_geral:'Como você avalia a sua estada conosco?',
+      identificacao_nome:'Nossos colaboradores o identificaram pelo nome?',
+      expectativas_superadas:'Suas expectativas em relação aos nossos serviços foram superadas?',
+      // PDVs
+      alim_qualidade:'Qualidade dos alimentos',alim_variedade:'Variedade do cardápio',
+      alim_cortesia:'Cortesia e agilidade dos colaboradores',alim_apresentacao:'Apresentação dos alimentos',
+      inst_infraestrutura:'Infraestrutura do ambiente',inst_limpeza:'Limpeza do restaurante/bar e banheiros',
+      inst_conforto:'Conforto do ambiente',inst_wifi:'Serviço de Wi-Fi',
+      ger_experiencia:'Sua experiência conosco',ger_expectativas:'Suas expectativas em relação aos nossos serviços',
+      com_geral:'Comentários e sugestões',
+      // SPA
+      servicos_expectativa:'A expectativa do tratamento',
+      servicos_explicacao:'A explicação da massoterapeuta sobre os benefícios e procedimentos',
+      servicos_atitude:'A atitude e a qualidade dos serviços prestados pela massoterapeuta',
+      servicos_tecnica:'A técnica e a habilidade da massoterapeuta',
+      instalacoes_conforto:'Conforto e conservação da estrutura do SPA',
+      instalacoes_organizacao:'Organização da sala, equipamentos e a atmosfera do ambiente',
+      instalacoes_conveniencia:'Os itens de conveniência (roupões, toalhas, etc) foram suficientes',
+      recomenda_qual:'Qual tratamento recomendaria?',recomenda_porque:'Por quê (recomendação)?',
+      // Eventos - Durante
+      ev_servicos:'Como você avalia os serviços do Hotel?',ev_equipamentos:'Os equipamentos funcionaram corretamente?',
+      // Eventos - Comercial
+      com_cortesia:'Cortesia (demonstra educação e cordialidade)',
+      com_receptividade:'Receptividade (responde de acordo com o solicitado)',
+      com_qualidade:'Qualidade do serviço',com_presteza:'Presteza (atende as solicitações em 48H)',
+      // Eventos - Operação
+      op_agilidade:'Agilidade (pronto atendimento durante o evento)',
+      op_desenvolvimento:'Desenvolvimento (execução do serviço)',op_pontualidade:'Pontualidade',
+      op_expectativa:'Expectativa (serviços executados de acordo com o acordado)',
+      // Eventos - A&B
+      ab_apresentacao:'Apresentação dos alimentos',ab_qualidade:'Qualidade dos alimentos',
+      ab_variedade:'Variedade dos alimentos',ab_quantidade:'Quantidade dos alimentos',
+      ab_horario:'Serviço de A&B entregue no horário',
+      ab_fidelidade:'Fidelidade dos alimentos (entregue conforme acordado)',
+      // Eventos - Infraestrutura
+      inf_conforto:'Conforto e conservação dos ambientes',inf_temperatura:'Temperatura do espaço estava agradável',
+      inf_iluminacao:'Iluminação do espaço estava ideal',inf_limpeza:'Limpeza das salas e banheiros',
+      inf_acesso:'Indicação de acesso aos espaços de eventos',inf_internet:'Serviço de Internet',
+      inf_manobristas:'Serviço de manobristas',inf_allug:'Serviço de equipamentos ALLUG',
+      inf_montagem:'O salão se encontrava com a montagem solicitada?',
+      inf_material:'Agilidade no recebimento do material do evento',
+      // Corporativos - Wi-Fi
+      wifi_apresentacao:'Apresentação / instrução do serviço de Wi-Fi',wifi_facilidade:'Facilidade da conexão',
+      wifi_sinal:'Qualidade do sinal Wi-Fi',wifi_velocidade:'Velocidade do serviço Wi-Fi',
+      // Corporativos - Terceiros
+      ter_manobristas:'Serviço de manobristas',ter_allug:'Serviço de equipamentos da empresa ALLUG',
+      ter_celular:'Qualidade do sinal de dados e de voz do celular',
+      // Avaliação Geral Eventos
+      ev_expectativas:'Suas expectativas em relação ao evento foram atendidas?',
+      ev_voltaria:'Você voltaria a realizar eventos em nosso hotel?',
+      ec_expectativas:'Suas expectativas em relação ao evento foram atendidas?',
+      ec_voltaria:'Você voltaria a realizar eventos em nosso hotel?',
+      // Comentários
+      comentarios:'Comentários e sugestões',comentario:'Comentário',
+      observacoes:'Observações',obs:'Observações',
+      infra_negativo:'Se alguma resposta for negativa, por quê?',
+      melhorar:'Em que podemos melhorar?',
+      justificativa:'Justificativa (quando nota Bom, Regular ou À Melhorar)',
+      // Legado
+      atendimento:'Atendimento',qualidade:'Qualidade',ambiente:'Ambiente',
+      preco:'Preço / custo-benefício',limpeza:'Limpeza',organizacao:'Organização',
+      produto:'Produto / comida',servico:'Serviço',rapidez:'Rapidez no atendimento',
+      cordialidade:'Cordialidade',apresentacao:'Apresentação',nota:'Nota geral',recomendaria:'Recomendaria?',
+    };
     const SKIP=new Set(['tipo','tipo_pesquisa','app_origem','fonte_id','inserido_por']);
     const RATING={otimo:'⬤ Ótimo',bom:'⬤ Bom',regular:'⬤ Regular',ruim:'⬤ À Melhorar'};
     const RATING_COLOR={otimo:'var(--success)',bom:'var(--gold)',regular:'var(--warn)',ruim:'var(--danger)'};
@@ -667,7 +753,76 @@ async function openLocalEdit(id){
     const data=await r.json();
     if(!data.ok)throw new Error(data.error||'Erro');
     const it=data.item, p=it.payload||{};
-    const LABELS={nome:'Nome',empresa:'Empresa',quarto:'Quarto',email:'E-mail',data_tratamento:'Data do tratamento',atendimento:'Atendimento',qualidade:'Qualidade',ambiente:'Ambiente',preco:'Preço / custo-benefício',limpeza:'Limpeza',organizacao:'Organização',produto:'Produto / comida',servico:'Serviço',rapidez:'Rapidez no atendimento',cordialidade:'Cordialidade',apresentacao:'Apresentação',nota:'Nota geral',recomendaria:'Recomendaria?',comentario:'Comentário',observacoes:'Observações',obs:'Observações',controle_interno:'Nº do questionário físico',nome_evento:'Nome do evento',data_evento:'Data do evento',contato:'Contato',telefone:'Telefone'};
+    const LABELS={
+      nome:'Nome',empresa:'Empresa',email:'E-mail',cel:'Cel',telefone:'Telefone',telefone2:'Telefone 2',
+      quarto:'Nº do Apto',apto:'Nº do Apto',controle_interno:'Nº do questionário',
+      check_in:'Data Check-in',cidade:'Cidade/Estado',data:'Data',evento:'Evento',locais:'Local da Visita',
+      tipo_cliente:'Sobre você',tratamento:'Tratamento realizado',masso:'Massoterapeuta',tel:'Tel / WhatsApp',
+      data_tratamento:'Data do tratamento',nome_evento:'Nome do evento',data_evento:'Data do evento',contato:'Contato',
+      rec_checkinout:'Check-in / Check-out',rec_recepcao:'Atendimento e cortesia da Recepção',
+      rec_concierge:'Atendimento e cortesia do Concierge',rec_mensageiros:'Atendimento dos Mensageiros',
+      rec_guestservice:'Atendimento Guest Service',rec_fitness:'Fitness Center',
+      apto_governanca:'Atendimento da Governança',apto_limpeza:'Limpeza e arrumação do apartamento',
+      apto_enxoval:'Qualidade do enxoval',apto_conforto:'Conforto e conservação do apartamento',
+      apto_banheiro:'Instalações do banheiro',apto_equipamentos:'Equipamentos do apartamento',
+      apto_manutencao:'Atendimento da Manutenção',apto_wifi:'Serviço de Wi-Fi (apartamento)',
+      cafe_qualidade:'Qualidade dos alimentos (café)',cafe_variedade:'Variedade do buffet',
+      cafe_cortesia:'Cortesia e agilidade dos colaboradores (café)',cafe_apresentacao:'Apresentação dos alimentos (café)',
+      qto_qualidade:'Qualidade do cardápio (quarto)',qto_variedade:'Variedade do cardápio (quarto)',
+      qto_cortesia:'Cortesia e agilidade dos colaboradores (quarto)',qto_apresentacao:'Apresentação dos alimentos (quarto)',
+      qto_cafe:'Café da manhã no apartamento',
+      motive_visita:'Motivo da Visita',avaliacao_geral:'Como você avalia a sua estada conosco?',
+      identificacao_nome:'Nossos colaboradores o identificaram pelo nome?',
+      expectativas_superadas:'Suas expectativas em relação aos nossos serviços foram superadas?',
+      alim_qualidade:'Qualidade dos alimentos',alim_variedade:'Variedade do cardápio',
+      alim_cortesia:'Cortesia e agilidade dos colaboradores',alim_apresentacao:'Apresentação dos alimentos',
+      inst_infraestrutura:'Infraestrutura do ambiente',inst_limpeza:'Limpeza do restaurante/bar e banheiros',
+      inst_conforto:'Conforto do ambiente',inst_wifi:'Serviço de Wi-Fi',
+      ger_experiencia:'Sua experiência conosco',ger_expectativas:'Suas expectativas em relação aos nossos serviços',
+      com_geral:'Comentários e sugestões',
+      servicos_expectativa:'A expectativa do tratamento',
+      servicos_explicacao:'A explicação da massoterapeuta sobre os benefícios e procedimentos',
+      servicos_atitude:'A atitude e a qualidade dos serviços prestados pela massoterapeuta',
+      servicos_tecnica:'A técnica e a habilidade da massoterapeuta',
+      instalacoes_conforto:'Conforto e conservação da estrutura do SPA',
+      instalacoes_organizacao:'Organização da sala, equipamentos e a atmosfera do ambiente',
+      instalacoes_conveniencia:'Os itens de conveniência (roupões, toalhas, etc) foram suficientes',
+      recomenda_qual:'Qual tratamento recomendaria?',recomenda_porque:'Por quê (recomendação)?',
+      ev_servicos:'Como você avalia os serviços do Hotel?',ev_equipamentos:'Os equipamentos funcionaram corretamente?',
+      com_cortesia:'Cortesia (demonstra educação e cordialidade)',
+      com_receptividade:'Receptividade (responde de acordo com o solicitado)',
+      com_qualidade:'Qualidade do serviço',com_presteza:'Presteza (atende as solicitações em 48H)',
+      op_agilidade:'Agilidade (pronto atendimento durante o evento)',
+      op_desenvolvimento:'Desenvolvimento (execução do serviço)',op_pontualidade:'Pontualidade',
+      op_expectativa:'Expectativa (serviços executados de acordo com o acordado)',
+      ab_apresentacao:'Apresentação dos alimentos',ab_qualidade:'Qualidade dos alimentos',
+      ab_variedade:'Variedade dos alimentos',ab_quantidade:'Quantidade dos alimentos',
+      ab_horario:'Serviço de A&B entregue no horário',
+      ab_fidelidade:'Fidelidade dos alimentos (entregue conforme acordado)',
+      inf_conforto:'Conforto e conservação dos ambientes',inf_temperatura:'Temperatura do espaço estava agradável',
+      inf_iluminacao:'Iluminação do espaço estava ideal',inf_limpeza:'Limpeza das salas e banheiros',
+      inf_acesso:'Indicação de acesso aos espaços de eventos',inf_internet:'Serviço de Internet',
+      inf_manobristas:'Serviço de manobristas',inf_allug:'Serviço de equipamentos ALLUG',
+      inf_montagem:'O salão se encontrava com a montagem solicitada?',
+      inf_material:'Agilidade no recebimento do material do evento',
+      wifi_apresentacao:'Apresentação / instrução do serviço de Wi-Fi',wifi_facilidade:'Facilidade da conexão',
+      wifi_sinal:'Qualidade do sinal Wi-Fi',wifi_velocidade:'Velocidade do serviço Wi-Fi',
+      ter_manobristas:'Serviço de manobristas',ter_allug:'Serviço de equipamentos da empresa ALLUG',
+      ter_celular:'Qualidade do sinal de dados e de voz do celular',
+      ev_expectativas:'Suas expectativas em relação ao evento foram atendidas?',
+      ev_voltaria:'Você voltaria a realizar eventos em nosso hotel?',
+      ec_expectativas:'Suas expectativas em relação ao evento foram atendidas?',
+      ec_voltaria:'Você voltaria a realizar eventos em nosso hotel?',
+      comentarios:'Comentários e sugestões',comentario:'Comentário',
+      observacoes:'Observações',obs:'Observações',
+      infra_negativo:'Se alguma resposta for negativa, por quê?',
+      melhorar:'Em que podemos melhorar?',
+      justificativa:'Justificativa (quando nota Bom, Regular ou À Melhorar)',
+      atendimento:'Atendimento',qualidade:'Qualidade',ambiente:'Ambiente',
+      preco:'Preço / custo-benefício',limpeza:'Limpeza',organizacao:'Organização',
+      produto:'Produto / comida',servico:'Serviço',rapidez:'Rapidez no atendimento',
+      cordialidade:'Cordialidade',apresentacao:'Apresentação',nota:'Nota geral',recomendaria:'Recomendaria?',
+    };
     const SKIP=new Set(['tipo','tipo_pesquisa','app_origem','fonte_id','inserido_por']);
     const RATINGS=['otimo','bom','regular','ruim'];
     const RATING_LABELS={otimo:'Ótimo',bom:'Bom',regular:'Regular',ruim:'À Melhorar'};
