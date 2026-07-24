@@ -851,6 +851,36 @@ async function renderOverview(trigger){
         ${progressCard('pdvs','PDVs','pdvs')}
         ${progressCard('eventos','Eventos','eventos')}
       </div>
+      <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
+      <div class="filter-box" style="margin-bottom:12px">
+        <div class="filter-group">
+          <span class="fl">Tipo</span>
+          <div class="fi"><select id="ovTipo">
+            <option value="">Todos</option>
+            <option value="spa" ${ovState.tipo==='spa'?'selected':''}>Gran SPA</option>
+            <option value="geral" ${ovState.tipo==='geral'?'selected':''}>Geral</option>
+            <option value="pdvs" ${ovState.tipo==='pdvs'?'selected':''}>PDVs</option>
+            <option value="eventos" ${ovState.tipo==='eventos'?'selected':''}>Eventos</option>
+          </select></div>
+        </div>
+        <div class="filter-group">
+          <span class="fl">De</span>
+          <div class="fi"><input type="date" id="ovFrom" value="${ovState.from}" max="${today}"></div>
+        </div>
+        <div class="filter-group">
+          <span class="fl">Até</span>
+          <div class="fi"><input type="date" id="ovTo" value="${ovState.to}" max="${today}"></div>
+        </div>
+        <div class="filter-group filter-flex">
+          <span class="fl">Busca</span>
+          <div class="fi">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            <input type="text" id="ovQ" placeholder="Nome, empresa…" value="${esc(ovState.q)}" style="flex:1">
+          </div>
+        </div>
+        <button class="btn-gold" id="btnOvF">Filtrar</button>
+      </div>
+      <div id="ovTable"></div>
     `;
     main.style.opacity='';main.style.pointerEvents='';
     main.querySelectorAll('.ov-card[data-goto]').forEach(card=>{
@@ -859,6 +889,18 @@ async function renderOverview(trigger){
         if(el)el.click();
       });
     });
+    const tableEl=main.querySelector('#ovTable');
+    renderOverviewTable(tableEl);
+    const applyOvFilter=()=>{
+      ovState.tipo=document.getElementById('ovTipo')?.value||'';
+      ovState.from=document.getElementById('ovFrom')?.value||'';
+      ovState.to=document.getElementById('ovTo')?.value||'';
+      ovState.q=document.getElementById('ovQ')?.value||'';
+      ovState.page=1;
+      renderOverviewTable(tableEl);
+    };
+    document.getElementById('btnOvF')?.addEventListener('click',applyOvFilter);
+    document.getElementById('ovQ')?.addEventListener('keydown',e=>{if(e.key==='Enter')applyOvFilter();});
   }catch(e){
     if(e.name==='AbortError')return;
     main.style.opacity='';main.style.pointerEvents='';
@@ -914,6 +956,85 @@ async function renderLocal(trigger){
 }
 
 let _renderCtrl=null, _lastActivity=Date.now();
+let ovState={tipo:'',from:'',to:'',q:'',page:1,totalPages:1};
+
+async function renderOverviewTable(containerEl){
+  containerEl.innerHTML='<div class="empty" style="padding:32px 0">Carregando...</div>';
+  try{
+    const {tipo,from,to,q,page}=ovState;
+    const OV_LIMIT=20;
+    let items=[],total=0,totalPages=1;
+    const isLocal=!tipo||tipo==='geral'||tipo==='pdvs'||tipo==='eventos';
+    const isSpa=!tipo||tipo==='spa';
+
+    if(isLocal&&tipo!=='spa'){
+      const qs=new URLSearchParams({from:from||'',to:to||'',q:q||'',page:tipo?page:1,limit:tipo?OV_LIMIT:15});
+      if(tipo)qs.set('tipo',tipo);
+      const r=await fetch('/api/respostas-local?'+qs);
+      if(r.status===401){location.href='/acesso-hub.html';return;}
+      const d=await r.json();
+      if(!d.ok)throw new Error(d.error);
+      items=(d.items||[]).map(i=>({...i,_src:'local'}));
+      total=d.total||0;
+      totalPages=Math.ceil(total/OV_LIMIT)||1;
+    }
+
+    if(isSpa){
+      const qs2=new URLSearchParams({slug:'spa-locc-v1',from:from||'',to:to||'',q:q||'',page:tipo==='spa'?page:1,limit:tipo==='spa'?OV_LIMIT:15});
+      const r2=await fetch('/api/respostas?'+qs2);
+      if(r2.status===401){location.href='/acesso-hub.html';return;}
+      const d2=await r2.json();
+      const spaItems=(d2.items||[]).map(i=>({id:i.id,date:i.date,nome:i.nome,email:i.email,tipo_pesquisa:'spa',inserido_por:i.origem==='colaborador'?'Colaborador':'Hóspede',_src:'spa',media:i.media}));
+      if(tipo==='spa'){
+        items=spaItems;total=d2.total||0;totalPages=Math.ceil(total/OV_LIMIT)||1;
+      } else {
+        items=[...items,...spaItems].sort((a,b)=>{
+          const da=a.date.split('/').reverse().join(''),db=b.date.split('/').reverse().join('');
+          return da<db?1:da>db?-1:0;
+        }).slice(0,OV_LIMIT);
+        total=total+(d2.total||0);
+        totalPages=1;
+      }
+    }
+    ovState.totalPages=totalPages;
+
+    const badge=r=>{
+      if(r._src==='spa')return'Gran SPA';
+      const t=r.tipo_pesquisa;
+      if(t==='geral-granclass')return'★ Gran Class';
+      if(t==='pdvs-granclass')return'★ PDV GC';
+      if(t==='geral')return'Geral';
+      if(t==='pdvs')return'PDV';
+      if(t==='eventos')return'Evento';
+      if(t==='eventos-cliente')return'Ev. Social';
+      if(t==='eventos-corporativos')return'Corporativo';
+      return t||'—';
+    };
+    const rows=items.map(r=>`<div class="tbl-row">
+      <div class="tbl-date">${esc(r.date)}</div>
+      <div class="tbl-nome">${esc(r.nome)}</div>
+      <div class="tbl-email">${esc(r.email||'—')}</div>
+      <div class="tbl-tipo"><span>${esc(badge(r))}</span></div>
+      <div class="tbl-orig" style="font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.inserido_por||'—')}</div>
+      <div>${r._src==='spa'?`<span class="score ${scoreClass(r.media)}">${esc(r.media)}</span>`:''}</div>
+      <div></div>
+    </div>`).join('');
+    const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
+      <button class="btn-icon" id="ovPgPrev" ${page<=1?'disabled':''} style="${page<=1?'opacity:.4;cursor:default':''}">← Anterior</button>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)">Página ${page} de ${totalPages}</span>
+      <button class="btn-icon" id="ovPgNext" ${page>=totalPages?'disabled':''} style="${page>=totalPages?'opacity:.4;cursor:default':''}">Próxima →</button>
+    </div>`:'';
+    containerEl.innerHTML=`<div class="tbl-hdr"><div class="tbl-title">Avaliações</div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><div>Data</div><div>Nome</div><div>E-mail / Empresa</div><div>Tipo</div><div>Inserido por</div><div>Média</div><div></div></div>
+      ${rows||'<div class="empty">Nenhuma avaliação encontrada</div>'}
+    </div>${pgHtml}`;
+    containerEl.querySelector('#ovPgPrev')?.addEventListener('click',()=>{if(ovState.page>1){ovState.page--;renderOverviewTable(containerEl);}});
+    containerEl.querySelector('#ovPgNext')?.addEventListener('click',()=>{if(ovState.page<ovState.totalPages){ovState.page++;renderOverviewTable(containerEl);}});
+  }catch(e){
+    containerEl.innerHTML=`<div class="empty">Erro: ${esc(e.message)}</div>`;
+  }
+}
 ['mousemove','keydown','mousedown','touchstart'].forEach(ev=>
   document.addEventListener(ev,()=>_lastActivity=Date.now(),{passive:true})
 );
