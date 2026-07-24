@@ -88,6 +88,15 @@ body{
 }
 .btn-nova-pesquisa:hover{background:var(--gold-dark)}
 .btn-nova-pesquisa:active{transform:scale(.97)}
+.ev-soc-pills{display:flex;gap:8px;margin:8px 0 24px}
+.ev-soc-pill{
+  padding:5px 18px;border-radius:7px;border:1px solid var(--border-soft);
+  background:transparent;cursor:pointer;color:var(--muted);
+  font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  transition:background .15s,border-color .15s,color .15s;line-height:1.6
+}
+.ev-soc-pill.active{background:var(--gold);border-color:var(--gold);color:#fff}
+.ev-soc-pill:not(.active):hover{border-color:var(--gold);color:var(--gold)}
 .btn-edit-local{
   background:none;border:1px solid var(--border-soft);border-radius:6px;
   width:28px;height:28px;cursor:pointer;color:var(--muted);font-size:.85rem;
@@ -460,7 +469,8 @@ body{
   <div class="tab" data-tab="spa">Gran SPA</div>
   <div class="tab" data-tab="geral">Geral da Qualidade</div>
   <div class="tab" data-tab="pdvs">PDVs</div>
-  <div class="tab" data-tab="eventos">Eventos</div>
+  <div class="tab" data-tab="eventos-corp">Corporativos</div>
+  <div class="tab" data-tab="eventos-soc">Sociais</div>
 </div>
 
 <main class="main" id="main"><div class="empty">Carregando...</div></main>
@@ -488,7 +498,7 @@ function updateTs() {
 updateTs(); setInterval(updateTs, 60000);
 
 const LIMIT=20;
-const METAS={spa:30,geral:20,pdvs:15,eventos:10};
+const METAS={spa:30,geral:20,pdvs:15,'eventos-corp':5,'eventos-soc':5};
 const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, periodCustom:false };
 (function(){
   try {
@@ -903,7 +913,11 @@ function renderLocalFilters(){
 
 function renderLocalTable(rows,total,page){
   const tipoBadge=t=>{
-    if(!t||t===activeTab)return activeTab==='eventos'?'Evento':'—';
+    if(!t||t===activeTab){
+      if(activeTab==='eventos-corp')return'Corporativo';
+      if(activeTab==='eventos-soc')return'Social';
+      return'—';
+    }
     if(t==='geral-granclass'||t==='pdvs-granclass')return '★ Gran Class';
     if(t==='eventos-cliente')return 'Social · Cliente';
     if(t==='eventos-cerimonialista')return 'Social · Parceiros';
@@ -949,6 +963,12 @@ async function renderOverview(trigger){
     const [local,spa]=await Promise.all([localRes.json(),spaRes.json()]);
     const totaisMap={};(local.totais||[]).forEach(r=>{totaisMap[r.tipo]=r.total;});
     const mesMap={};(local.mes||[]).forEach(r=>{mesMap[r.tipo]=r.total;});
+    const mesSubMap={};(local.mesSub||[]).forEach(r=>{if(r.subtipo)mesSubMap[r.subtipo]=r.total;});
+    const totaisSubMap={};(local.totaisSub||[]).forEach(r=>{if(r.subtipo)totaisSubMap[r.subtipo]=r.total;});
+    mesMap['eventos-corp']=mesSubMap['eventos-corporativos']||0;
+    mesMap['eventos-soc']=(mesSubMap['eventos-cliente']||0)+(mesSubMap['eventos-cerimonialista']||0);
+    totaisMap['eventos-corp']=totaisSubMap['eventos-corporativos']||0;
+    totaisMap['eventos-soc']=(totaisSubMap['eventos-cliente']||0)+(totaisSubMap['eventos-cerimonialista']||0);
     const spaMes=spa.total||0;
     const localTotal=(totaisMap.geral||0)+(totaisMap.pdvs||0)+(totaisMap.eventos||0);
     const localMes=(mesMap.geral||0)+(mesMap.pdvs||0)+(mesMap.eventos||0);
@@ -1001,7 +1021,8 @@ async function renderOverview(trigger){
         ${progressCard('spa','Gran SPA','spa')}
         ${progressCard('geral','Geral da Qualidade','geral')}
         ${progressCard('pdvs','PDVs','pdvs')}
-        ${progressCard('eventos','Eventos','eventos')}
+        ${progressCard('eventos-corp','Corporativos','eventos-corp')}
+        ${progressCard('eventos-soc','Sociais','eventos-soc')}
       </div>
       <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
       <div class="filter-box" style="margin-bottom:12px">
@@ -1012,7 +1033,8 @@ async function renderOverview(trigger){
             <option value="spa" ${ovState.tipo==='spa'?'selected':''}>Gran SPA</option>
             <option value="geral" ${ovState.tipo==='geral'?'selected':''}>Geral</option>
             <option value="pdvs" ${ovState.tipo==='pdvs'?'selected':''}>PDVs</option>
-            <option value="eventos" ${ovState.tipo==='eventos'?'selected':''}>Eventos</option>
+            <option value="eventos-corp" ${ovState.tipo==='eventos-corp'?'selected':''}>Corporativos</option>
+            <option value="eventos-soc" ${ovState.tipo==='eventos-soc'?'selected':''}>Sociais</option>
           </select></div>
         </div>
         <div class="filter-group">
@@ -1070,18 +1092,22 @@ async function renderLocal(trigger){
   main.style.opacity='0.5';main.style.pointerEvents='none';
   try{
     const qs=new URLSearchParams({tipo:activeTab,from:state.from||'',to:state.to||'',q:state.q||'',page:state.page,limit:LIMIT});
+    if(activeTab==='eventos-soc'&&evSocSubfiltro!=='todos'){
+      qs.set('subtipo',evSocSubfiltro==='cliente'?'eventos-cliente':'eventos-cerimonialista');
+    }
     const res=await fetch('/api/respostas-local?'+qs,{signal});
     if(res.status===401){location.href='/acesso-hub.html';return;}
     const data=await res.json();
     if(!data.ok)throw new Error(data.error);
     state.totalPages=Math.ceil((data.total||0)/LIMIT)||1;
-    const labels={geral:'Geral da Qualidade',pdvs:'PDVs',eventos:'Eventos'};
+    const labels={geral:'Geral da Qualidade',pdvs:'PDVs','eventos-corp':'Eventos Corporativos','eventos-soc':'Eventos Sociais'};
+    const subPills=activeTab==='eventos-soc'?renderEvSocPills():'';
     main.innerHTML=`<div class="kpis-hdr"><div class="eyebrow">${labels[activeTab]||activeTab}</div></div>
       <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);max-width:560px;margin-bottom:52px">
         <div class="kpi hero"><div class="kpi-label">Total de avaliações</div><div><div class="kpi-hero-val">${data.total}<span></span></div><div class="kpi-hero-line"></div></div></div>
         <div class="kpi"><div class="kpi-label">Nesta página</div><div class="kpi-val">${data.items.length}<span>/${LIMIT}</span></div></div>
         <div class="kpi"><div class="kpi-label">Páginas</div><div class="kpi-val">${state.totalPages}</div></div>
-      </div>`+renderLocalFilters()+renderLocalTable(data.items||[],data.total||0,state.page);
+      </div>`+renderLocalFilters()+subPills+renderLocalTable(data.items||[],data.total||0,state.page);
     main.style.opacity='';main.style.pointerEvents='';
     if(isAuto)window.scrollTo({top:savedScrollY,behavior:'instant'});
     else if(trigger==='filter'||trigger==='page')document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
@@ -1100,6 +1126,9 @@ async function renderLocal(trigger){
     });
     document.getElementById('pgPrev')?.addEventListener('click',()=>{if(state.page>1){state.page--;render('page');}});
     document.getElementById('pgNext')?.addEventListener('click',()=>{if(state.page<state.totalPages){state.page++;render('page');}});
+    document.querySelectorAll('.ev-soc-pill').forEach(btn=>{
+      btn.addEventListener('click',()=>{evSocSubfiltro=btn.dataset.soc;state.page=1;render('filter');});
+    });
     document.querySelectorAll('.tbl-row[data-id]').forEach(row=>{
       row.addEventListener('click',()=>{const id=parseInt(row.dataset.id);if(id)openLocalDetail(id);});
     });
@@ -1112,6 +1141,12 @@ async function renderLocal(trigger){
 
 let _renderCtrl=null, _lastActivity=Date.now();
 let ovState={tipo:'',from:'',to:'',q:'',page:1,totalPages:1};
+let evSocSubfiltro='todos';
+function renderEvSocPills(){
+  return `<div class="ev-soc-pills">
+    ${[{v:'todos',l:'Todos'},{v:'cliente',l:'Cliente'},{v:'parceiros',l:'Parceiros'}].map(o=>`<button class="ev-soc-pill${evSocSubfiltro===o.v?' active':''}" data-soc="${o.v}">${o.l}</button>`).join('')}
+  </div>`;
+}
 
 async function renderOverviewTable(containerEl){
   containerEl.innerHTML='<div class="empty" style="padding:32px 0">Carregando...</div>';
@@ -1119,7 +1154,7 @@ async function renderOverviewTable(containerEl){
     const {tipo,from,to,q,page}=ovState;
     const OV_LIMIT=20;
     let items=[],total=0,totalPages=1;
-    const isLocal=!tipo||tipo==='geral'||tipo==='pdvs'||tipo==='eventos';
+    const isLocal=!tipo||tipo==='geral'||tipo==='pdvs'||tipo==='eventos'||tipo==='eventos-corp'||tipo==='eventos-soc';
     const isSpa=!tipo||tipo==='spa';
 
     if(isLocal&&tipo!=='spa'){
@@ -1161,7 +1196,8 @@ async function renderOverviewTable(containerEl){
       if(t==='geral')return'Geral';
       if(t==='pdvs')return'PDV';
       if(t==='eventos')return'Evento';
-      if(t==='eventos-cliente')return'Ev. Social';
+      if(t==='eventos-cliente')return'Social · Cliente';
+      if(t==='eventos-cerimonialista')return'Social · Parceiros';
       if(t==='eventos-corporativos')return'Corporativo';
       return t||'—';
     };
@@ -1292,6 +1328,7 @@ document.querySelectorAll('.tab[data-tab]').forEach(t=>{
     activeTab=t.dataset.tab;
     document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.toggle('tab-active',x.dataset.tab===activeTab));
     state.page=1;state.from=state.to='';state.tipo=state.origem=state.q='';state.periodCustom=false;
+    evSocSubfiltro='todos';
     render('tab');
   });
 });
@@ -1625,19 +1662,31 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
     { label: 'Pesquisa geral da qualidade', active: true, action: 'geral' },
     { label: 'Pesquisa PDVs', active: true, action: 'pdvs' },
     { label: 'Pesquisa Gran SPA', active: true, action: 'spa' },
-    { label: 'Pesquisa de Eventos Sociais Cliente', active: true, action: 'eventos-cliente' },
-    { label: 'Pesquisa de Eventos Sociais Parceiros', active: true, action: 'eventos-cerimonialista' },
-    { label: 'Pesquisa de Eventos Corporativos', active: true, action: 'eventos-corporativos' },
+    { label: 'Pesquisa de Eventos Corporativos', active: true, action: 'eventos-corporativos', section: 'Eventos Corporativos' },
+    { label: 'Pesquisa de Eventos Sociais — Cliente', active: true, action: 'eventos-cliente', section: 'Eventos Sociais' },
+    { label: 'Pesquisa de Eventos Sociais — Parceiros', active: true, action: 'eventos-cerimonialista' },
   ];
+  function buildPickerItems(){
+    let html='', lastSection=null;
+    PESQUISAS.forEach((p,i)=>{
+      if(p.section&&p.section!==lastSection){
+        html+=`<div style="font-size:.6rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 4px 4px;opacity:.8">${p.section}</div>`;
+        lastSection=p.section;
+      }
+      const indent=lastSection?'padding-left:10px;':'';
+      html+=`<button class="picker-item${p.active?'':' picker-soon'}" data-idx="${i}" style="${indent}">
+        <span>${p.label}</span>
+        ${p.active?'<span class="picker-arrow">→</span>':'<span class="picker-badge">Em breve</span>'}
+      </button>`;
+    });
+    return html;
+  }
   const pickerOverlay = document.createElement('div');
   pickerOverlay.id = 'pickerOverlay';
   pickerOverlay.innerHTML = `<div id="pickerModal">
     <button class="picker-close" id="pickerClose">✕</button>
     <div class="picker-title">Selecionar pesquisa</div>
-    <div class="picker-list">${PESQUISAS.map((p,i)=>`<button class="picker-item${p.active?'':' picker-soon'}" data-idx="${i}">
-      <span>${p.label}</span>
-      ${p.active?'<span class="picker-arrow">→</span>':'<span class="picker-badge">Em breve</span>'}
-    </button>`).join('')}</div>
+    <div class="picker-list">${buildPickerItems()}</div>
   </div>`;
   document.body.appendChild(pickerOverlay);
   function pickerOpen(){ pickerOverlay.classList.add('open'); }

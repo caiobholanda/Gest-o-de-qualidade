@@ -312,18 +312,25 @@ app.put('/api/resposta-local/:id', requireSession, (req, res) => {
 
 app.get('/api/stats-local', requireSession, (_req, res) => {
   try {
-    const { totais, mes } = contarRespostas();
-    res.json({ ok: true, totais, mes });
+    const { totais, mes, mesSub, totaisSub } = contarRespostas();
+    res.json({ ok: true, totais, mes, mesSub, totaisSub });
   }
   catch (e) { console.error('[stats-local]', e); res.status(500).json({ ok: false, error: 'Erro' }); }
 });
 
 app.get('/api/respostas-local', requireSession, (req, res) => {
-  const TIPOS = new Set(['geral', 'pdvs', 'eventos']);
-  const tipo = TIPOS.has(req.query.tipo) ? req.query.tipo : null;
+  const tipoRaw = req.query.tipo;
+  let tipo = null, subtipo = null;
+  if (tipoRaw === 'eventos-corp') {
+    tipo = 'eventos'; subtipo = 'eventos-corporativos';
+  } else if (tipoRaw === 'eventos-soc') {
+    tipo = 'eventos'; subtipo = req.query.subtipo || 'eventos-sociais';
+  } else if (['geral', 'pdvs', 'eventos'].includes(tipoRaw)) {
+    tipo = tipoRaw; subtipo = req.query.subtipo || null;
+  }
   try {
     const result = listarRespostas({
-      tipo,
+      tipo, subtipo,
       from: req.query.from || null,
       to:   req.query.to   || null,
       q:    req.query.q    || null,

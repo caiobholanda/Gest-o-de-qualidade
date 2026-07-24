@@ -81,12 +81,26 @@ export function contarRespostas() {
   const mesAtual = new Date().toISOString().slice(0, 7);
   const totais = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta GROUP BY tipo`).all();
   const mes    = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta WHERE substr(submitted_at,1,7) = ? GROUP BY tipo`).all(mesAtual);
-  return { totais, mes };
+  const mesSub = db.prepare(`
+    SELECT JSON_EXTRACT(payload,'$.tipo_pesquisa') AS subtipo, COUNT(*) AS total
+    FROM resposta WHERE tipo='eventos' AND substr(submitted_at,1,7)=? GROUP BY subtipo
+  `).all(mesAtual);
+  const totaisSub = db.prepare(`
+    SELECT JSON_EXTRACT(payload,'$.tipo_pesquisa') AS subtipo, COUNT(*) AS total
+    FROM resposta WHERE tipo='eventos' GROUP BY subtipo
+  `).all();
+  return { totais, mes, mesSub, totaisSub };
 }
 
-export function listarRespostas({ tipo = null, from = null, to = null, q = null, page = 1, limit = 20 } = {}) {
+export function listarRespostas({ tipo = null, subtipo = null, from = null, to = null, q = null, page = 1, limit = 20 } = {}) {
   const conds = [], args = [];
   if (tipo) { conds.push('tipo = ?'); args.push(tipo); }
+  if (subtipo === 'eventos-sociais') {
+    conds.push("(JSON_EXTRACT(payload,'$.tipo_pesquisa')='eventos-cliente' OR JSON_EXTRACT(payload,'$.tipo_pesquisa')='eventos-cerimonialista')");
+  } else if (subtipo) {
+    conds.push("JSON_EXTRACT(payload,'$.tipo_pesquisa')=?");
+    args.push(subtipo);
+  }
   if (from) { conds.push("substr(submitted_at,1,10) >= ?"); args.push(from); }
   if (to)   { conds.push("substr(submitted_at,1,10) <= ?"); args.push(to); }
   if (q)    { conds.push("(payload LIKE ? OR inserido_por LIKE ?)"); args.push(`%${q}%`, `%${q}%`); }
