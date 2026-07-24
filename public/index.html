@@ -1562,7 +1562,7 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
 
 // Cache de quartos Gran Class — acessível a GQ e PDV (escopo de script)
 let _gqPdvGranClassAptos=null;
-async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{const r=await fetch('/api/quartos');const d=await r.json();_gqPdvGranClassAptos=new Set((d.items||[]).filter(q=>q.categoria==='gran_class').map(q=>q.numero));}catch(e){_gqPdvGranClassAptos=new Set();}}
+async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{const r=await fetch('/api/quartos');const d=await r.json();_gqPdvGranClassAptos=new Set((d.items||[]).filter(q=>q.categoria==='gran_class').map(q=>q.numero));}catch(e){_gqPdvGranClassAptos=new Set();}['gqApto','pdvApto'].forEach(id=>{const el=document.getElementById(id);if(el)el.dispatchEvent(new Event('input',{bubbles:true}));});}
 
 // ── Modal: Pesquisa Geral da Qualidade / Gran Class ──
 {
