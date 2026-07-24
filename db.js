@@ -78,7 +78,10 @@ export function inserirResposta({ tipo, app_origem = 'gestao-qualidade', fonte_i
 }
 
 export function contarRespostas() {
-  return db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta GROUP BY tipo`).all();
+  const mesAtual = new Date().toISOString().slice(0, 7);
+  const totais = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta GROUP BY tipo`).all();
+  const mes    = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta WHERE substr(submitted_at,1,7) = ? GROUP BY tipo`).all(mesAtual);
+  return { totais, mes };
 }
 
 export function listarRespostas({ tipo = null, from = null, to = null, q = null, page = 1, limit = 20 } = {}) {

@@ -281,7 +281,10 @@ app.get('/api/tratamentos', requireSession, async (req, res) => {
 });
 
 app.get('/api/stats-local', requireSession, (_req, res) => {
-  try { res.json({ ok: true, items: contarRespostas() }); }
+  try {
+    const { totais, mes } = contarRespostas();
+    res.json({ ok: true, totais, mes });
+  }
   catch (e) { console.error('[stats-local]', e); res.status(500).json({ ok: false, error: 'Erro' }); }
 });
 
