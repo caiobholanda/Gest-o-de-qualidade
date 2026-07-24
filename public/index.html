@@ -728,161 +728,112 @@ async function openLocalDetail(id){
   }
 }
 
-let _editOverlay=null,_editEscHandler=null;
-function editClose(){if(_editOverlay)_editOverlay.style.display='none';document.body.style.overflow='';if(_editEscHandler)document.removeEventListener('keydown',_editEscHandler);}
+// IDs de texto por tipo de formulário → [campo_payload: id_dom]
+const _EDIT_FIELD_IDS = {
+  spa: {nome:'psNome',email:'psEmail',apto:'psApto',controle_interno:'psControleInterno',tel:'psTel',data:'psData',tratamento:'psTratamento',masso:'psMasso'},
+  geral: {nome:'gqNome',email:'gqEmail',cel:'gqTel',apto:'gqApto',check_in:'gqCheckIn',cidade:'gqCidade',controle_interno:'gqControle',comentarios:'gqComentarios'},
+  'geral-granclass': {nome:'gqNome',email:'gqEmail',cel:'gqTel',apto:'gqApto',check_in:'gqCheckIn',cidade:'gqCidade',controle_interno:'gqControle',comentarios:'gqComentarios'},
+  pdvs: {nome:'pdvNome',email:'pdvEmail',cel:'pdvTel',apto:'pdvApto',controle_interno:'pdvControle',com_geral:'pdvComGeral'},
+  'pdvs-granclass': {nome:'pdvNome',email:'pdvEmail',cel:'pdvTel',apto:'pdvApto',controle_interno:'pdvControle',com_geral:'pdvComGeral'},
+  'eventos-cliente': {nome:'evNome',email:'evEmail',telefone:'evTel',telefone2:'evTel2',empresa:'evEmpresa',data:'evData',controle_interno:'evControle',comentarios:'evComentarios',infra_negativo:'evInfraNeg',melhorar:'evMelhorar'},
+  'eventos-cerimonialista': {nome:'evNome',email:'evEmail',telefone:'evTel',empresa:'evEmpresa',data:'evData',controle_interno:'evControle',comentarios:'evComentarios',infra_negativo:'evInfraNeg',melhorar:'evMelhorar'},
+  'eventos-corporativos': {nome:'ecNome',email:'ecEmail',telefone:'ecTel',empresa:'ecEmpresa',evento:'ecEvento',data:'ecData',controle_interno:'ecControle',justificativa:'ecJustificativa',comentarios:'ecComentarios'},
+};
+const _EDIT_FORM_URLS = ['/api/nova-resposta','/api/nova-resposta-geral','/api/nova-resposta-pdvs','/api/nova-resposta-eventos'];
 
 async function openLocalEdit(id){
-  if(!_editOverlay){
-    _editOverlay=document.createElement('div');
-    _editOverlay.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);overflow-y:auto;padding:40px 16px 80px';
-    _editOverlay.setAttribute('tabindex','-1');
-    document.body.appendChild(_editOverlay);
-  }
-  if(_editEscHandler)document.removeEventListener('keydown',_editEscHandler);
-  _editEscHandler=e=>{if(e.key==='Escape')editClose();};
-  document.addEventListener('keydown',_editEscHandler);
-  _editOverlay.style.display='block';
-  _editOverlay.scrollTop=0;
-  document.body.style.overflow='hidden';
-  _editOverlay.focus();
-  const closeBtn=`<button id="editCloseBtn" style="background:none;border:1px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:.85rem;display:flex;align-items:center;justify-content:center;flex:none">✕</button>`;
-  _editOverlay.innerHTML=`<div style="background:var(--surface);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;width:100%;max-width:760px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35)"><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border-soft)">${closeBtn}</div><div class="empty" style="padding:60px 24px">Carregando...</div></div>`;
-  _editOverlay.querySelector('#editCloseBtn')?.addEventListener('click',editClose);
   try{
     const r=await fetch(`/api/resposta-local/${id}`);
     const data=await r.json();
     if(!data.ok)throw new Error(data.error||'Erro');
     const it=data.item, p=it.payload||{};
-    const LABELS={
-      nome:'Nome',empresa:'Empresa',email:'E-mail',cel:'Cel',telefone:'Telefone',telefone2:'Telefone 2',
-      quarto:'Nº do Apto',apto:'Nº do Apto',controle_interno:'Nº do questionário',
-      check_in:'Data Check-in',cidade:'Cidade/Estado',data:'Data',evento:'Evento',locais:'Local da Visita',
-      tipo_cliente:'Sobre você',tratamento:'Tratamento realizado',masso:'Massoterapeuta',tel:'Tel / WhatsApp',
-      data_tratamento:'Data do tratamento',nome_evento:'Nome do evento',data_evento:'Data do evento',contato:'Contato',
-      rec_checkinout:'Check-in / Check-out',rec_recepcao:'Atendimento e cortesia da Recepção',
-      rec_concierge:'Atendimento e cortesia do Concierge',rec_mensageiros:'Atendimento dos Mensageiros',
-      rec_guestservice:'Atendimento Guest Service',rec_fitness:'Fitness Center',
-      apto_governanca:'Atendimento da Governança',apto_limpeza:'Limpeza e arrumação do apartamento',
-      apto_enxoval:'Qualidade do enxoval',apto_conforto:'Conforto e conservação do apartamento',
-      apto_banheiro:'Instalações do banheiro',apto_equipamentos:'Equipamentos do apartamento',
-      apto_manutencao:'Atendimento da Manutenção',apto_wifi:'Serviço de Wi-Fi (apartamento)',
-      cafe_qualidade:'Qualidade dos alimentos (café)',cafe_variedade:'Variedade do buffet',
-      cafe_cortesia:'Cortesia e agilidade dos colaboradores (café)',cafe_apresentacao:'Apresentação dos alimentos (café)',
-      qto_qualidade:'Qualidade do cardápio (quarto)',qto_variedade:'Variedade do cardápio (quarto)',
-      qto_cortesia:'Cortesia e agilidade dos colaboradores (quarto)',qto_apresentacao:'Apresentação dos alimentos (quarto)',
-      qto_cafe:'Café da manhã no apartamento',
-      motive_visita:'Motivo da Visita',avaliacao_geral:'Como você avalia a sua estada conosco?',
-      identificacao_nome:'Nossos colaboradores o identificaram pelo nome?',
-      expectativas_superadas:'Suas expectativas em relação aos nossos serviços foram superadas?',
-      alim_qualidade:'Qualidade dos alimentos',alim_variedade:'Variedade do cardápio',
-      alim_cortesia:'Cortesia e agilidade dos colaboradores',alim_apresentacao:'Apresentação dos alimentos',
-      inst_infraestrutura:'Infraestrutura do ambiente',inst_limpeza:'Limpeza do restaurante/bar e banheiros',
-      inst_conforto:'Conforto do ambiente',inst_wifi:'Serviço de Wi-Fi',
-      ger_experiencia:'Sua experiência conosco',ger_expectativas:'Suas expectativas em relação aos nossos serviços',
-      com_geral:'Comentários e sugestões',
-      servicos_expectativa:'A expectativa do tratamento',
-      servicos_explicacao:'A explicação da massoterapeuta sobre os benefícios e procedimentos',
-      servicos_atitude:'A atitude e a qualidade dos serviços prestados pela massoterapeuta',
-      servicos_tecnica:'A técnica e a habilidade da massoterapeuta',
-      instalacoes_conforto:'Conforto e conservação da estrutura do SPA',
-      instalacoes_organizacao:'Organização da sala, equipamentos e a atmosfera do ambiente',
-      instalacoes_conveniencia:'Os itens de conveniência (roupões, toalhas, etc) foram suficientes',
-      recomenda_qual:'Qual tratamento recomendaria?',recomenda_porque:'Por quê (recomendação)?',
-      ev_servicos:'Como você avalia os serviços do Hotel?',ev_equipamentos:'Os equipamentos funcionaram corretamente?',
-      com_cortesia:'Cortesia (demonstra educação e cordialidade)',
-      com_receptividade:'Receptividade (responde de acordo com o solicitado)',
-      com_qualidade:'Qualidade do serviço',com_presteza:'Presteza (atende as solicitações em 48H)',
-      op_agilidade:'Agilidade (pronto atendimento durante o evento)',
-      op_desenvolvimento:'Desenvolvimento (execução do serviço)',op_pontualidade:'Pontualidade',
-      op_expectativa:'Expectativa (serviços executados de acordo com o acordado)',
-      ab_apresentacao:'Apresentação dos alimentos',ab_qualidade:'Qualidade dos alimentos',
-      ab_variedade:'Variedade dos alimentos',ab_quantidade:'Quantidade dos alimentos',
-      ab_horario:'Serviço de A&B entregue no horário',
-      ab_fidelidade:'Fidelidade dos alimentos (entregue conforme acordado)',
-      inf_conforto:'Conforto e conservação dos ambientes',inf_temperatura:'Temperatura do espaço estava agradável',
-      inf_iluminacao:'Iluminação do espaço estava ideal',inf_limpeza:'Limpeza das salas e banheiros',
-      inf_acesso:'Indicação de acesso aos espaços de eventos',inf_internet:'Serviço de Internet',
-      inf_manobristas:'Serviço de manobristas',inf_allug:'Serviço de equipamentos ALLUG',
-      inf_montagem:'O salão se encontrava com a montagem solicitada?',
-      inf_material:'Agilidade no recebimento do material do evento',
-      wifi_apresentacao:'Apresentação / instrução do serviço de Wi-Fi',wifi_facilidade:'Facilidade da conexão',
-      wifi_sinal:'Qualidade do sinal Wi-Fi',wifi_velocidade:'Velocidade do serviço Wi-Fi',
-      ter_manobristas:'Serviço de manobristas',ter_allug:'Serviço de equipamentos da empresa ALLUG',
-      ter_celular:'Qualidade do sinal de dados e de voz do celular',
-      ev_expectativas:'Suas expectativas em relação ao evento foram atendidas?',
-      ev_voltaria:'Você voltaria a realizar eventos em nosso hotel?',
-      ec_expectativas:'Suas expectativas em relação ao evento foram atendidas?',
-      ec_voltaria:'Você voltaria a realizar eventos em nosso hotel?',
-      comentarios:'Comentários e sugestões',comentario:'Comentário',
-      observacoes:'Observações',obs:'Observações',
-      infra_negativo:'Se alguma resposta for negativa, por quê?',
-      melhorar:'Em que podemos melhorar?',
-      justificativa:'Justificativa (quando nota Bom, Regular ou À Melhorar)',
-      atendimento:'Atendimento',qualidade:'Qualidade',ambiente:'Ambiente',
-      preco:'Preço / custo-benefício',limpeza:'Limpeza',organizacao:'Organização',
-      produto:'Produto / comida',servico:'Serviço',rapidez:'Rapidez no atendimento',
-      cordialidade:'Cordialidade',apresentacao:'Apresentação',nota:'Nota geral',recomendaria:'Recomendaria?',
-    };
-    const SKIP=new Set(['tipo','tipo_pesquisa','app_origem','fonte_id','inserido_por']);
-    const RATINGS=['otimo','bom','regular','ruim'];
-    const RATING_LABELS={otimo:'Ótimo',bom:'Bom',regular:'Regular',ruim:'À Melhorar'};
-    const RATING_COLORS={otimo:'var(--success)',bom:'var(--gold)',regular:'var(--warn)',ruim:'var(--danger)'};
-    const fields=Object.entries(p).filter(([k,v])=>!SKIP.has(k)&&v!=null&&v!=='');
-    const fieldsHtml=fields.map(([k,v])=>{
-      const label=LABELS[k]||k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-      const isRating=RATINGS.includes(v);
-      const input=isRating
-        ?`<div style="display:flex;gap:8px;flex-wrap:wrap">${RATINGS.map(rv=>`<button type="button" class="edit-rating-btn${rv===v?' active':''}" data-field="${k}" data-val="${rv}" style="padding:5px 12px;border-radius:6px;border:1px solid ${rv===v?RATING_COLORS[rv]:'var(--border-soft)'};background:${rv===v?RATING_COLORS[rv]+'22':'transparent'};color:${rv===v?RATING_COLORS[rv]:'var(--muted)'};cursor:pointer;font-size:.78rem;transition:all .15s" onclick="(function(btn){btn.closest('[data-field-group]').querySelectorAll('.edit-rating-btn').forEach(b=>{b.style.border='1px solid var(--border-soft)';b.style.background='transparent';b.style.color='var(--muted)';b.classList.remove('active')});btn.style.border='1px solid ${RATING_COLORS[rv]}';btn.style.background='${RATING_COLORS[rv]}22';btn.style.color='${RATING_COLORS[rv]}';btn.classList.add('active')})(this)">${esc(RATING_LABELS[rv])}</button>`).join('')}</div>`
-        :`<input type="text" data-field="${k}" value="${esc(String(v))}" style="width:100%;padding:7px 10px;border:1px solid var(--border-soft);border-radius:6px;background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;font-size:.88rem;box-sizing:border-box" />`;
-      return `<div data-field-group="${k}" style="display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--border-soft);align-items:flex-start">
-        <span style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;min-width:170px;flex-shrink:0;padding-top:${isRating?'8':'9'}px">${esc(label)}</span>
-        <div style="flex:1">${input}</div>
-      </div>`;
-    }).join('');
-    const tipoLabel={'geral':'Geral da Qualidade','geral-granclass':'Geral Gran Class','pdvs':'PDVs','pdvs-granclass':'PDV Gran Class','eventos':'Eventos','eventos-cliente':'Eventos Social','eventos-cerimonialista':'Eventos Cerimonialista','eventos-corporativos':'Eventos Corporativo'};
-    _editOverlay.innerHTML=`<div style="background:var(--surface);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;width:100%;max-width:760px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35)">
-      <div style="position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border-soft);padding:12px 24px 10px;display:flex;align-items:center;justify-content:space-between">
-        <div><span class="eyebrow">Editar Avaliação #${id}</span><span style="margin-left:10px;font-size:.7rem;color:var(--gold);font-weight:600">${esc(tipoLabel[p.tipo_pesquisa||it.tipo]||p.tipo_pesquisa||it.tipo)}</span></div>${closeBtn}
-      </div>
-      <div style="padding:28px 32px 48px">
-        <div style="margin-bottom:20px">
-          <div style="font-weight:500;font-size:1.1rem;color:var(--text)">${esc(p.nome||p.empresa||'Sem nome')}</div>
-        </div>
-        <div id="editFields">${fieldsHtml||'<div class="empty" style="padding:20px 0">Sem campos editáveis</div>'}</div>
-        <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
-          <button class="btn-icon" id="editCancelBtn">Cancelar</button>
-          <button class="btn-gold" id="editSaveBtn" style="min-width:110px">Salvar</button>
-        </div>
-        <div id="editMsg" style="margin-top:12px;text-align:right;font-size:.8rem"></div>
-      </div>
-    </div>`;
-    _editOverlay.querySelector('#editCloseBtn')?.addEventListener('click',editClose);
-    _editOverlay.querySelector('#editCancelBtn')?.addEventListener('click',editClose);
-    _editOverlay.querySelector('#editSaveBtn')?.addEventListener('click',async()=>{
-      const saveBtn=_editOverlay.querySelector('#editSaveBtn');
-      const msg=_editOverlay.querySelector('#editMsg');
-      saveBtn.disabled=true;saveBtn.textContent='Salvando…';msg.textContent='';
-      const newPayload={};
-      _editOverlay.querySelectorAll('[data-field-group]').forEach(group=>{
-        const field=group.dataset.fieldGroup;
-        const activeRating=group.querySelector('.edit-rating-btn.active');
-        if(activeRating){newPayload[field]=activeRating.dataset.val;}
-        else{const inp=group.querySelector('input[data-field]');if(inp)newPayload[field]=inp.value.trim();}
+    const tipo=p.tipo_pesquisa||it.tipo;
+    const opener=window._openers?.[tipo];
+
+    if(opener){
+      // ── Modo formulário: abre o form original e intercepta o submit ──
+      let _origFetch=window.fetch;
+      let _fetchPatched=true;
+      const cleanup=()=>{
+        if(_fetchPatched){window.fetch=_origFetch;_fetchPatched=false;}
+      };
+      window.fetch=async(url,opts)=>{
+        if(_fetchPatched&&typeof url==='string'&&_EDIT_FORM_URLS.some(u=>url.startsWith(u))){
+          cleanup();
+          try{
+            const resp=await _origFetch(`/api/resposta-local/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:opts?.body});
+            const d=await resp.json();
+            if(!d.ok)throw new Error(d.error||'Erro ao salvar');
+            setTimeout(()=>render('edit'),1200);
+            return new Response(JSON.stringify({ok:true}),{status:200,headers:{'Content-Type':'application/json'}});
+          }catch(e){
+            return new Response(JSON.stringify({ok:false,error:e.message}),{status:500,headers:{'Content-Type':'application/json'}});
+          }
+        }
+        return _origFetch(url,opts);
+      };
+
+      // Abre o formulário
+      opener();
+
+      // Pré-preenche após o DOM renderizar
+      requestAnimationFrame(()=>{
+        const RATINGS=['otimo','bom','regular','ruim'];
+        const SN=['sim','nao'];
+        // Ratings (smiley buttons)
+        Object.entries(p).forEach(([key,val])=>{
+          if(RATINGS.includes(val)){
+            document.querySelector(`.smiley-btn[data-qkey="${key}"][data-val="${val}"]`)?.click();
+          } else if(SN.includes(val)){
+            document.querySelector(`.ev-sn-btn[data-qkey="${key}"][data-val="${val}"], .ec-sn-btn[data-qkey="${key}"][data-val="${val}"]`)?.click();
+          }
+        });
+        // Campos de texto por ID
+        const ids=_EDIT_FIELD_IDS[tipo]||{};
+        Object.entries(ids).forEach(([field,domId])=>{
+          const el=document.getElementById(domId);
+          if(el&&p[field]!=null&&p[field]!=='')el.value=p[field];
+        });
+        // SPA: tipo de origem e recomendação
+        if(tipo==='spa'){
+          if(p.origem)document.querySelector(`[data-tipo="${p.origem}"]`)?.click();
+          // Comentários de seção
+          const sec1=document.getElementById('psComSec1');const sec2=document.getElementById('psComSec2');
+          if(sec1&&(p.servicos_comentario||p.comentario_sec1))sec1.value=p.servicos_comentario||p.comentario_sec1||'';
+          if(sec2&&(p.instalacoes_comentario||p.comentario_sec2))sec2.value=p.instalacoes_comentario||p.comentario_sec2||'';
+        }
+        // Geral: campos especiais (motivo, avaliação, identificação, expectativas)
+        if(tipo==='geral'||tipo==='geral-granclass'){
+          if(p.motive_visita)document.querySelector(`[data-gqtipo="${p.motive_visita}"]`)?.click();
+          if(p.avaliacao_geral)document.querySelector(`[data-gqaval="${p.avaliacao_geral}"]`)?.click();
+          if(p.identificacao_nome)document.querySelector(`[data-gqident="${p.identificacao_nome}"]`)?.click();
+          if(p.expectativas_superadas)document.querySelector(`[data-gqexpect="${p.expectativas_superadas}"]`)?.click();
+          // Comentários de seção
+          ['gqComRec','gqComApt','gqComCafe','gqComQto'].forEach(domId=>{
+            const field=domId.replace('gqCom','comentario_').toLowerCase();
+            const el=document.getElementById(domId);
+            if(el&&p[field])el.value=p[field];
+          });
+        }
+
+        // Observa quando o overlay fecha para restaurar fetch
+        setTimeout(()=>{
+          const overlays=[...document.querySelectorAll('body>div')].filter(d=>d.style.display==='block'&&parseInt(d.style.zIndex)>=999);
+          overlays.forEach(ov=>{
+            new MutationObserver((muts,obs)=>{
+              if(ov.style.display==='none'||ov.style.display===''){cleanup();obs.disconnect();}
+            }).observe(ov,{attributes:true,attributeFilter:['style']});
+          });
+        },100);
       });
-      try{
-        const resp=await fetch(`/api/resposta-local/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(newPayload)});
-        const d=await resp.json();
-        if(!d.ok)throw new Error(d.error||'Erro ao salvar');
-        msg.style.color='var(--success)';msg.textContent='Salvo com sucesso.';
-        setTimeout(()=>{editClose();render('edit');},800);
-      }catch(e){
-        msg.style.color='var(--danger)';msg.textContent='Erro: '+e.message;
-        saveBtn.disabled=false;saveBtn.textContent='Salvar';
-      }
-    });
+      return;
+    }
+
+    // ── Fallback: modal genérico de edição ──
+    // (mantido para tipos sem opener: legados, casos raros)
+    alert('Edição genérica não disponível para este tipo. Abra o formulário pelo botão "Nova Pesquisa" para corrigir.');
   }catch(e){
-    _editOverlay.innerHTML=`<div style="background:var(--surface);border-radius:16px;width:100%;max-width:700px;margin:0 auto;padding:36px;text-align:center"><div class="empty">Erro ao carregar: ${esc(e.message)}</div><button class="btn-gold" style="margin:16px auto;display:block" id="editCloseBtn2">Fechar</button></div>`;
-    _editOverlay.querySelector('#editCloseBtn2')?.addEventListener('click',editClose);
+    console.error('[openLocalEdit]',e);
   }
 }
 window.openLocalEdit = openLocalEdit;
