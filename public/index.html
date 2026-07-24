@@ -720,6 +720,7 @@ async function openLocalEdit(id){
     _editOverlay.querySelector('#editCloseBtn2')?.addEventListener('click',editClose);
   }
 }
+window.openLocalEdit = openLocalEdit;
 
 function buildSegs(dist){
   const {otimo=0,bom=0,regular=0,ruim=0}=dist, tot=otimo+bom+regular+ruim||1, segs=[];
