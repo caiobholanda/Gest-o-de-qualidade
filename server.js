@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
+import { inserirResposta } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -17,7 +17,7 @@ if (!SSO_SECRET) console.warn('[WARN] SSO_SECRET não configurado');
 if (!JWT_SECRET) console.warn('[WARN] JWT_SECRET não configurado');
 
 app.set('trust proxy', 1);
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Cabeçalhos de segurança HTTP
 app.use((_req, res, next) => {
@@ -194,67 +194,58 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
   }
 });
 
-// Armazenamento local para pesquisas (Geral e PDVs)
-const DATA_DIR = path.join(__dirname, 'data');
-function appendRecord(filename, record) {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  const filePath = path.join(DATA_DIR, filename);
-  let arr = [];
-  try { arr = JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch {}
-  arr.unshift(record);
-  fs.writeFileSync(filePath, JSON.stringify(arr, null, 2));
+// Armazenamento local (SQLite em ./data/qualidade.db — volume persistente no Fly)
+function novaRespostaLocal(tipoPadrao) {
+  return (req, res) => {
+    const b = req.body || {};
+    if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
+    const decoded = jwt.decode(req.gqToken);
+    try {
+      const { id } = inserirResposta({
+        tipo: typeof b.tipo === 'string' && b.tipo.trim() ? b.tipo.trim() : tipoPadrao,
+        inserido_por: decoded?.username || null,
+        payload: b,
+      });
+      res.json({ ok: true, id });
+    } catch (e) {
+      console.error(`[nova-resposta-${tipoPadrao}]`, e);
+      res.status(500).json({ ok: false, error: 'Erro ao salvar' });
+    }
+  };
 }
 
-app.post('/api/nova-resposta-geral', requireSession, (req, res) => {
-  const b = req.body || {};
-  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
-  const decoded = jwt.decode(req.gqToken);
-  try {
-    appendRecord('respostas-geral.json', {
-      id: Date.now(),
-      submitted_at: new Date().toISOString(),
-      inserido_por: decoded?.username || null,
-      ...b,
-    });
-    res.json({ ok: true });
-  } catch (e) {
-    console.error('[nova-resposta-geral]', e);
-    res.status(500).json({ ok: false, error: 'Erro ao salvar' });
-  }
-});
+app.post('/api/nova-resposta-geral', requireSession, novaRespostaLocal('geral'));
+app.post('/api/nova-resposta-pdvs', requireSession, novaRespostaLocal('pdvs'));
+app.post('/api/nova-resposta-eventos', requireSession, novaRespostaLocal('eventos'));
 
-app.post('/api/nova-resposta-pdvs', requireSession, (req, res) => {
-  const b = req.body || {};
-  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
-  const decoded = jwt.decode(req.gqToken);
+// Ingestão server-to-server (SPA → GestaoQualidade), autenticada por JWT assinado com SSO_SECRET
+app.post('/api/ingest/resposta', (req, res) => {
+  const auth = req.headers.authorization || '';
+  const tok = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!tok) return res.status(401).json({ ok: false, error: 'Token ausente' });
+  let claims;
   try {
-    appendRecord('respostas-pdvs.json', {
-      id: Date.now(),
-      submitted_at: new Date().toISOString(),
-      inserido_por: decoded?.username || null,
-      ...b,
-    });
-    res.json({ ok: true });
-  } catch (e) {
-    console.error('[nova-resposta-pdvs]', e);
-    res.status(500).json({ ok: false, error: 'Erro ao salvar' });
+    claims = jwt.verify(tok, SSO_SECRET, { algorithms: ['HS256'] });
+  } catch {
+    return res.status(401).json({ ok: false, error: 'Token inválido' });
   }
-});
-
-app.post('/api/nova-resposta-eventos', requireSession, (req, res) => {
   const b = req.body || {};
-  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
-  const decoded = jwt.decode(req.gqToken);
+  if (!b.tipo || typeof b.tipo !== 'string' || typeof b.payload !== 'object' || b.payload === null) {
+    return res.status(400).json({ ok: false, error: 'Campos obrigatórios: tipo (string), payload (objeto)' });
+  }
   try {
-    appendRecord('respostas-eventos.json', {
-      id: Date.now(),
-      submitted_at: new Date().toISOString(),
-      inserido_por: decoded?.username || null,
-      ...b,
+    const { id, duplicado } = inserirResposta({
+      tipo: b.tipo.trim(),
+      app_origem: String(claims.app || 'spa'),
+      fonte_id: b.fonte_id,
+      submitted_at: b.submitted_at,
+      inserido_por: b.inserido_por || null,
+      payload: b.payload,
+      ignorarDuplicado: true,
     });
-    res.json({ ok: true });
+    res.json({ ok: true, id, duplicado });
   } catch (e) {
-    console.error('[nova-resposta-eventos]', e);
+    console.error('[ingest]', e);
     res.status(500).json({ ok: false, error: 'Erro ao salvar' });
   }
 });
