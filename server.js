@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { inserirResposta, listarRespostas, contarRespostas, buscarResposta } from './db.js';
+import { inserirResposta, listarRespostas, contarRespostas, buscarResposta, atualizarResposta } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -289,6 +289,23 @@ app.get('/api/resposta-local/:id', requireSession, (req, res) => {
     res.json({ ok: true, item });
   } catch(e) {
     console.error('[resposta-local]', e);
+    res.status(500).json({ ok: false, error: 'Erro' });
+  }
+});
+
+app.put('/api/resposta-local/:id', requireSession, (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ ok: false, error: 'ID inválido' });
+  const payload = req.body;
+  if (!payload || typeof payload !== 'object') return res.status(400).json({ ok: false, error: 'Payload inválido' });
+  try {
+    const item = buscarResposta(id);
+    if (!item) return res.status(404).json({ ok: false, error: 'Não encontrado' });
+    const novoPayload = { ...item.payload, ...payload };
+    const ok = atualizarResposta(id, novoPayload);
+    res.json({ ok });
+  } catch(e) {
+    console.error('[resposta-local PUT]', e);
     res.status(500).json({ ok: false, error: 'Erro' });
   }
 });

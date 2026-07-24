@@ -120,4 +120,9 @@ export function buscarResposta(id) {
   return { id: row.id, tipo: row.tipo, submitted_at: row.submitted_at, inserido_por: row.inserido_por, payload };
 }
 
+export function atualizarResposta(id, payload) {
+  const result = db.prepare('UPDATE resposta SET payload = ? WHERE id = ?').run(JSON.stringify(payload), id);
+  return result.changes > 0;
+}
+
 export default db;
