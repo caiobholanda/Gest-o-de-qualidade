@@ -980,10 +980,6 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
     }
   }
 
-  // Cache de quartos Gran Class — compartilhado entre GQ e PDV
-  let _gqPdvGranClassAptos=null;
-  async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{const r=await fetch('/api/quartos');const d=await r.json();_gqPdvGranClassAptos=new Set((d.items||[]).filter(q=>q.categoria==='gran_class').map(q=>q.numero));}catch(e){_gqPdvGranClassAptos=new Set();}}
-
   // Picker de pesquisa
   const PESQUISAS = [
     { label: 'Pesquisa geral da qualidade', active: true, action: 'geral' },
@@ -1019,6 +1015,10 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
   });
   document.getElementById('btnNovaPesquisa')?.addEventListener('click', pickerOpen);
 }
+
+// Cache de quartos Gran Class — acessível a GQ e PDV (escopo de script)
+let _gqPdvGranClassAptos=null;
+async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{const r=await fetch('/api/quartos');const d=await r.json();_gqPdvGranClassAptos=new Set((d.items||[]).filter(q=>q.categoria==='gran_class').map(q=>q.numero));}catch(e){_gqPdvGranClassAptos=new Set();}}
 
 // ── Modal: Pesquisa Geral da Qualidade / Gran Class ──
 {
