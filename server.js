@@ -76,9 +76,31 @@ app.get('/sso', (req, res) => {
   try {
     const payload = jwt.verify(sso_token, SSO_SECRET, { algorithms: ['HS256'] });
     const email = (payload.email || '').trim().toLowerCase();
-    const isMaster = payload.is_master || (payload.sites_admin || []).includes('pesquisa-satisfacao');
+    // Resolucao de papel ESPELHA byte-a-byte o app Pesquisa (PesquisaSatisfacaoSPA/
+    // src/server.js:302-321), autoridade sobre estes dados via requireSatisfacao. Ordem:
+    //   1) allowlist de TI (SPA_ADMIN_EMAILS) -> 'master'
+    //   2) site_roles['pesquisa-satisfacao'] do Hub, validado -> papel granular
+    //   3) sites_admin inclui 'pesquisa-satisfacao' -> 'admin'
+    //   4) senao -> 'user'
+    // CRITICO: ler site_roles ANTES de sites_admin. O Hub coloca em sites_admin
+    // qualquer papel != 'usuario' (inclui spa e massoterapeuta); trata-lo como
+    // master deixaria spa/massoterapeuta verem toda a PII de hospedes.
+    const SPA_ADMIN_EMAILS = ['richard@granmarquise.com.br', 'suporte.ti@granmarquise.com.br', 'estagio.ti@granmarquise.com.br'];
+    const PAPEIS_VALIDOS = ['master', 'admin', 'spa', 'satisfacao', 'massoterapeuta'];
     const siteRole = payload.site_roles && payload.site_roles['pesquisa-satisfacao'];
-    const role = isMaster ? 'master' : (siteRole || 'satisfacao');
+    let role;
+    if (SPA_ADMIN_EMAILS.includes(email)) role = 'master';
+    else if (siteRole && PAPEIS_VALIDOS.includes(siteRole)) role = siteRole;
+    else if (Array.isArray(payload.sites_admin) && payload.sites_admin.includes('pesquisa-satisfacao')) role = 'admin';
+    else role = 'user';
+    // Autorizacao: so master/satisfacao/admin (mesma allowlist do requireSatisfacao
+    // no app Pesquisa). spa, massoterapeuta e qualquer conta sem papel de qualidade
+    // sao negados — a GQ expoe PII de hospedes (respostas locais + proxy).
+    const ROLES_GQ = new Set(['master', 'satisfacao', 'admin']);
+    if (!ROLES_GQ.has(role)) {
+      console.warn('[SSO] acesso negado a GQ (papel sem permissao de qualidade):', email, '->', role);
+      return res.redirect('/acesso-hub.html?erro=sem_acesso');
+    }
     const token = jwt.sign({ sub: 0, username: email, role }, JWT_SECRET, { expiresIn: '8h' });
     setCookie(res, token);
     if (theme) res.appendHeader('Set-Cookie', `gq_theme=${theme}; Max-Age=31536000; Path=/; SameSite=Lax`);
