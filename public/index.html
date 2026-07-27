@@ -741,7 +741,7 @@ const _EDIT_FIELD_IDS = {
 };
 const _EDIT_FORM_URLS = ['/api/nova-resposta','/api/nova-resposta-geral','/api/nova-resposta-pdvs','/api/nova-resposta-eventos'];
 let _hubUrnas=null;
-async function _loadUrnas(){if(_hubUrnas)return _hubUrnas;try{const r=await fetch('https://hub-granmarquise.fly.dev/api/urnas',{signal:AbortSignal.timeout(5000)});const d=await r.json();_hubUrnas=d.urnas||[];}catch{_hubUrnas=[];}return _hubUrnas;}
+async function _loadUrnas(){try{const r=await fetch('https://hub-granmarquise.fly.dev/api/urnas',{signal:AbortSignal.timeout(5000)});const d=await r.json();_hubUrnas=d.urnas||[];}catch{if(!_hubUrnas)_hubUrnas=[];}return _hubUrnas;}
 function _fillUrna(sel,ids){if(!sel)return;sel.innerHTML='<option value="" disabled selected></option>';(_hubUrnas||[]).filter(u=>(u.pesquisas||[]).some(p=>ids.includes(p))).forEach(u=>{const o=document.createElement('option');o.value=u.id;o.textContent=u.nome;sel.appendChild(o);});}
 
 async function openLocalEdit(id){
