@@ -749,11 +749,11 @@ const _EDIT_FIELD_IDS = {
   spa: {nome:'psNome',email:'psEmail',apto:'psApto',controle_interno:'psControleInterno',tel:'psTel',data:'psData',tratamento:'psTratamento',masso:'psMasso'},
   geral: {nome:'gqNome',email:'gqEmail',cel:'gqTel',apto:'gqApto',check_in:'gqCheckIn',cidade:'gqCidade',controle_interno:'gqControle',comentarios:'gqComentarios'},
   'geral-granclass': {nome:'gqNome',email:'gqEmail',cel:'gqTel',apto:'gqApto',check_in:'gqCheckIn',cidade:'gqCidade',controle_interno:'gqControle',comentarios:'gqComentarios'},
-  pdvs: {nome:'pdvNome',email:'pdvEmail',cel:'pdvTel',apto:'pdvApto',controle_interno:'pdvControle',com_geral:'pdvComGeral'},
-  'pdvs-granclass': {nome:'pdvNome',email:'pdvEmail',cel:'pdvTel',apto:'pdvApto',controle_interno:'pdvControle',com_geral:'pdvComGeral'},
-  'eventos-cliente': {nome:'evNome',email:'evEmail',telefone:'evTel',telefone2:'evTel2',empresa:'evEmpresa',data:'evData',controle_interno:'evControle',comentarios:'evComentarios',infra_negativo:'evInfraNeg',melhorar:'evMelhorar'},
-  'eventos-cerimonialista': {nome:'evNome',email:'evEmail',telefone:'evTel',empresa:'evEmpresa',data:'evData',controle_interno:'evControle',comentarios:'evComentarios',infra_negativo:'evInfraNeg',melhorar:'evMelhorar'},
-  'eventos-corporativos': {nome:'ecNome',email:'ecEmail',telefone:'ecTel',empresa:'ecEmpresa',evento:'ecEvento',data:'ecData',controle_interno:'ecControle',justificativa:'ecJustificativa',comentarios:'ecComentarios'},
+  pdvs: {nome:'pdvNome',email:'pdvEmail',cel:'pdvTel',telefone:'pdvTel',apto:'pdvApto',controle_interno:'pdvControle',com_geral:'pdvComGeral'},
+  'pdvs-granclass': {nome:'pdvNome',email:'pdvEmail',cel:'pdvTel',telefone:'pdvTel',apto:'pdvApto',controle_interno:'pdvControle',com_geral:'pdvComGeral'},
+  'eventos-cliente': {nome:'evNome',email:'evEmail',telefone:'evTel',telefone2:'evTel2',empresa:'evEmpresa',data_evento:'evData',controle_interno:'evControle',comentarios:'evComentarios',infra_negativo:'evInfraNeg',melhorar:'evMelhorar'},
+  'eventos-cerimonialista': {nome:'evNome',email:'evEmail',telefone:'evTel',empresa:'evEmpresa',data_evento:'evData',controle_interno:'evControle',comentarios:'evComentarios',infra_negativo:'evInfraNeg',melhorar:'evMelhorar'},
+  'eventos-corporativos': {nome:'ecNome',email:'ecEmail',telefone:'ecTel',empresa:'ecEmpresa',evento:'ecEvento',data_evento:'ecData',controle_interno:'ecControle',justificativa:'ecJustificativa',comentarios:'ecComentarios'},
 };
 const _EDIT_FORM_URLS = ['/api/nova-resposta','/api/nova-resposta-geral','/api/nova-resposta-pdvs','/api/nova-resposta-eventos'];
 let _hubUrnas=null;
@@ -797,26 +797,28 @@ async function openLocalEdit(id){
 
       // Pré-preenche após o DOM renderizar
       requestAnimationFrame(()=>{
-        const RATINGS=['otimo','bom','regular','ruim'];
+        const RATINGS=['otimo','bom','regular','ruim','muitobom','amelhorar'];
         const SN=['sim','nao'];
         // Ratings (smiley buttons)
         Object.entries(p).forEach(([key,val])=>{
           if(RATINGS.includes(val)){
             document.querySelector(`.smiley-btn[data-qkey="${key}"][data-val="${val}"]`)?.click();
           } else if(SN.includes(val)){
-            document.querySelector(`.ev-sn-btn[data-qkey="${key}"][data-val="${val}"], .ec-sn-btn[data-qkey="${key}"][data-val="${val}"]`)?.click();
+            document.querySelector(`.ev-sn-btn[data-qkey="${key}"][data-val="${val}"]`)?.click();
+            document.querySelector(`.ec-sn-btn[data-qkey="${key}"][data-val="${val}"]`)?.click();
           }
         });
         // Campos de texto por ID
         const ids=_EDIT_FIELD_IDS[tipo]||{};
+        const _seen=new Set();
         Object.entries(ids).forEach(([field,domId])=>{
+          if(_seen.has(domId))return; // evita sobrescrever se dois campos mapeiam mesmo DOM
           const el=document.getElementById(domId);
-          if(el&&p[field]!=null&&p[field]!=='')el.value=p[field];
+          if(el&&p[field]!=null&&p[field]!==''){el.value=p[field];_seen.add(domId);}
         });
         // SPA: tipo de origem e recomendação
         if(tipo==='spa'){
           if(p.origem)document.querySelector(`[data-tipo="${p.origem}"]`)?.click();
-          // Comentários de seção
           const sec1=document.getElementById('psComSec1');const sec2=document.getElementById('psComSec2');
           if(sec1&&(p.servicos_comentario||p.comentario_sec1))sec1.value=p.servicos_comentario||p.comentario_sec1||'';
           if(sec2&&(p.instalacoes_comentario||p.comentario_sec2))sec2.value=p.instalacoes_comentario||p.comentario_sec2||'';
@@ -827,12 +829,27 @@ async function openLocalEdit(id){
           if(p.avaliacao_geral)document.querySelector(`[data-gqaval="${p.avaliacao_geral}"]`)?.click();
           if(p.identificacao_nome)document.querySelector(`[data-gqident="${p.identificacao_nome}"]`)?.click();
           if(p.expectativas_superadas)document.querySelector(`[data-gqexpect="${p.expectativas_superadas}"]`)?.click();
-          // Comentários de seção
-          ['gqComRec','gqComApt','gqComCafe','gqComQto'].forEach(domId=>{
-            const field=domId.replace('gqCom','comentario_').toLowerCase();
+          // Comentários de seção — mapeamento explícito (gqSubmit salva como com_recepcao etc.)
+          const _GQ_COM={gqComRec:'com_recepcao',gqComApt:'com_apartamento',gqComCafe:'com_cafe',gqComQto:'com_quarto'};
+          Object.entries(_GQ_COM).forEach(([domId,field])=>{
             const el=document.getElementById(domId);
             if(el&&p[field])el.value=p[field];
           });
+        }
+        // PDVs: tipo de cliente e locais (checkboxes)
+        if(tipo==='pdvs'||tipo==='pdvs-granclass'){
+          if(p.tipo_cliente)document.querySelector(`[data-pdvtipo="${p.tipo_cliente}"]`)?.click();
+          if(p.locais){
+            const PDV_LOCAIS=['Restaurante Mangostin','Restaurante Mucuripe (almoço)','Restaurante Mucuripe (jantar)','Bar da Piscina','Lobby Bar'];
+            const salvos=p.locais.split(',').map(s=>s.trim());
+            PDV_LOCAIS.forEach((l,i)=>{if(salvos.includes(l))document.querySelector(`.pdv-loc[data-pdvloc="${i}"]`)?.click();});
+          }
+        }
+        // Urna: pré-seleciona após _fillUrna (que é async via _loadUrnas)
+        if(p.urna_id){
+          const _URNA_SEL={'spa':'psUrna','geral':'gqUrna','geral-granclass':'gqUrna','pdvs':'pdvUrna','pdvs-granclass':'pdvUrna','eventos-cliente':'evUrna','eventos-cerimonialista':'evUrna','eventos-corporativos':'ecUrna'};
+          const _urnaId=_URNA_SEL[tipo];
+          if(_urnaId)setTimeout(()=>{const sel=document.getElementById(_urnaId);if(sel&&sel.querySelector(`option[value="${String(p.urna_id).replace(/"/g,'&quot;')}"]`))sel.value=String(p.urna_id);},350);
         }
 
         // Observa quando o overlay fecha para restaurar fetch
