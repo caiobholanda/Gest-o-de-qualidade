@@ -144,7 +144,7 @@ export function listarRespostas({ tipo = null, subtipo = null, from = null, to =
   const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
   const total = db.prepare(`SELECT COUNT(*) AS n FROM resposta ${where}`).get(...args).n;
   const offset = (page - 1) * limit;
-  const rows = db.prepare(`SELECT id, tipo, submitted_at, inserido_por, payload FROM resposta ${where} ORDER BY submitted_at DESC, id DESC LIMIT ? OFFSET ?`).all(...args, limit, offset);
+  const rows = db.prepare(`SELECT id, tipo, app_origem, submitted_at, inserido_por, payload FROM resposta ${where} ORDER BY submitted_at DESC, id DESC LIMIT ? OFFSET ?`).all(...args, limit, offset);
   return {
     total,
     items: rows.map(r => {
@@ -154,6 +154,7 @@ export function listarRespostas({ tipo = null, subtipo = null, from = null, to =
       return {
         id: r.id,
         tipo: r.tipo,
+        app_origem: r.app_origem,
         date: r.submitted_at.slice(0, 10).split('-').reverse().join('/'),
         nome: p.nome || p.empresa || '—',
         email: p.email || p.empresa || '—',
@@ -166,11 +167,11 @@ export function listarRespostas({ tipo = null, subtipo = null, from = null, to =
 }
 
 export function buscarResposta(id) {
-  const row = db.prepare('SELECT id, tipo, submitted_at, inserido_por, payload FROM resposta WHERE id = ?').get(id);
+  const row = db.prepare('SELECT id, tipo, app_origem, submitted_at, inserido_por, payload FROM resposta WHERE id = ?').get(id);
   if (!row) return null;
   let payload = {};
   try { payload = JSON.parse(row.payload); } catch {}
-  return { id: row.id, tipo: row.tipo, submitted_at: row.submitted_at, inserido_por: row.inserido_por, payload };
+  return { id: row.id, tipo: row.tipo, app_origem: row.app_origem, submitted_at: row.submitted_at, inserido_por: row.inserido_por, payload };
 }
 
 export function atualizarResposta(id, payload) {

@@ -520,6 +520,7 @@ const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, 
 
 function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
 function scoreClass(s){ if(s==='—')return'nenhum'; const n=parseInt(s); if(n>=85)return'alto'; if(n>=60)return'medio'; return'baixo'; }
+function _extOrigem(app){ const l={'spa':'Gran SPA · site'}[app]||'Site externo'; return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:.68rem;color:var(--muted2);background:var(--surface2);border:1px solid var(--border-soft);border-radius:10px;padding:2px 8px;letter-spacing:.02em;font-style:italic">↗ ${esc(l)}</span>`; }
 
 const _RATINGS=[{key:'otimo',pt:'Ótimo',type:'great'},{key:'bom',pt:'Bom',type:'good'},{key:'regular',pt:'Regular',type:'fair'},{key:'ruim',pt:'Ruim',type:'poor'}];
 const _MOUTHS={great:'M11.5 23 Q20 33 28.5 23',good:'M12.5 24.5 Q20 29.5 27.5 24.5',fair:'M13 26 H27',poor:'M12.5 28.5 Q20 22.5 27.5 28.5'};
@@ -731,7 +732,7 @@ async function openLocalDetail(id){
         <div style="margin-bottom:52px">
           <div style="font-weight:500;font-size:1.3rem;color:var(--text);margin-bottom:5px">${esc(p.nome||p.empresa||'Sem nome')}</div>
           ${headerSub?`<div style="font-size:.82rem;color:var(--muted2);margin-bottom:4px">${headerSub}</div>`:''}
-          <div style="font-size:.82rem;color:var(--muted2)">${esc(dtFmt(it.submitted_at))}${it.inserido_por?` · Inserido por <strong style="color:var(--text)">${esc(it.inserido_por)}</strong>`:''}</div>
+          <div style="font-size:.82rem;color:var(--muted2)">${esc(dtFmt(it.submitted_at))}${it.app_origem==='gestao-qualidade'?(it.inserido_por?` · Inserido por <strong style="color:var(--text)">${esc(it.inserido_por)}</strong>`:''): ` · ${_extOrigem(it.app_origem)}`}</div>
         </div>
         ${content}
       </div>
@@ -1053,8 +1054,8 @@ function renderLocalTable(rows,total,page){
     <div class="tbl-nome">${esc(r.nome)}</div>
     <div class="tbl-email">${esc(r.email)}</div>
     <div class="tbl-tipo"><span>${esc(tipoBadge(r.tipo_pesquisa))}</span></div>
-    <div class="tbl-orig" style="font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.inserido_por)}</div>
-    <div></div><div style="display:flex;align-items:center;justify-content:center">${r.tipo_pesquisa!=='spa'?`<button class="btn-edit-local" title="Editar" onclick="event.stopPropagation();openLocalEdit(${r.id})">✎</button>`:''}</div>
+    <div class="tbl-orig" style="font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.app_origem==='gestao-qualidade'?esc(r.inserido_por):_extOrigem(r.app_origem)}</div>
+    <div></div><div style="display:flex;align-items:center;justify-content:center">${r.app_origem==='gestao-qualidade'?`<button class="btn-edit-local" title="Editar" onclick="event.stopPropagation();openLocalEdit(${r.id})">✎</button>`:''}</div>
   </div>`).join('');
   const totalPages=Math.ceil(total/LIMIT)||1;
   const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
@@ -1376,9 +1377,9 @@ async function renderOverviewTable(containerEl){
       <div class="tbl-nome">${esc(r.nome)}</div>
       <div class="tbl-email">${esc(r.email||'—')}</div>
       <div class="tbl-tipo"><span>${esc(badge(r))}</span></div>
-      <div class="tbl-orig" style="font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.inserido_por||'—')}</div>
+      <div class="tbl-orig" style="font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r._src==='spa'?esc(r.inserido_por||'—'):(r.app_origem==='gestao-qualidade'?esc(r.inserido_por||'—'):_extOrigem(r.app_origem))}</div>
       <div>${r.media?`<span class="score ${scoreClass(r.media)}">${esc(r.media)}</span>`:''}</div>
-      <div style="display:flex;align-items:center;justify-content:center">${r._src!=='spa'?`<button class="btn-edit-local" title="Editar" onclick="event.stopPropagation();openLocalEdit(${r.id})">✎</button>`:''}</div>
+      <div style="display:flex;align-items:center;justify-content:center">${r._src!=='spa'&&r.app_origem==='gestao-qualidade'?`<button class="btn-edit-local" title="Editar" onclick="event.stopPropagation();openLocalEdit(${r.id})">✎</button>`:''}</div>
     </div>`).join('');
     const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
       <button class="btn-icon" id="ovPgPrev" ${page<=1?'disabled':''} style="${page<=1?'opacity:.4;cursor:default':''}">← Anterior</button>
