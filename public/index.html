@@ -2010,6 +2010,13 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
 }
 
 })();
+
+// Desativa autocomplete em todos os inputs presentes e futuros
+(function(){
+  const off=()=>document.querySelectorAll('input,textarea,select').forEach(el=>{if(!el.dataset.acSet){el.setAttribute('autocomplete','off');el.dataset.acSet='1';}});
+  off();
+  new MutationObserver(off).observe(document.documentElement,{childList:true,subtree:true});
+})();
 </script>
 </body>
 </html>
