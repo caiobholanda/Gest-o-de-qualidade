@@ -1061,12 +1061,12 @@ async function renderOverview(trigger){
     const now=new Date(),pad=n=>String(n).padStart(2,'0');
     const mesFrom=`${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
     const today=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-    const [localRes,spaRes]=await Promise.all([
-      fetch('/api/stats-local',{signal}),
-      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${today}`,{signal}),
-    ]);
-    if(localRes.status===401||spaRes.status===401){location.href='/acesso-hub.html';return;}
-    const [local,spa]=await Promise.all([localRes.json(),spaRes.json()]);
+
+    // 1) Local data first — DB local, resposta rápida
+    const localRes=await fetch('/api/stats-local',{signal});
+    if(localRes.status===401){location.href='/acesso-hub.html';return;}
+    const local=await localRes.json();
+
     const totaisMap={};(local.totais||[]).forEach(r=>{totaisMap[r.tipo]=r.total;});
     const mesMap={};(local.mes||[]).forEach(r=>{mesMap[r.tipo]=r.total;});
     const mesSubMap={};(local.mesSub||[]).forEach(r=>{if(r.subtipo)mesSubMap[r.subtipo]=r.total;});
@@ -1075,12 +1075,10 @@ async function renderOverview(trigger){
     mesMap['eventos-soc']=(mesSubMap['eventos-cliente']||0)+(mesSubMap['eventos-cerimonialista']||0);
     totaisMap['eventos-corp']=totaisSubMap['eventos-corporativos']||0;
     totaisMap['eventos-soc']=(totaisSubMap['eventos-cliente']||0)+(totaisSubMap['eventos-cerimonialista']||0);
-    const spaMes=spa.total||0;
     const localTotal=(totaisMap.geral||0)+(totaisMap.pdvs||0)+(totaisMap.eventos||0);
     const localMes=(mesMap.geral||0)+(mesMap.pdvs||0)+(mesMap.eventos||0);
-    const totalMes=localMes+spaMes;
 
-    function progressCard(key,label,tab){
+    function progressCard(key,label,tab,spaMes){
       const mes=key==='spa'?spaMes:(mesMap[key]||0);
       const total=key==='spa'?spaMes:(totaisMap[key]||0);
       const meta=METAS[key]||1;
@@ -1097,39 +1095,32 @@ async function renderOverview(trigger){
       </div>`;
     }
 
+    // 2) Render imediatamente com dados locais; SPA com placeholder
     main.innerHTML=`
       <div class="kpis-hdr" style="margin-bottom:36px"><div class="eyebrow">Visão geral — todas as pesquisas</div></div>
       <div class="ov-hero-row">
         <div class="ov-hero" style="background:linear-gradient(140deg,var(--surface) 0%,var(--gold-dim2) 100%);box-shadow:0 6px 32px var(--gold-dim)">
           <div class="ov-card-label">Pesquisas de qualidade este mês</div>
-          <div class="ov-hero-val">${totalMes}<span></span></div>
+          <div class="ov-hero-val" id="ov-total-val">${localMes}<span></span></div>
           <div class="ov-hero-sub">avaliações em todos os setores · acumulado local: ${localTotal}</div>
           <div class="ov-stat-grid">
             <div class="ov-stat"><div class="ov-stat-val">${mesMap.geral||0}</div><div class="ov-stat-label">Geral</div></div>
             <div class="ov-stat"><div class="ov-stat-val">${mesMap.pdvs||0}</div><div class="ov-stat-label">PDVs</div></div>
             <div class="ov-stat"><div class="ov-stat-val">${mesMap.eventos||0}</div><div class="ov-stat-label">Eventos</div></div>
-            <div class="ov-stat"><div class="ov-stat-val">${spaMes}</div><div class="ov-stat-label">Gran SPA</div></div>
+            <div id="ov-stat-spa" class="ov-stat"><div class="ov-stat-val" style="opacity:.35">—</div><div class="ov-stat-label">Gran SPA</div></div>
           </div>
         </div>
-        <div class="ov-hero" style="background:linear-gradient(140deg,var(--surface) 0%,var(--success-dim) 100%);border-color:rgba(21,112,90,.2)">
-          <div class="ov-card-label">Gran SPA — Média do mês</div>
-          <div class="ov-hero-val">${spa.mediaGeral!=null?Math.floor(spa.mediaGeral):'—'}<span>${spa.mediaGeral!=null?'%':''}</span></div>
-          <div class="ov-hero-sub">${spaMes} avaliação${spaMes!==1?'s':''} · Recomendação: ${spa.pctRecomendacao!=null?spa.pctRecomendacao.toFixed(1)+'%':'—'}</div>
-          <div class="ov-stat-grid">
-            <div class="ov-stat"><div class="ov-stat-val">${spa.origemDistrib?.hospede||0}</div><div class="ov-stat-label">Hóspedes</div></div>
-            <div class="ov-stat"><div class="ov-stat-val">${spa.origemDistrib?.colaborador||0}</div><div class="ov-stat-label">Colaboradores</div></div>
-            <div class="ov-stat"><div class="ov-stat-val">${spa.semAvaliacao||0}</div><div class="ov-stat-label">Sem avaliação</div></div>
-            <div class="ov-stat"><div class="ov-stat-val">${spa.secoes?.length||0}</div><div class="ov-stat-label">Seções avaliadas</div></div>
-          </div>
+        <div id="ov-spa-hero" class="ov-hero" style="background:linear-gradient(140deg,var(--surface) 0%,var(--success-dim) 100%);border-color:rgba(21,112,90,.2);display:flex;align-items:center;justify-content:center">
+          <div class="ov-hero-sub" style="opacity:.4">carregando Gran SPA…</div>
         </div>
       </div>
       <div class="eyebrow" style="margin-bottom:14px">Metas mensais por pesquisa</div>
       <div class="ov-cards">
-        ${progressCard('spa','Gran SPA','spa')}
-        ${progressCard('geral','Geral da Qualidade','geral')}
-        ${progressCard('pdvs','PDVs','pdvs')}
-        ${progressCard('eventos-corp','Corporativos','eventos-corp')}
-        ${progressCard('eventos-soc','Sociais','eventos-soc')}
+        <div id="ov-card-spa" class="ov-card" style="opacity:.35" data-goto="spa"><div class="ov-card-label">Gran SPA</div><div class="ov-card-total">—</div><div class="ov-card-mes">— este mês</div></div>
+        ${progressCard('geral','Geral da Qualidade','geral',0)}
+        ${progressCard('pdvs','PDVs','pdvs',0)}
+        ${progressCard('eventos-corp','Corporativos','eventos-corp',0)}
+        ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
       </div>
       <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
       <div class="filter-box" style="margin-bottom:12px">
@@ -1182,6 +1173,40 @@ async function renderOverview(trigger){
     };
     document.getElementById('btnOvF')?.addEventListener('click',applyOvFilter);
     document.getElementById('ovQ')?.addEventListener('keydown',e=>{if(e.key==='Enter')applyOvFilter();});
+
+    // 3) SPA data — background; atualiza DOM quando chegar
+    fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${today}`,{signal})
+      .then(r=>r.ok?r.json():null)
+      .then(spa=>{
+        if(!spa||signal.aborted)return;
+        const spaMes=spa.total||0;
+        const heroVal=main.querySelector('#ov-total-val');
+        if(heroVal)heroVal.innerHTML=`${localMes+spaMes}<span></span>`;
+        const statSpa=main.querySelector('#ov-stat-spa');
+        if(statSpa)statSpa.innerHTML=`<div class="ov-stat-val">${spaMes}</div><div class="ov-stat-label">Gran SPA</div>`;
+        const spaHero=main.querySelector('#ov-spa-hero');
+        if(spaHero){
+          spaHero.style.display='';
+          spaHero.innerHTML=`
+            <div class="ov-card-label">Gran SPA — Média do mês</div>
+            <div class="ov-hero-val">${spa.mediaGeral!=null?Math.floor(spa.mediaGeral):'—'}<span>${spa.mediaGeral!=null?'%':''}</span></div>
+            <div class="ov-hero-sub">${spaMes} avaliação${spaMes!==1?'s':''} · Recomendação: ${spa.pctRecomendacao!=null?spa.pctRecomendacao.toFixed(1)+'%':'—'}</div>
+            <div class="ov-stat-grid">
+              <div class="ov-stat"><div class="ov-stat-val">${spa.origemDistrib?.hospede||0}</div><div class="ov-stat-label">Hóspedes</div></div>
+              <div class="ov-stat"><div class="ov-stat-val">${spa.origemDistrib?.colaborador||0}</div><div class="ov-stat-label">Colaboradores</div></div>
+              <div class="ov-stat"><div class="ov-stat-val">${spa.semAvaliacao||0}</div><div class="ov-stat-label">Sem avaliação</div></div>
+              <div class="ov-stat"><div class="ov-stat-val">${spa.secoes?.length||0}</div><div class="ov-stat-label">Seções avaliadas</div></div>
+            </div>`;
+        }
+        const spaCardEl=main.querySelector('#ov-card-spa');
+        if(spaCardEl){
+          spaCardEl.outerHTML=progressCard('spa','Gran SPA','spa',spaMes);
+          main.querySelector('.ov-card[data-goto="spa"]')?.addEventListener('click',()=>{
+            document.querySelector('.tab[data-tab="spa"]')?.click();
+          });
+        }
+      })
+      .catch(()=>{});
   }catch(e){
     if(e.name==='AbortError')return;
     main.style.opacity='';main.style.pointerEvents='';
