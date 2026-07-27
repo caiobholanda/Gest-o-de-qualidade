@@ -139,4 +139,16 @@ export function atualizarResposta(id, payload) {
   return result.changes > 0;
 }
 
+export function contarPorUrna({ mes = null } = {}) {
+  const where = mes ? 'WHERE substr(submitted_at,1,7) = ?' : '';
+  const args = mes ? [mes] : [];
+  return db.prepare(`
+    SELECT JSON_EXTRACT(payload,'$.urna_id') AS urna_id, COUNT(*) AS total
+    FROM resposta ${where}
+    GROUP BY JSON_EXTRACT(payload,'$.urna_id')
+    ORDER BY total DESC
+  `).all(...args);
+}
+
 export default db;
+
