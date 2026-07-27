@@ -12,6 +12,8 @@ const SSO_SECRET = process.env.SSO_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE = 'gq_sess';
 const FETCH_TIMEOUT = 10000;
+const GQ_CACHE_TTL = 2 * 60 * 1000; // 2 minutos
+const _gqCache = new Map(); // cacheKey → { data, ts }
 
 if (!SSO_SECRET) console.warn('[WARN] SSO_SECRET não configurado');
 if (!JWT_SECRET) console.warn('[WARN] JWT_SECRET não configurado');
@@ -159,16 +161,25 @@ const MOCK_RESPOSTAS = {
 };
 
 async function proxyGQ(req, res, endpoint) {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(req.query)) if (GQ_ALLOWED_PARAMS.has(k)) params.set(k, v);
+  const cacheKey = `${endpoint}:${params}`;
+
+  const hit = _gqCache.get(cacheKey);
+  if (hit && Date.now() - hit.ts < GQ_CACHE_TTL) return res.json(hit.data);
+
   try {
-    const params = new URLSearchParams();
-    for (const [k, v] of Object.entries(req.query)) if (GQ_ALLOWED_PARAMS.has(k)) params.set(k, v);
     const url = `${PESQUISA_URL}/api/gq/${endpoint}?${params}`;
     const r = await fetchWithTimeout(url, {
       headers: { Authorization: `Bearer ${req.gqToken}` },
     });
     const data = await r.json();
+    if (r.ok) _gqCache.set(cacheKey, { data, ts: Date.now() });
     res.status(r.status).json(data);
   } catch (e) {
+    // Serve stale cache se existir (preferível ao mock)
+    const stale = _gqCache.get(cacheKey);
+    if (stale) return res.json(stale.data);
     if (endpoint === 'stats') return res.json(MOCK_STATS);
     if (endpoint === 'respostas') return res.json(MOCK_RESPOSTAS);
     res.status(502).json({ ok: false, error: 'Erro ao buscar dados' });
@@ -383,4 +394,10 @@ app.use((req, res) => {
   res.status(404).send('Não encontrado');
 });
 
-app.listen(PORT, () => console.log(`GestaoQualidade rodando na porta ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`GestaoQualidade rodando na porta ${PORT}`);
+  // Mantém pesquisa-satisfacao acordada para evitar cold start no proxy
+  const _warmup = () => fetchWithTimeout(`${PESQUISA_URL}/api/health`).catch(() => {});
+  _warmup();
+  setInterval(_warmup, 4 * 60 * 1000);
+});
