@@ -1078,6 +1078,7 @@ async function renderOverview(trigger){
     const spaMes=spa.total||0;
     const localTotal=(totaisMap.geral||0)+(totaisMap.pdvs||0)+(totaisMap.eventos||0);
     const localMes=(mesMap.geral||0)+(mesMap.pdvs||0)+(mesMap.eventos||0);
+    const totalMes=localMes+spaMes;
 
     function progressCard(key,label,tab){
       const mes=key==='spa'?spaMes:(mesMap[key]||0);
@@ -1100,14 +1101,14 @@ async function renderOverview(trigger){
       <div class="kpis-hdr" style="margin-bottom:36px"><div class="eyebrow">Visão geral — todas as pesquisas</div></div>
       <div class="ov-hero-row">
         <div class="ov-hero" style="background:linear-gradient(140deg,var(--surface) 0%,var(--gold-dim2) 100%);box-shadow:0 6px 32px var(--gold-dim)">
-          <div class="ov-card-label">Pesquisas de qualidade (total acumulado)</div>
-          <div class="ov-hero-val">${localTotal}<span></span></div>
-          <div class="ov-hero-sub">${localMes} avaliações de qualidade este mês</div>
+          <div class="ov-card-label">Pesquisas de qualidade este mês</div>
+          <div class="ov-hero-val">${totalMes}<span></span></div>
+          <div class="ov-hero-sub">avaliações em todos os setores · acumulado local: ${localTotal}</div>
           <div class="ov-stat-grid">
-            <div class="ov-stat"><div class="ov-stat-val">${mesMap.geral||0}</div><div class="ov-stat-label">Geral este mês</div></div>
-            <div class="ov-stat"><div class="ov-stat-val">${mesMap.pdvs||0}</div><div class="ov-stat-label">PDVs este mês</div></div>
-            <div class="ov-stat"><div class="ov-stat-val">${mesMap.eventos||0}</div><div class="ov-stat-label">Eventos este mês</div></div>
-            <div class="ov-stat"><div class="ov-stat-val">${spaMes}</div><div class="ov-stat-label">Gran SPA este mês</div></div>
+            <div class="ov-stat"><div class="ov-stat-val">${mesMap.geral||0}</div><div class="ov-stat-label">Geral</div></div>
+            <div class="ov-stat"><div class="ov-stat-val">${mesMap.pdvs||0}</div><div class="ov-stat-label">PDVs</div></div>
+            <div class="ov-stat"><div class="ov-stat-val">${mesMap.eventos||0}</div><div class="ov-stat-label">Eventos</div></div>
+            <div class="ov-stat"><div class="ov-stat-val">${spaMes}</div><div class="ov-stat-label">Gran SPA</div></div>
           </div>
         </div>
         <div class="ov-hero" style="background:linear-gradient(140deg,var(--surface) 0%,var(--success-dim) 100%);border-color:rgba(21,112,90,.2)">
