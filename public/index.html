@@ -758,7 +758,7 @@ const _EDIT_FIELD_IDS = {
 const _EDIT_FORM_URLS = ['/api/nova-resposta','/api/nova-resposta-geral','/api/nova-resposta-pdvs','/api/nova-resposta-eventos'];
 let _hubUrnas=null;
 async function _loadUrnas(){try{const r=await fetch('https://hub-granmarquise.fly.dev/api/urnas',{signal:AbortSignal.timeout(5000)});const d=await r.json();_hubUrnas=d.urnas||[];}catch{if(!_hubUrnas)_hubUrnas=[];}return _hubUrnas;}
-function _fillUrna(sel,ids){if(!sel)return;sel.innerHTML='<option value="" disabled selected></option>';(_hubUrnas||[]).filter(u=>(u.pesquisas||[]).some(p=>ids.includes(p))).forEach(u=>{const o=document.createElement('option');o.value=u.id;o.textContent=u.nome;sel.appendChild(o);});}
+function _fillUrna(sel,ids){if(!sel)return;sel.innerHTML='<option value="" disabled selected></option>';const _m=(_hubUrnas||[]).filter(u=>(u.pesquisas||[]).some(p=>ids.includes(p)));_m.forEach(u=>{const o=document.createElement('option');o.value=u.id;o.textContent=u.nome;sel.appendChild(o);});if(_m.length===1){sel.value=_m[0].id;sel.dispatchEvent(new Event('change',{bubbles:true}));}}
 
 async function openLocalEdit(id){
   try{
