@@ -92,6 +92,43 @@ export function contarRespostas() {
   return { totais, mes, mesSub, totaisSub };
 }
 
+const _LSCORE = { otimo: 9, bom: 3, regular: 1, ruim: 0, muitobom: 9, amelhorar: 0 };
+const _LRATING_KEYS = {
+  geral: ['rec_checkinout','rec_recepcao','rec_concierge','rec_mensageiros','rec_guestservice','rec_fitness',
+          'apto_governanca','apto_limpeza','apto_enxoval','apto_conforto','apto_banheiro','apto_equipamentos','apto_manutencao','apto_wifi',
+          'cafe_qualidade','cafe_variedade','cafe_cortesia','cafe_apresentacao',
+          'qto_qualidade','qto_variedade','qto_cortesia','qto_apresentacao','qto_cafe'],
+  pdvs: ['alim_qualidade','alim_variedade','alim_cortesia','alim_apresentacao',
+         'inst_infraestrutura','inst_limpeza','inst_conforto','inst_wifi',
+         'ger_experiencia','ger_expectativas'],
+  'eventos-cliente': ['ev_servicos','ev_equipamentos','com_cortesia','com_receptividade','com_qualidade','com_presteza',
+                      'op_agilidade','op_desenvolvimento','op_pontualidade','op_expectativa',
+                      'ab_apresentacao','ab_qualidade','ab_variedade',
+                      'inf_conforto','inf_temperatura','inf_iluminacao','inf_limpeza','inf_acesso','inf_internet','inf_manobristas','inf_allug'],
+  'eventos-cerimonialista': ['ev_servicos','ev_equipamentos','com_cortesia','com_receptividade','com_qualidade','com_presteza',
+                             'op_agilidade','op_desenvolvimento','op_pontualidade','op_expectativa',
+                             'ab_apresentacao','ab_qualidade','ab_variedade','ab_quantidade','ab_horario'],
+  'eventos-corporativos': ['ev_servicos','ev_equipamentos','com_cortesia','com_receptividade','com_qualidade',
+                           'op_agilidade','op_desenvolvimento','op_pontualidade','op_expectativa',
+                           'ab_apresentacao','ab_qualidade','ab_fidelidade',
+                           'inf_conforto','inf_temperatura','inf_iluminacao','inf_limpeza','inf_acesso',
+                           'wifi_apresentacao','wifi_facilidade','wifi_sinal','wifi_velocidade',
+                           'ter_manobristas','ter_allug','ter_celular'],
+};
+
+function computeLocalScore(tipo, payload) {
+  const tipoPesquisa = (payload.tipo_pesquisa || tipo || '').replace('-granclass', '');
+  const keys = _LRATING_KEYS[tipoPesquisa] || _LRATING_KEYS[tipo];
+  if (!keys) return null;
+  let sum = 0, count = 0;
+  for (const k of keys) {
+    const val = payload[k];
+    if (val != null && val in _LSCORE) { sum += _LSCORE[val]; count++; }
+  }
+  if (count === 0) return null;
+  return Math.round(sum / (count * 9) * 100);
+}
+
 export function listarRespostas({ tipo = null, subtipo = null, from = null, to = null, q = null, page = 1, limit = 20 } = {}) {
   const conds = [], args = [];
   if (tipo) { conds.push('tipo = ?'); args.push(tipo); }
@@ -113,6 +150,7 @@ export function listarRespostas({ tipo = null, subtipo = null, from = null, to =
     items: rows.map(r => {
       let p = {};
       try { p = JSON.parse(r.payload); } catch {}
+      const score = computeLocalScore(r.tipo, p);
       return {
         id: r.id,
         tipo: r.tipo,
@@ -121,6 +159,7 @@ export function listarRespostas({ tipo = null, subtipo = null, from = null, to =
         email: p.email || p.empresa || '—',
         tipo_pesquisa: p.tipo_pesquisa || r.tipo,
         inserido_por: r.inserido_por || '—',
+        media: score != null ? `${score}%` : null,
       };
     }),
   };
