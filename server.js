@@ -78,29 +78,30 @@ app.get('/sso', (req, res) => {
   try {
     const payload = jwt.verify(sso_token, SSO_SECRET, { algorithms: ['HS256'] });
     const email = (payload.email || '').trim().toLowerCase();
-    // Resolucao de papel ESPELHA byte-a-byte o app Pesquisa (PesquisaSatisfacaoSPA/
-    // src/server.js:302-321), autoridade sobre estes dados via requireSatisfacao. Ordem:
-    //   1) allowlist de TI (SPA_ADMIN_EMAILS) -> 'master'
-    //   2) site_roles['pesquisa-satisfacao'] do Hub, validado -> papel granular
-    //   3) sites_admin inclui 'pesquisa-satisfacao' -> 'admin'
-    //   4) senao -> 'user'
-    // CRITICO: ler site_roles ANTES de sites_admin. O Hub coloca em sites_admin
-    // qualquer papel != 'usuario' (inclui spa e massoterapeuta); trata-lo como
-    // master deixaria spa/massoterapeuta verem toda a PII de hospedes.
+    // A GQ SEGUE a autorizacao do Hub: quem o Hub libera para o sistema
+    // 'gestao-de-qualidade' (o card do portal) pode entrar. Assim, ver o card e
+    // conseguir abrir a GQ usam a MESMA fonte de verdade (sem loop de acesso).
+    // O `role` abaixo define apenas a capacidade no proxy da Pesquisa
+    // (master/satisfacao escrevem; admin e leitura).
     const SPA_ADMIN_EMAILS = ['richard@granmarquise.com.br', 'suporte.ti@granmarquise.com.br', 'estagio.ti@granmarquise.com.br'];
-    const PAPEIS_VALIDOS = ['master', 'admin', 'spa', 'satisfacao', 'massoterapeuta'];
     const siteRole = payload.site_roles && payload.site_roles['pesquisa-satisfacao'];
+    const sistemas = Array.isArray(payload.sistemas) ? payload.sistemas : null;
+    const autorizadoPeloHub = sistemas ? sistemas.includes('gestao-de-qualidade') : false;
     let role;
-    if (SPA_ADMIN_EMAILS.includes(email)) role = 'master';
-    else if (siteRole && PAPEIS_VALIDOS.includes(siteRole)) role = siteRole;
-    else if (Array.isArray(payload.sites_admin) && payload.sites_admin.includes('pesquisa-satisfacao')) role = 'admin';
-    else role = 'user';
-    // Autorizacao: so master/satisfacao/admin (mesma allowlist do requireSatisfacao
-    // no app Pesquisa). spa, massoterapeuta e qualquer conta sem papel de qualidade
-    // sao negados — a GQ expoe PII de hospedes (respostas locais + proxy).
+    if (SPA_ADMIN_EMAILS.includes(email) || payload.is_master) {
+      role = 'master';                                     // TI / master do Hub
+    } else if (siteRole === 'satisfacao' || siteRole === 'admin') {
+      role = siteRole;                                     // papel de qualidade explicito
+    } else if (Array.isArray(payload.sites_admin) && payload.sites_admin.includes('pesquisa-satisfacao')) {
+      role = 'admin';
+    } else if (autorizadoPeloHub || payload.tipo === 'admin') {
+      role = 'admin';                                      // liberado pelo Hub (card/admin) -> leitura
+    } else {
+      role = 'user';                                       // sem autorizacao no Hub
+    }
     const ROLES_GQ = new Set(['master', 'satisfacao', 'admin']);
     if (!ROLES_GQ.has(role)) {
-      console.warn('[SSO] acesso negado a GQ (papel sem permissao de qualidade):', email, '->', role);
+      console.warn('[SSO] acesso negado a GQ (sem autorizacao no Hub):', email);
       return res.redirect('/acesso-hub.html?erro=sem_acesso');
     }
     const token = jwt.sign({ sub: 0, username: email, role }, JWT_SECRET, { expiresIn: '8h' });

@@ -129,7 +129,20 @@
   </div>
 <script>
   (function () {
-    document.getElementById('btn-hub').href = 'https://hub-granmarquise.fly.dev';
+    var btn = document.getElementById('btn-hub');
+    btn.href = 'https://hub-granmarquise.fly.dev';
+    var erro = new URLSearchParams(location.search).get('erro');
+    if (erro === 'sem_acesso') {
+      // Acesso negado (usuario sem autorizacao no Hub para a Gestao da
+      // Qualidade). Mostra mensagem clara em vez da tela generica de login,
+      // e nao oferece um botao que reinicie o ciclo de acesso.
+      document.title = 'Acesso não autorizado — Gestão da Qualidade';
+      document.querySelector('h1').textContent = 'Acesso não autorizado';
+      document.querySelector('p.lead').textContent =
+        'Sua conta não tem permissão para abrir a Gestão da Qualidade. Se você precisa de acesso, faça login novamente pelo Hub ou solicite a liberação ao TI.';
+      var label = btn.firstChild;
+      if (label && label.nodeType === 3) label.nodeValue = ' Voltar ao Hub ';
+    }
   })();
 </script>
 </body>
