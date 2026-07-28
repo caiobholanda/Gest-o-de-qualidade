@@ -206,8 +206,6 @@ app.get('/api/resposta/:id', requireSession, async (req, res) => {
 
 app.post('/api/nova-resposta', requireSession, async (req, res) => {
   const b = req.body || {};
-  if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
-  if (!b.email?.trim()) return res.status(400).json({ ok: false, error: 'E-mail obrigatório' });
   if (!['hospede', 'colaborador'].includes(b.origem)) return res.status(400).json({ ok: false, error: 'Origem inválida' });
   if (b.data_tratamento) {
     const today = new Date().toISOString().slice(0, 10);
@@ -232,7 +230,6 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
 function novaRespostaLocal(tipoPadrao) {
   return (req, res) => {
     const b = req.body || {};
-    if (!b.nome?.trim()) return res.status(400).json({ ok: false, error: 'Nome obrigatório' });
     const decoded = jwt.decode(req.gqToken);
     try {
       const { id } = inserirResposta({
