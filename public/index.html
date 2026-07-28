@@ -1146,7 +1146,7 @@ async function renderOverview(trigger){
         <div class="ov-hero" style="background:linear-gradient(140deg,var(--surface) 0%,var(--gold-dim2) 100%);box-shadow:0 6px 32px var(--gold-dim);gap:0">
           <div class="ov-card-label" style="margin-bottom:10px">Pesquisas este mês</div>
           <div class="ov-hero-val" id="ov-total-val">${localMes}<span></span></div>
-          <div class="ov-hero-sub" style="margin-bottom:20px">avaliações em todos os setores · acumulado: ${localTotal}</div>
+          <div class="ov-hero-sub" id="ov-acumulado-sub" style="margin-bottom:20px">avaliações em todos os setores · acumulado: ${localTotal}</div>
           <div>${tipoRowsHtml}</div>
         </div>
         <div class="ov-hero" id="ov-urna-panel" style="background:linear-gradient(140deg,var(--surface) 0%,rgba(21,112,90,.05) 100%);border-color:rgba(21,112,90,.15);gap:0">
@@ -1217,13 +1217,17 @@ async function renderOverview(trigger){
     document.getElementById('ovQ')?.addEventListener('keydown',e=>{if(e.key==='Enter')applyOvFilter();});
 
     // 3) SPA data — background; atualiza DOM quando chegar
-    fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${today}`,{signal})
-      .then(r=>r.ok?r.json():null)
-      .then(spa=>{
+    Promise.all([
+      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${today}`,{signal}).then(r=>r.ok?r.json():null),
+      fetch(`/api/stats?slug=spa-locc-v1`,{signal}).then(r=>r.ok?r.json():null),
+    ]).then(([spa,spaAll])=>{
         if(!spa||signal.aborted)return;
         const spaMes=spa.total||0;
+        const spaTotal=spaAll?.total||0;
         const heroVal=main.querySelector('#ov-total-val');
         if(heroVal)heroVal.innerHTML=`${localMes+spaMes}<span></span>`;
+        const subEl=main.querySelector('#ov-acumulado-sub');
+        if(subEl)subEl.textContent=`avaliações em todos os setores · acumulado: ${localTotal+spaTotal}`;
         const cntSpa=main.querySelector('#ov-cnt-spa');
         if(cntSpa)cntSpa.textContent=spaMes;
         const barSpa=main.querySelector('#ov-bar-spa');
