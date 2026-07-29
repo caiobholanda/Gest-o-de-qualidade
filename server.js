@@ -262,7 +262,7 @@ app.post('/api/metas', requireMaster, (req, res) => {
     const d = jwt.decode(req.gqToken);
     upsertMetas(entries, d?.username || null);
     res.json({ ok: true });
-  } catch(e) { res.status(500).json({ ok: false, error: 'Erro ao salvar metas' }); }
+  } catch(e) { console.error('[metas] erro ao salvar:', e.message); res.status(500).json({ ok: false, error: 'Erro ao salvar metas' }); }
 });
 
 app.get('/api/me', requireSession, (req, res) => {
