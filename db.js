@@ -11,6 +11,13 @@ const db = new Database(path.join(DATA_DIR, 'qualidade.db'));
 db.pragma('journal_mode = WAL');
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS gq_admins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    nivel TEXT NOT NULL DEFAULT 'operador',
+    criado_por TEXT,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+  );
   CREATE TABLE IF NOT EXISTS resposta (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tipo TEXT NOT NULL,
@@ -188,6 +195,24 @@ export function contarPorUrna({ mes = null } = {}) {
     GROUP BY JSON_EXTRACT(payload,'$.urna_id')
     ORDER BY total DESC
   `).all(...args);
+}
+
+export function listarAdmins() {
+  return db.prepare('SELECT id, email, nivel, criado_por, criado_em FROM gq_admins ORDER BY criado_em DESC').all();
+}
+
+export function upsertAdmin(email, nivel, criado_por) {
+  return db.prepare(
+    'INSERT INTO gq_admins (email, nivel, criado_por) VALUES (?, ?, ?) ON CONFLICT(email) DO UPDATE SET nivel=excluded.nivel, criado_por=excluded.criado_por'
+  ).run(email.trim().toLowerCase(), nivel, criado_por || null);
+}
+
+export function removerAdmin(email) {
+  return db.prepare('DELETE FROM gq_admins WHERE lower(email) = lower(?)').run(email);
+}
+
+export function buscarNivelAdmin(email) {
+  return db.prepare('SELECT nivel FROM gq_admins WHERE lower(email) = lower(?)').get(email);
 }
 
 export default db;

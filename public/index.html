@@ -477,6 +477,25 @@ body{
   /* iOS Safari: inputs/selects com fonte <16px disparam zoom no foco. */
   .fi input,.fi select{font-size:16px}
 }
+.admin-wrap{max-width:700px;margin:32px auto;padding:0 20px}
+.admin-section{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.admin-section-hdr{padding:14px 18px;border-bottom:1px solid var(--border-soft);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.admin-row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border-soft);gap:12px}
+.admin-row:last-child{border-bottom:none}
+.admin-email{font-size:.9rem;color:var(--text);word-break:break-all}
+.admin-meta{font-size:.67rem;color:var(--muted);margin-top:2px}
+.nivel-badge{padding:2px 10px;border-radius:10px;font-size:.65rem;font-weight:700;letter-spacing:.06em;white-space:nowrap}
+.nivel-badge.operador{background:var(--success-dim);color:var(--success)}
+.nivel-badge.leitura{background:var(--surface2);color:var(--muted)}
+.btn-remover{background:none;border:1px solid var(--border-soft);border-radius:7px;padding:5px 12px;font-size:.72rem;color:var(--muted);cursor:pointer;transition:border-color .15s,color .15s;white-space:nowrap}
+.btn-remover:hover{border-color:var(--danger);color:var(--danger)}
+.admin-add-row{display:flex;gap:10px;flex-wrap:wrap;padding:16px 18px}
+.admin-add-row input,.admin-add-row select{flex:1;min-width:180px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:.88rem;font-family:inherit;outline:none}
+.admin-add-row input:focus,.admin-add-row select:focus{border-color:var(--gold)}
+.btn-add-admin{padding:9px 20px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .15s}
+.btn-add-admin:hover{background:var(--gold-dark)}
+.btn-add-admin:disabled{opacity:.5;cursor:not-allowed}
+.admin-msg{margin:0 18px 14px;font-size:.82rem}
 </style>
 </head>
 <body data-theme="light">
@@ -502,6 +521,7 @@ body{
   <div class="tab" data-tab="pdvs">PDVs</div>
   <div class="tab" data-tab="eventos-corp">Corporativos</div>
   <div class="tab" data-tab="eventos-soc">Sociais</div>
+  <div class="tab" data-tab="admin" id="tabAdmin" style="display:none">Admin</div>
 </div>
 
 <main class="main" id="main"><div class="empty">Carregando...</div></main>
@@ -527,6 +547,17 @@ function updateTs() {
     `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} · ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 updateTs(); setInterval(updateTs, 60000);
+
+let _gqMe = { email: '', role: '' };
+fetch('/api/me').then(r=>r.json()).then(d=>{
+  if (!d.ok) return;
+  _gqMe = d;
+  if (d.role === 'master') document.getElementById('tabAdmin').style.display = '';
+  if (d.role !== 'satisfacao' && d.role !== 'master') {
+    const btn = document.getElementById('btnNovaPesquisa');
+    if (btn) btn.style.display = 'none';
+  }
+}).catch(()=>{});
 
 const LIMIT=20;
 const METAS={spa:30,geral:20,pdvs:15,'eventos-corp':5,'eventos-soc':5};
@@ -1474,7 +1505,90 @@ async function renderOverviewTable(containerEl){
   document.addEventListener(ev,()=>_lastActivity=Date.now(),{passive:true})
 );
 
+async function renderAdmin(){
+  const main=document.getElementById('main');
+  main.innerHTML='<div class="empty">Carregando...</div>';
+  try{
+    const r=await fetch('/api/admins');
+    if(r.status===403){main.innerHTML='<div class="empty">Acesso negado</div>';return;}
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'Erro');
+    _renderAdminPanel(d.admins||[]);
+  }catch(e){main.innerHTML=`<div class="empty">Erro: ${esc(e.message)}</div>`;}
+}
+function _renderAdminPanel(admins){
+  const main=document.getElementById('main');
+  const badge=n=>n==='operador'
+    ?`<span class="nivel-badge operador">OPERADOR</span>`
+    :`<span class="nivel-badge leitura">LEITURA</span>`;
+  const rows=admins.map(a=>`
+    <div class="admin-row">
+      <div>
+        <div class="admin-email">${esc(a.email)}</div>
+        <div class="admin-meta">Adicionado por ${esc(a.criado_por||'sistema')} · ${(a.criado_em||'').slice(0,10)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        ${badge(a.nivel)}
+        <button class="btn-remover" data-email="${esc(a.email)}">Remover</button>
+      </div>
+    </div>`).join('');
+  main.innerHTML=`<div class="admin-wrap">
+    <div style="margin-bottom:22px">
+      <div style="font-size:1.05rem;font-weight:600;color:var(--text);margin-bottom:5px">Administradores</div>
+      <div style="font-size:.82rem;color:var(--muted);line-height:1.55"><strong style="color:var(--text)">Operador</strong> pode inserir e editar pesquisas. <strong style="color:var(--text)">Leitura</strong> só visualiza o painel.</div>
+    </div>
+    <div class="admin-section">
+      <div class="admin-section-hdr">Adicionar acesso</div>
+      <div class="admin-add-row">
+        <input type="email" id="adminEmailIn" placeholder="email@granmarquise.com.br" autocomplete="off">
+        <select id="adminNivelSel">
+          <option value="operador">Operador</option>
+          <option value="leitura">Leitura</option>
+        </select>
+        <button class="btn-add-admin" id="btnAddAdmin">Adicionar</button>
+      </div>
+      <div id="adminMsg" class="admin-msg" style="display:none"></div>
+    </div>
+    <div class="admin-section">
+      <div class="admin-section-hdr">${admins.length} acesso${admins.length!==1?'s':''} configurado${admins.length!==1?'s':''}</div>
+      ${rows||'<div style="padding:28px 18px;color:var(--muted);font-size:.88rem">Nenhum administrador configurado ainda.</div>'}
+    </div>
+  </div>`;
+  document.getElementById('btnAddAdmin')?.addEventListener('click',_addAdmin);
+  document.getElementById('adminEmailIn')?.addEventListener('keydown',e=>{if(e.key==='Enter')_addAdmin();});
+  document.querySelectorAll('.btn-remover').forEach(btn=>{
+    btn.addEventListener('click',()=>_removeAdmin(btn.dataset.email));
+  });
+}
+async function _addAdmin(){
+  const email=(document.getElementById('adminEmailIn')?.value||'').trim();
+  const nivel=document.getElementById('adminNivelSel')?.value||'operador';
+  const msg=document.getElementById('adminMsg');
+  if(!email){if(msg){msg.textContent='Informe o e-mail.';msg.style.color='var(--danger)';msg.style.display='block';}return;}
+  if(msg)msg.style.display='none';
+  const btn=document.getElementById('btnAddAdmin');
+  if(btn)btn.disabled=true;
+  try{
+    const r=await fetch('/api/admins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,nivel})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'Erro');
+    renderAdmin();
+  }catch(e){
+    if(msg){msg.textContent=e.message;msg.style.color='var(--danger)';msg.style.display='block';}
+    if(btn)btn.disabled=false;
+  }
+}
+async function _removeAdmin(email){
+  try{
+    const r=await fetch(`/api/admins/${encodeURIComponent(email)}`,{method:'DELETE'});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'Erro');
+    renderAdmin();
+  }catch(e){alert('Erro ao remover: '+e.message);}
+}
+
 async function render(trigger){
+  if(activeTab==='admin')return renderAdmin();
   if(activeTab==='overview')return renderOverview(trigger);
   if(activeTab!=='spa')return renderLocal(trigger);
   try { localStorage.setItem('gq_filters',JSON.stringify({from:state.from,to:state.to,tipo:state.tipo,origem:state.origem,q:state.q,page:state.page,periodCustom:state.periodCustom})); } catch(e){}

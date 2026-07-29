@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { inserirResposta, listarRespostas, contarRespostas, buscarResposta, atualizarResposta, contarPorUrna } from './db.js';
+import { inserirResposta, listarRespostas, contarRespostas, buscarResposta, atualizarResposta, contarPorUrna, listarAdmins, upsertAdmin, removerAdmin, buscarNivelAdmin } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -62,6 +62,18 @@ function requireSession(req, res, next) {
   next();
 }
 
+function requireMaster(req, res, next) {
+  const tok = getCookie(req, COOKIE);
+  if (!tok) return res.status(401).json({ ok: false, error: 'Não autenticado' });
+  let payload;
+  try { payload = jwt.verify(tok, JWT_SECRET, { algorithms: ['HS256'] }); }
+  catch { return res.status(401).json({ ok: false, error: 'Sessão expirada' }); }
+  if (payload.role !== 'master') return res.status(403).json({ ok: false, error: 'Acesso negado' });
+  req.gqToken = tok;
+  req.gqUser = payload;
+  next();
+}
+
 function fetchWithTimeout(url, opts) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT);
@@ -98,6 +110,13 @@ app.get('/sso', (req, res) => {
       role = 'admin';                                      // liberado pelo Hub (card/admin) -> leitura
     } else {
       role = 'user';                                       // sem autorizacao no Hub
+    }
+    // Tabela local gq_admins sobrescreve nível para não-masters
+    if (role !== 'master') {
+      const adminEntry = buscarNivelAdmin(email);
+      if (adminEntry) {
+        role = adminEntry.nivel === 'operador' ? 'satisfacao' : 'admin';
+      }
     }
     const ROLES_GQ = new Set(['master', 'satisfacao', 'admin']);
     if (!ROLES_GQ.has(role)) {
@@ -224,6 +243,35 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
   } catch (e) {
     res.status(502).json({ ok: false, error: 'Erro ao enviar resposta' });
   }
+});
+
+app.get('/api/me', requireSession, (req, res) => {
+  const d = jwt.decode(req.gqToken);
+  res.json({ ok: true, email: d?.username || '', role: d?.role || '' });
+});
+
+app.get('/api/admins', requireMaster, (_req, res) => {
+  try { res.json({ ok: true, admins: listarAdmins() }); }
+  catch(e) { res.status(500).json({ ok: false, error: 'Erro ao listar' }); }
+});
+
+app.post('/api/admins', requireMaster, (req, res) => {
+  const { email = '', nivel = 'operador' } = req.body || {};
+  const e = email.trim().toLowerCase();
+  if (!e || !/^[^@]+@[^@]+\.[^@]+$/.test(e)) return res.status(400).json({ ok: false, error: 'E-mail inválido' });
+  if (!['operador', 'leitura'].includes(nivel)) return res.status(400).json({ ok: false, error: 'Nível inválido' });
+  try {
+    const d = jwt.decode(req.gqToken);
+    upsertAdmin(e, nivel, d?.username || null);
+    res.json({ ok: true });
+  } catch(err) { res.status(500).json({ ok: false, error: 'Erro ao salvar' }); }
+});
+
+app.delete('/api/admins/:email', requireMaster, (req, res) => {
+  try {
+    removerAdmin(decodeURIComponent(req.params.email));
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ ok: false, error: 'Erro ao remover' }); }
 });
 
 // Armazenamento local (SQLite em ./data/qualidade.db — volume persistente no Fly)
