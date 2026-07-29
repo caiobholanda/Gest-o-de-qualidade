@@ -477,6 +477,39 @@ body{
   /* iOS Safari: inputs/selects com fonte <16px disparam zoom no foco. */
   .fi input,.fi select{font-size:16px}
 }
+/* ── Settings Overlay ── */
+.cfg-overlay{position:fixed;inset:0;z-index:600;display:flex;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .22s ease}
+.cfg-overlay.cfg-open{opacity:1;pointer-events:all}
+.cfg-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.cfg-panel{position:relative;width:500px;max-width:100vw;height:100%;background:var(--surface);border-left:1px solid var(--border-soft);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.25,.46,.45,.94);box-shadow:-24px 0 80px rgba(0,0,0,.18)}
+.cfg-overlay.cfg-open .cfg-panel{transform:translateX(0)}
+.cfg-hdr{position:sticky;top:0;z-index:2;background:var(--surface);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft)}
+.cfg-hdr-left{display:flex;align-items:center;gap:12px}
+.cfg-gear-deco{width:28px;height:28px;background:var(--gold-dim);border:1px solid var(--gold-dim2);border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0}
+.cfg-title{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+.cfg-close{background:none;border:1px solid var(--border-soft);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s;flex-shrink:0}
+.cfg-close:hover{border-color:var(--gold);color:var(--gold)}
+.cfg-body{flex:1;overflow-y:auto;padding:24px}
+.cfg-sec{margin-bottom:28px}
+.cfg-sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)}
+.cfg-sec-num{width:20px;height:20px;border-radius:50%;background:var(--gold-dim);color:var(--gold);font-size:.6rem;font-weight:800;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cfg-sec-title{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border-soft);gap:16px}
+.cfg-row:last-child{border-bottom:none}
+.cfg-row-label{font-size:.88rem;color:var(--text);flex:1;line-height:1.35}
+.cfg-row-sub{font-size:.68rem;color:var(--muted);margin-top:1px}
+.cfg-input{width:76px;padding:7px 0;border:none;border-bottom:2px solid var(--border);background:transparent;color:var(--text);font-size:1rem;font-family:'JetBrains Mono',ui-monospace,monospace;text-align:center;outline:none;transition:border-color .18s}
+.cfg-input:focus{border-color:var(--gold)}
+.cfg-input-unit{font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-align:center;margin-top:2px}
+.cfg-input-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.cfg-footer{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border-soft);padding:14px 24px;display:flex;align-items:center;gap:12px}
+.btn-cfg-save{flex:1;padding:11px 0;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .15s,opacity .15s}
+.btn-cfg-save:hover{background:var(--gold-dark)}
+.btn-cfg-save:disabled{opacity:.45;cursor:not-allowed}
+.cfg-msg{font-size:.78rem;padding:8px 12px;border-radius:7px;display:none}
+.cfg-msg.ok{color:var(--success);background:var(--success-dim)}
+.cfg-msg.err{color:var(--danger);background:var(--danger-dim)}
+.cfg-urnas-loading{padding:20px 0;text-align:center;color:var(--muted);font-size:.82rem}
 .admin-wrap{max-width:700px;margin:32px auto;padding:0 20px}
 .admin-section{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;overflow:hidden;margin-bottom:20px}
 .admin-section-hdr{padding:14px 18px;border-bottom:1px solid var(--border-soft);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
@@ -509,6 +542,7 @@ body{
   <div class="hdr-right">
     <span class="hdr-ts" id="ts"></span>
     <button class="btn-nova-pesquisa" id="btnNovaPesquisa">+ Nova Pesquisa</button>
+    <button class="btn-icon" id="btnSettings" title="Configurações" style="display:none" aria-label="Configurações"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     <button class="btn-icon" id="btnTheme" title="Alternar tema">☾</button>
     <button class="btn-sair" onclick="location.href='/api/logout'">Sair</button>
   </div>
@@ -549,18 +583,31 @@ function updateTs() {
 updateTs(); setInterval(updateTs, 60000);
 
 let _gqMe = { email: '', role: '' };
-fetch('/api/me').then(r=>r.json()).then(d=>{
-  if (!d.ok) return;
-  _gqMe = d;
-  if (d.role === 'master') document.getElementById('tabAdmin').style.display = '';
-  if (d.role !== 'satisfacao' && d.role !== 'master') {
-    const btn = document.getElementById('btnNovaPesquisa');
-    if (btn) btn.style.display = 'none';
+Promise.all([
+  fetch('/api/me').then(r=>r.json()).catch(()=>({})),
+  fetch('/api/metas').then(r=>r.json()).catch(()=>({})),
+]).then(([me, met]) => {
+  if (me.ok) {
+    _gqMe = me;
+    if (me.role === 'master') {
+      document.getElementById('tabAdmin').style.display = '';
+      document.getElementById('btnSettings').style.display = '';
+    }
+    if (me.role === 'satisfacao') {
+      document.getElementById('btnSettings').style.display = '';
+    }
+    if (me.role !== 'satisfacao' && me.role !== 'master') {
+      const btn = document.getElementById('btnNovaPesquisa');
+      if (btn) btn.style.display = 'none';
+    }
   }
-}).catch(()=>{});
+  if (met.ok && met.metas) {
+    Object.assign(METAS, met.metas);
+  }
+});
 
 const LIMIT=20;
-const METAS={spa:30,geral:20,pdvs:15,'eventos-corp':5,'eventos-soc':5};
+let METAS={spa:30,geral:20,pdvs:15,'eventos-corp':5,'eventos-soc':5};
 const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, periodCustom:false };
 (function(){
   try {
@@ -2200,6 +2247,130 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
 
 })();
 
+// ── Settings panel ──
+{
+  const CFG_PESQUISAS = [
+    { key:'spa',          label:'Gran SPA',                sub:'Pesquisa de satisfação do SPA' },
+    { key:'geral',        label:'Geral da Qualidade',      sub:'Pesquisa geral do hotel' },
+    { key:'pdvs',         label:'PDVs / Pontos de Venda',  sub:'Restaurantes, bares, rooftop' },
+    { key:'eventos-corp', label:'Eventos Corporativos',    sub:'' },
+    { key:'eventos-soc',  label:'Eventos Sociais',         sub:'Clientes e parceiros cerimoniaisistas' },
+  ];
+
+  const cfgOv  = document.getElementById('cfgOverlay');
+  const cfgBod = document.getElementById('cfgBody');
+  const cfgMsg = document.getElementById('cfgMsg');
+  const btnSave = document.getElementById('btnCfgSave');
+
+  function _cfgShow(msg, type) {
+    cfgMsg.textContent = msg;
+    cfgMsg.className = 'cfg-msg ' + type;
+    cfgMsg.style.display = 'block';
+    if (type === 'ok') setTimeout(() => { cfgMsg.style.display = 'none'; }, 2200);
+  }
+
+  function cfgOpen() {
+    cfgOv.classList.add('cfg-open');
+    cfgOv.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    cfgBod.innerHTML = '<div class="cfg-urnas-loading">Carregando…</div>';
+    cfgMsg.style.display = 'none';
+    _renderCfg();
+  }
+
+  function cfgClose() {
+    cfgOv.classList.remove('cfg-open');
+    cfgOv.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  async function _renderCfg() {
+    let urnas = [];
+    try {
+      urnas = (await _loadUrnas()) || [];
+    } catch {}
+
+    const pesquisasRows = CFG_PESQUISAS.map(p => `
+      <div class="cfg-row">
+        <div class="cfg-row-label">
+          ${esc(p.label)}
+          ${p.sub ? `<div class="cfg-row-sub">${esc(p.sub)}</div>` : ''}
+        </div>
+        <div class="cfg-input-wrap">
+          <input class="cfg-input" type="number" min="0" step="1" id="cfgP_${p.key}" value="${METAS[p.key]||0}" inputmode="numeric">
+          <div class="cfg-input-unit">/ mês</div>
+        </div>
+      </div>`).join('');
+
+    const urnasRows = urnas.length
+      ? urnas.map(u => `
+          <div class="cfg-row">
+            <div class="cfg-row-label">${esc(u.nome||u.id)}</div>
+            <div class="cfg-input-wrap">
+              <input class="cfg-input" type="number" min="0" step="1" id="cfgU_${esc(u.id)}" value="${METAS['urna:'+u.id]||0}" inputmode="numeric">
+              <div class="cfg-input-unit">/ mês</div>
+            </div>
+          </div>`).join('')
+      : '<div style="padding:16px 0;color:var(--muted);font-size:.82rem">Nenhuma urna cadastrada no Hub.</div>';
+
+    cfgBod.innerHTML = `
+      <div class="cfg-sec">
+        <div class="cfg-sec-hdr">
+          <div class="cfg-sec-num">1</div>
+          <span class="cfg-sec-title">Metas das Pesquisas</span>
+        </div>
+        ${pesquisasRows}
+      </div>
+      <div class="cfg-sec">
+        <div class="cfg-sec-hdr">
+          <div class="cfg-sec-num">2</div>
+          <span class="cfg-sec-title">Metas das Urnas</span>
+        </div>
+        ${urnasRows}
+      </div>`;
+  }
+
+  async function _saveCfg() {
+    if (_gqMe.role !== 'master') { _cfgShow('Apenas masters podem salvar.', 'err'); return; }
+    btnSave.disabled = true;
+    cfgMsg.style.display = 'none';
+    const entries = [];
+
+    CFG_PESQUISAS.forEach(p => {
+      const el = document.getElementById('cfgP_' + p.key);
+      if (el) entries.push({ tipo: p.key, valor: Math.max(0, parseInt(el.value) || 0) });
+    });
+
+    const urnas = _hubUrnas || [];
+    urnas.forEach(u => {
+      const el = document.getElementById('cfgU_' + u.id);
+      if (el) entries.push({ tipo: 'urna:' + u.id, valor: Math.max(0, parseInt(el.value) || 0) });
+    });
+
+    try {
+      const r = await fetch('/api/metas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entries }),
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Erro');
+      entries.forEach(e => { METAS[e.tipo] = e.valor; });
+      _cfgShow('Salvo com sucesso ✓', 'ok');
+    } catch(e) {
+      _cfgShow(e.message, 'err');
+    } finally {
+      btnSave.disabled = false;
+    }
+  }
+
+  document.getElementById('btnSettings')?.addEventListener('click', cfgOpen);
+  document.getElementById('cfgClose')?.addEventListener('click', cfgClose);
+  document.getElementById('cfgBackdrop')?.addEventListener('click', cfgClose);
+  btnSave?.addEventListener('click', _saveCfg);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && cfgOv.classList.contains('cfg-open')) cfgClose(); });
+}
+
 // Desativa autocomplete em todos os inputs presentes e futuros
 (function(){
   const off=()=>document.querySelectorAll('input,textarea,select').forEach(el=>{if(!el.dataset.acSet){el.setAttribute('autocomplete','off');el.dataset.acSet='1';}});
@@ -2207,5 +2378,26 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
   new MutationObserver(off).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+
+<!-- Settings Overlay -->
+<div id="cfgOverlay" class="cfg-overlay" aria-hidden="true">
+  <div class="cfg-backdrop" id="cfgBackdrop"></div>
+  <div class="cfg-panel" role="dialog" aria-modal="true" aria-label="Configurações">
+    <div class="cfg-hdr">
+      <div class="cfg-hdr-left">
+        <div class="cfg-gear-deco"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <span class="cfg-title">Configurações</span>
+      </div>
+      <button class="cfg-close" id="cfgClose" aria-label="Fechar">✕</button>
+    </div>
+    <div class="cfg-body" id="cfgBody">
+      <div class="cfg-urnas-loading">Carregando…</div>
+    </div>
+    <div class="cfg-footer">
+      <button class="btn-cfg-save" id="btnCfgSave">Salvar alterações</button>
+      <div id="cfgMsg" class="cfg-msg"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

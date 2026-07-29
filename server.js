@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { inserirResposta, listarRespostas, contarRespostas, buscarResposta, atualizarResposta, contarPorUrna, listarAdmins, upsertAdmin, removerAdmin, buscarNivelAdmin } from './db.js';
+import { inserirResposta, listarRespostas, contarRespostas, buscarResposta, atualizarResposta, contarPorUrna, listarMetas, upsertMetas, listarAdmins, upsertAdmin, removerAdmin, buscarNivelAdmin } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -243,6 +243,26 @@ app.post('/api/nova-resposta', requireSession, async (req, res) => {
   } catch (e) {
     res.status(502).json({ ok: false, error: 'Erro ao enviar resposta' });
   }
+});
+
+app.get('/api/metas', requireSession, (_req, res) => {
+  try {
+    const rows = listarMetas();
+    const map = Object.fromEntries(rows.map(r => [r.tipo, r.valor]));
+    res.json({ ok: true, metas: map });
+  } catch(e) { res.status(500).json({ ok: false, error: 'Erro ao listar metas' }); }
+});
+
+app.post('/api/metas', requireMaster, (req, res) => {
+  const entries = req.body?.entries;
+  if (!Array.isArray(entries) || entries.some(e => typeof e.tipo !== 'string' || isNaN(Number(e.valor)))) {
+    return res.status(400).json({ ok: false, error: 'entries deve ser [{tipo, valor}]' });
+  }
+  try {
+    const d = jwt.decode(req.gqToken);
+    upsertMetas(entries, d?.username || null);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ ok: false, error: 'Erro ao salvar metas' }); }
 });
 
 app.get('/api/me', requireSession, (req, res) => {
