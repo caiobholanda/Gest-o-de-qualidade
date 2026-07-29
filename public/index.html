@@ -2249,6 +2249,7 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
 
 // ── Settings panel ──
 {
+  const esc = s => { const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; };
   const CFG_PESQUISAS = [
     { key:'spa',          label:'Gran SPA',                sub:'Pesquisa de satisfação do SPA' },
     { key:'geral',        label:'Geral da Qualidade',      sub:'Pesquisa geral do hotel' },
