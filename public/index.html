@@ -2257,34 +2257,41 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
     { key:'eventos-soc',  label:'Eventos Sociais',         sub:'Clientes e parceiros cerimoniaisistas' },
   ];
 
-  const cfgOv  = document.getElementById('cfgOverlay');
-  const cfgBod = document.getElementById('cfgBody');
-  const cfgMsg = document.getElementById('cfgMsg');
-  const btnSave = document.getElementById('btnCfgSave');
+  function _cfgEl(id){ return document.getElementById(id); }
 
   function _cfgShow(msg, type) {
-    cfgMsg.textContent = msg;
-    cfgMsg.className = 'cfg-msg ' + type;
-    cfgMsg.style.display = 'block';
-    if (type === 'ok') setTimeout(() => { cfgMsg.style.display = 'none'; }, 2200);
+    const el = _cfgEl('cfgMsg');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'cfg-msg ' + type;
+    el.style.display = 'block';
+    if (type === 'ok') setTimeout(() => { el.style.display = 'none'; }, 2200);
   }
 
   function cfgOpen() {
+    const cfgOv = _cfgEl('cfgOverlay');
+    const cfgBod = _cfgEl('cfgBody');
+    if (!cfgOv) return;
     cfgOv.classList.add('cfg-open');
     cfgOv.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-    cfgBod.innerHTML = '<div class="cfg-urnas-loading">Carregando…</div>';
-    cfgMsg.style.display = 'none';
+    if (cfgBod) cfgBod.innerHTML = '<div class="cfg-urnas-loading">Carregando…</div>';
+    const cfgMsg = _cfgEl('cfgMsg');
+    if (cfgMsg) cfgMsg.style.display = 'none';
     _renderCfg();
   }
 
   function cfgClose() {
+    const cfgOv = _cfgEl('cfgOverlay');
+    if (!cfgOv) return;
     cfgOv.classList.remove('cfg-open');
     cfgOv.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
 
   async function _renderCfg() {
+    const cfgBod = _cfgEl('cfgBody');
+    if (!cfgBod) return;
     let urnas = [];
     try {
       urnas = (await _loadUrnas()) || [];
@@ -2313,7 +2320,7 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
           </div>`).join('')
       : '<div style="padding:16px 0;color:var(--muted);font-size:.82rem">Nenhuma urna cadastrada no Hub.</div>';
 
-    cfgBod.innerHTML = `
+    cfgBod.innerHTML=`
       <div class="cfg-sec">
         <div class="cfg-sec-hdr">
           <div class="cfg-sec-num">1</div>
@@ -2332,8 +2339,10 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
 
   async function _saveCfg() {
     if (_gqMe.role !== 'master') { _cfgShow('Apenas masters podem salvar.', 'err'); return; }
-    btnSave.disabled = true;
-    cfgMsg.style.display = 'none';
+    const btnSave = _cfgEl('btnCfgSave');
+    const cfgMsg = _cfgEl('cfgMsg');
+    if (btnSave) btnSave.disabled = true;
+    if (cfgMsg) cfgMsg.style.display = 'none';
     const entries = [];
 
     CFG_PESQUISAS.forEach(p => {
@@ -2360,15 +2369,19 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
     } catch(e) {
       _cfgShow(e.message, 'err');
     } finally {
-      btnSave.disabled = false;
+      if (btnSave) btnSave.disabled = false;
     }
   }
 
   document.getElementById('btnSettings')?.addEventListener('click', cfgOpen);
-  document.getElementById('cfgClose')?.addEventListener('click', cfgClose);
-  document.getElementById('cfgBackdrop')?.addEventListener('click', cfgClose);
-  btnSave?.addEventListener('click', _saveCfg);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && cfgOv.classList.contains('cfg-open')) cfgClose(); });
+  document.addEventListener('click', e => {
+    if (e.target.id === 'cfgClose' || e.target.id === 'cfgBackdrop') cfgClose();
+    if (e.target.id === 'btnCfgSave') _saveCfg();
+  });
+  document.addEventListener('keydown', e => {
+    const cfgOv = _cfgEl('cfgOverlay');
+    if (e.key === 'Escape' && cfgOv?.classList.contains('cfg-open')) cfgClose();
+  });
 }
 
 // Desativa autocomplete em todos os inputs presentes e futuros
