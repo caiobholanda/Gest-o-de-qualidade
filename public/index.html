@@ -136,21 +136,47 @@ body{
 .ov-card-label{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
 .ov-card-total{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:2rem;line-height:1;color:var(--text)}
 .ov-card-mes{font-size:.7rem;color:var(--muted)}
-.ov-progress-label{display:flex;justify-content:space-between;font-size:.58rem;color:var(--muted);margin-bottom:5px}
-.ov-progress-bar{height:4px;border-radius:2px;background:var(--border-soft);overflow:hidden}
-.ov-progress-fill{height:100%;border-radius:2px;background:var(--warn);transition:width .6s cubic-bezier(.16,1,.3,1)}
+@keyframes _barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.ov-progress-bar{height:5px;border-radius:3px;background:var(--border-soft);overflow:hidden;margin:1px 0}
+.ov-progress-fill{height:100%;border-radius:3px;transform-origin:left;animation:_barIn .75s cubic-bezier(.16,1,.3,1) both}
 .ov-progress-fill.ok{background:var(--success)}
-.ov-progress-fill.mid{background:var(--gold)}
+.ov-progress-fill.mid{background:var(--warn)}
+.ov-progress-fill.low{background:var(--danger)}
+.ov-card--ok{border-left:3px solid var(--success)}
+.ov-card--mid{border-left:3px solid var(--warn)}
+.ov-card--low{border-left:3px solid var(--danger)}
+.ov-card-kpi{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.ov-card-pct{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;padding:3px 8px;border-radius:6px;line-height:1.5;white-space:nowrap;flex-shrink:0}
+.ov-card-pct.ok{color:var(--success);background:var(--success-dim)}
+.ov-card-pct.mid{color:var(--warn);background:var(--warn-dim)}
+.ov-card-pct.low{color:var(--danger);background:var(--danger-dim)}
+.ov-meta-badge{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;width:fit-content}
+.ov-meta-badge.ok{color:var(--success);background:var(--success-dim)}
+.ov-meta-badge.mid{color:var(--warn);background:var(--warn-dim)}
+.ov-meta-badge.low{color:var(--danger);background:var(--danger-dim)}
 .ov-tipo-row{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border-soft)}
 .ov-tipo-row:last-child{border-bottom:0}
 .ov-tipo-name{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .ov-tipo-bar{height:3px;background:var(--border-soft);border-radius:2px;overflow:hidden}
-.ov-tipo-bar-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .7s cubic-bezier(.16,1,.3,1)}
+.ov-tipo-bar-fill{height:100%;background:var(--gold);border-radius:2px;transform-origin:left;animation:_barIn .75s cubic-bezier(.16,1,.3,1) both}
+.ov-tipo-bar-fill.ok{background:var(--success)}
+.ov-tipo-bar-fill.mid{background:var(--warn)}
+.ov-tipo-bar-fill.low{background:var(--danger)}
 .ov-tipo-count{font-family:'JetBrains Mono',monospace;font-size:.92rem;font-weight:600;color:var(--text);text-align:right}
 .ov-urna-row{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:9px;transition:background .15s}
 .ov-urna-row:hover{background:var(--border-soft)}
 .ov-urna-name{font-size:.74rem;color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ov-urna-count{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text);text-align:right}
+.ov-urna-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ov-urna-name-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ov-urna-pct{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:4px;flex-shrink:0}
+.ov-urna-pct.ok{color:var(--success);background:var(--success-dim)}
+.ov-urna-pct.mid{color:var(--warn);background:var(--warn-dim)}
+.ov-urna-pct.low{color:var(--danger);background:var(--danger-dim)}
+.ov-urna-sub{font-size:.58rem;color:var(--muted)}
+.ov-urna-sub.ok{color:var(--success)}
+.ov-urna-sub.mid{color:var(--warn)}
+.ov-urna-sub.low{color:var(--danger)}
 
 /* ── Layout ── */
 .main{max-width:1260px;margin:0 auto;padding:52px 48px 100px}
@@ -1234,15 +1260,18 @@ async function renderOverview(trigger){
       const total=key==='spa'?spaMes:(totaisMap[key]||0);
       const meta=METAS[key]||1;
       const pct=Math.min(100,Math.round(mes/meta*100));
-      const cls=pct>=100?'ok':pct>=60?'mid':'';
-      return `<div class="ov-card" data-goto="${tab}">
+      const cls=pct>=100?'ok':pct>=60?'mid':'low';
+      const faltam=Math.max(0,meta-mes);
+      const statusLabel=pct>=100?'✓ Meta atingida':`faltam ${faltam}`;
+      return `<div class="ov-card ov-card--${cls}" data-goto="${tab}">
         <div class="ov-card-label">${esc(label)}</div>
-        <div class="ov-card-total">${key==='spa'?spaMes:total}</div>
-        <div class="ov-card-mes">${mes} este mês</div>
-        <div>
-          <div class="ov-progress-label"><span>Meta mensal</span><span>${mes}/${meta}</span></div>
-          <div class="ov-progress-bar"><div class="ov-progress-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="ov-card-kpi">
+          <div class="ov-card-total">${key==='spa'?spaMes:total}</div>
+          <div class="ov-card-pct ${cls}">${pct}%</div>
         </div>
+        <div class="ov-card-mes">${mes} de ${meta} este mês</div>
+        <div class="ov-progress-bar"><div class="ov-progress-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="ov-meta-badge ${cls}">${statusLabel}</div>
       </div>`;
     }
 
@@ -1378,8 +1407,13 @@ async function renderOverview(trigger){
       const maxVal=Math.max(...rows.map(r=>r.total),1);
       urnaList.innerHTML=rows.map(r=>{
         const nome=r.urna_id?(nameMap[String(r.urna_id)]||`Urna ${String(r.urna_id).slice(0,8)}`):'Sem urna';
-        const pct=Math.round(r.total/maxVal*100);
-        return `<div class="ov-urna-row"><div style="display:flex;flex-direction:column;gap:5px;min-width:0"><div class="ov-urna-name">${esc(nome)}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill" style="width:${pct}%"></div></div></div><div class="ov-urna-count">${r.total}</div></div>`;
+        const urnaMeta=r.urna_id?(METAS['urna:'+String(r.urna_id)]||0):0;
+        const hasMeta=urnaMeta>0;
+        const urnaPct=hasMeta?Math.min(100,Math.round(r.total/urnaMeta*100)):Math.round(r.total/maxVal*100);
+        const urnaCls=hasMeta?(urnaPct>=100?'ok':urnaPct>=60?'mid':'low'):'';
+        const urnaFaltam=hasMeta?Math.max(0,urnaMeta-r.total):null;
+        const urnaStatusLabel=hasMeta?(urnaPct>=100?'✓ Meta atingida':`faltam ${urnaFaltam} · meta ${urnaMeta}`):null;
+        return `<div class="ov-urna-row"><div class="ov-urna-info"><div class="ov-urna-name-row"><div class="ov-urna-name">${esc(nome)}</div>${hasMeta?`<div class="ov-urna-pct ${urnaCls}">${urnaPct}%</div>`:''}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${urnaCls}" style="width:${urnaPct}%"></div></div>${urnaStatusLabel?`<div class="ov-urna-sub ${urnaCls}">${urnaStatusLabel}</div>`:''}</div><div class="ov-urna-count">${r.total}</div></div>`;
       }).join('');
     }).catch(()=>{});
   }catch(e){
