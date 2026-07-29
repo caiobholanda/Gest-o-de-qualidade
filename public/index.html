@@ -2292,10 +2292,16 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
   async function _renderCfg() {
     const cfgBod = _cfgEl('cfgBody');
     if (!cfgBod) return;
-    let urnas = [];
-    try {
-      urnas = (await _loadUrnas()) || [];
-    } catch {}
+    let urnas = _hubUrnas !== null ? _hubUrnas : [];
+    if (_hubUrnas === null) {
+      try {
+        urnas = await Promise.race([
+          _loadUrnas(),
+          new Promise(res => setTimeout(() => res([]), 4000))
+        ]) || [];
+        if (_hubUrnas === null) _hubUrnas = [];
+      } catch { urnas = []; _hubUrnas = []; }
+    }
 
     const pesquisasRows = CFG_PESQUISAS.map(p => `
       <div class="cfg-row">
@@ -2320,21 +2326,25 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
           </div>`).join('')
       : '<div style="padding:16px 0;color:var(--muted);font-size:.82rem">Nenhuma urna cadastrada no Hub.</div>';
 
-    cfgBod.innerHTML=`
-      <div class="cfg-sec">
-        <div class="cfg-sec-hdr">
-          <div class="cfg-sec-num">1</div>
-          <span class="cfg-sec-title">Metas das Pesquisas</span>
+    try {
+      cfgBod.innerHTML=`
+        <div class="cfg-sec">
+          <div class="cfg-sec-hdr">
+            <div class="cfg-sec-num">1</div>
+            <span class="cfg-sec-title">Metas das Pesquisas</span>
+          </div>
+          ${pesquisasRows}
         </div>
-        ${pesquisasRows}
-      </div>
-      <div class="cfg-sec">
-        <div class="cfg-sec-hdr">
-          <div class="cfg-sec-num">2</div>
-          <span class="cfg-sec-title">Metas das Urnas</span>
-        </div>
-        ${urnasRows}
-      </div>`;
+        <div class="cfg-sec">
+          <div class="cfg-sec-hdr">
+            <div class="cfg-sec-num">2</div>
+            <span class="cfg-sec-title">Metas das Urnas</span>
+          </div>
+          ${urnasRows}
+        </div>`;
+    } catch(e) {
+      cfgBod.innerHTML='<div style="padding:16px 0;color:var(--danger)">Erro ao carregar configurações.</div>';
+    }
   }
 
   async function _saveCfg() {
