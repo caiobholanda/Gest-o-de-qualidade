@@ -870,7 +870,7 @@ async function openLocalEdit(id){
         if(tipo==='pdvs'||tipo==='pdvs-granclass'){
           if(p.tipo_cliente)document.querySelector(`[data-pdvtipo="${p.tipo_cliente}"]`)?.click();
           if(p.locais){
-            const PDV_LOCAIS=['Restaurante Mangostin','Restaurante Mucuripe (almoço)','Restaurante Mucuripe (jantar)','Bar da Piscina','Lobby Bar'];
+            const PDV_LOCAIS=['Restaurante Mangostin','Restaurante Mucuripe','Restaurante Mucuripe Jantar','Restaurante Mucuripe Chá da tarde','Rooftop','Lobby Bar'];
             const salvos=p.locais.split(',').map(s=>s.trim());
             PDV_LOCAIS.forEach((l,i)=>{if(salvos.includes(l))document.querySelector(`.pdv-loc[data-pdvloc="${i}"]`)?.click();});
           }
@@ -1987,7 +1987,7 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
   const PDV_M={great:'M11.5 23 Q20 33 28.5 23',good:'M12.5 24.5 Q20 29.5 27.5 24.5',fair:'M13 26 H27',poor:'M12.5 28.5 Q20 22.5 27.5 28.5'};
   function pdvE(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   function pdvSm(type,filled,size){const c=filled?'#fff':'#9A9A9A',f=filled?'var(--gold)':'none';return `<svg viewBox="0 0 40 40" width="${size}" height="${size}" fill="none"><circle cx="20" cy="20" r="17" fill="${f}" stroke="${c}" stroke-width="2"/><circle cx="14.6" cy="16.4" r="1.7" fill="${c}"/><circle cx="25.4" cy="16.4" r="1.7" fill="${c}"/><path d="${PDV_M[type]}" stroke="${c}" stroke-width="2" stroke-linecap="round"/></svg>`;}
-  const PDV_LOCAIS=['Restaurante Mangostin','Restaurante Mucuripe (almoço)','Restaurante Mucuripe (jantar)','Bar da Piscina','Lobby Bar'];
+  const PDV_LOCAIS=['Restaurante Mangostin','Restaurante Mucuripe','Restaurante Mucuripe Jantar','Restaurante Mucuripe Chá da tarde','Rooftop','Lobby Bar'];
   const PDV_S1=[{key:'alim_qualidade',pt:'Qualidade dos alimentos'},{key:'alim_variedade',pt:'Variedade do cardápio'},{key:'alim_cortesia',pt:'Cortesia e agilidade dos colaboradores'},{key:'alim_apresentacao',pt:'Apresentação dos alimentos'}];
   const PDV_S2=[{key:'inst_infraestrutura',pt:'Infraestrutura do ambiente'},{key:'inst_limpeza',pt:'Limpeza do restaurante/bar e banheiros'},{key:'inst_conforto',pt:'Conforto do ambiente'},{key:'inst_wifi',pt:'Serviço de Wi-Fi'}];
   const PDV_S3=[{key:'ger_experiencia',pt:'Sua experiência conosco'},{key:'ger_expectativas',pt:'Suas expectativas em relação aos nossos serviços'}];
