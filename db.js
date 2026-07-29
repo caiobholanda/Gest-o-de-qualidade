@@ -209,7 +209,7 @@ export function listarMetas() {
 
 export function upsertMetas(entries, por) {
   const stmt = db.prepare(
-    'INSERT INTO gq_metas (tipo, valor, atualizado_por) VALUES (?, ?, ?) ON CONFLICT(tipo) DO UPDATE SET valor=excluded.valor, atualizado_por=excluded.atualizado_por, atualizado_em=datetime("now")'
+    `INSERT INTO gq_metas (tipo, valor, atualizado_por) VALUES (?, ?, ?) ON CONFLICT(tipo) DO UPDATE SET valor=excluded.valor, atualizado_por=excluded.atualizado_por, atualizado_em=datetime('now')`
   );
   db.transaction(() => { for (const { tipo, valor } of entries) stmt.run(tipo, Number(valor) || 0, por || null); })();
 }
