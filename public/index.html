@@ -163,27 +163,18 @@ body{
 .ov-tipo-bar-fill.mid{background:var(--warn)}
 .ov-tipo-bar-fill.low{background:var(--danger)}
 .ov-tipo-count{font-family:'JetBrains Mono',monospace;font-size:.92rem;font-weight:600;color:var(--text);text-align:right}
-.ov-urna-row{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:9px;transition:background .15s}
-.ov-urna-row:hover{background:var(--border-soft)}
-.ov-urna-name{font-size:.74rem;color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ov-urna-count{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--text);text-align:right}
-.ov-urna-info{display:flex;flex-direction:column;gap:4px;min-width:0}
-.ov-urna-name-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.ov-urna-pct{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:4px;flex-shrink:0}
-.ov-urna-pct.ok{color:var(--success);background:var(--success-dim)}
-.ov-urna-pct.mid{color:var(--warn);background:var(--warn-dim)}
-.ov-urna-pct.low{color:var(--danger);background:var(--danger-dim)}
-.ov-urna-sub{font-size:.58rem;color:var(--muted)}
-.ov-urna-sub.ok{color:var(--success)}
-.ov-urna-sub.mid{color:var(--warn)}
-.ov-urna-sub.low{color:var(--danger)}
-.ov-urna-pills{display:flex;flex-wrap:wrap;gap:4px;margin:0}
-.ov-urna-pill{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--gold-dim2);color:var(--muted2);border:1px solid var(--gold-dim)}
-.ov-urna-active{display:flex;flex-direction:column;gap:6px}
-.ov-urna-zeros{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
-.ov-urna-zero{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 13px;background:var(--surface2);border-radius:9px;border:1px solid var(--border-soft)}
-.ov-urna-zero-n{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
-.ov-urna-zero-v{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:500;color:var(--text);line-height:1}
+.ov-urna-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ov-urna-cell{display:flex;flex-direction:column;gap:7px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border-soft);border-radius:10px;min-width:0;transition:border-color .15s}
+.ov-urna-cell:hover{border-color:var(--gold-dim)}
+.ov-urna-cell-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ov-urna-cell-n{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov-urna-cell-v{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:500;color:var(--text);line-height:1;flex-shrink:0}
+.ov-urna-cell .ov-tipo-bar{height:3px}
+.ov-urna-cell-sub{font-size:.56rem;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ov-urna-cell-sub .pct{font-family:'JetBrains Mono',monospace;font-weight:700}
+.ov-urna-cell-sub.ok,.ov-urna-cell-sub.ok .pct{color:var(--success)}
+.ov-urna-cell-sub.mid,.ov-urna-cell-sub.mid .pct{color:var(--warn)}
+.ov-urna-cell-sub.low,.ov-urna-cell-sub.low .pct{color:var(--danger)}
 
 /* ── Layout ── */
 .main{max-width:1260px;margin:0 auto;padding:52px 48px 100px}
@@ -1420,26 +1411,18 @@ async function renderOverview(trigger){
         if(!allForPanel.length&&!spaSiteCount){
           urnaList.innerHTML='<div style="opacity:.35;font-size:.74rem;color:var(--muted)">Nenhuma urna cadastrada no Hub.</div>';
         }else{
-          const maxVal=Math.max(...allForPanel.map(r=>r.total),spaSiteCount,1);
-          const renderUrnaRow=(total,nome,urnaMeta,hasMeta)=>{
-            const pct=hasMeta?Math.min(100,Math.round(total/urnaMeta*100)):Math.round(total/maxVal*100);
+          const mkCell=(nome,total,meta)=>{
+            const hasMeta=meta>0;
+            const pct=hasMeta?Math.min(100,Math.round(total/meta*100)):0;
             const cls=hasMeta?(pct>=100?'ok':pct>=60?'mid':'low'):'';
-            const faltam=hasMeta?Math.max(0,urnaMeta-total):null;
-            const statusLabel=hasMeta?(pct>=100?'✓ Meta atingida':`faltam ${faltam} · meta ${urnaMeta}`):null;
-            return `<div class="ov-urna-row"><div class="ov-urna-info"><div class="ov-urna-name-row"><div class="ov-urna-name">${esc(nome)}</div>${hasMeta?`<div class="ov-urna-pct ${cls}">${pct}%</div>`:''}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${cls}" style="width:${pct}%"></div></div>${statusLabel?`<div class="ov-urna-sub ${cls}">${statusLabel}</div>`:''}</div><div class="ov-urna-count">${total}</div></div>`;
+            const sub=hasMeta?(pct>=100?'✓ Meta atingida':`faltam ${Math.max(0,meta-total)} · meta ${meta}`):'sem meta';
+            return `<div class="ov-urna-cell"><div class="ov-urna-cell-top"><div class="ov-urna-cell-n">${esc(nome)}</div><div class="ov-urna-cell-v">${total}</div></div>${hasMeta?`<div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${cls}" style="width:${pct}%"></div></div>`:''}<div class="ov-urna-cell-sub${cls?' '+cls:''}"><span>${sub}</span>${hasMeta?`<span class="pct">${pct}%</span>`:''}</div></div>`;
           };
-          const spaMeta=METAS['spa']||0;
-          const mkZero=(n)=>`<div class="ov-urna-zero"><div class="ov-urna-zero-n">${esc(n)}</div><div class="ov-urna-zero-v">0</div></div>`;
-          const active=[],zeros=[];
-          if(spaSiteCount>0)active.push(renderUrnaRow(spaSiteCount,'Gran SPA · site',spaMeta,spaMeta>0));
-          allForPanel.forEach(r=>{
-            const urnaMeta=METAS['urna:'+r.urna_id]||0;
-            if(r.total>0||urnaMeta>0)active.push(renderUrnaRow(r.total,r.nome,urnaMeta,urnaMeta>0));
-            else zeros.push(mkZero(r.nome));
-          });
-          const activePart=active.length?`<div class="ov-urna-active">${active.join('')}</div>`:'';
-          const zeroPart=zeros.length?`<div class="ov-urna-zeros">${zeros.join('')}</div>`:'';
-          urnaList.innerHTML=activePart+zeroPart;
+          const cells=[];
+          if(spaSiteCount>0)cells.push({nome:'Gran SPA · site',total:spaSiteCount,meta:METAS['spa']||0});
+          allForPanel.forEach(r=>cells.push({nome:r.nome||'',total:r.total,meta:METAS['urna:'+r.urna_id]||0}));
+          cells.sort((a,b)=>(b.total-a.total)||((b.meta>0)-(a.meta>0))||a.nome.localeCompare(b.nome));
+          urnaList.innerHTML=`<div class="ov-urna-grid">${cells.map(c=>mkCell(c.nome,c.total,c.meta)).join('')}</div>`;
         }
       }
     }).catch(()=>{});
