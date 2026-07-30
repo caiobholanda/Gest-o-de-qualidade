@@ -179,23 +179,11 @@ body{
 .ov-urna-sub.low{color:var(--danger)}
 .ov-urna-pills{display:flex;flex-wrap:wrap;gap:4px;margin:0}
 .ov-urna-pill{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--gold-dim2);color:var(--muted2);border:1px solid var(--gold-dim)}
-.ov-card--urna{cursor:default}
-.ov-card--urna:hover{border-color:var(--border-soft);box-shadow:none}
 .ov-urna-active{display:flex;flex-direction:column;gap:6px}
 .ov-urna-zeros{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
 .ov-urna-zero{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 13px;background:var(--surface2);border-radius:9px;border:1px solid var(--border-soft)}
 .ov-urna-zero-n{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
 .ov-urna-zero-v{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:500;color:var(--text);line-height:1}
-.ov-metas-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-bottom:56px}
-.ov-cards--pesq{grid-template-columns:repeat(2,1fr)!important}
-.ov-urna-metas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ov-urna-metas .ov-urna-row{padding:14px 16px;background:var(--surface);border:1px solid var(--border-soft);align-items:start}
-.ov-urna-metas .ov-urna-row.ok{border-left:3px solid var(--success)}
-.ov-urna-metas .ov-urna-row.mid{border-left:3px solid var(--warn)}
-.ov-urna-metas .ov-urna-row.low{border-left:3px solid var(--danger)}
-.ov-urna-metas .ov-urna-count{font-size:1.4rem;padding-top:1px}
-.ov-urna-metas .ov-urna-name{font-size:.75rem;white-space:normal;line-height:1.3}
-.ov-urna-metas .ov-tipo-bar{height:4px;margin-top:2px}
 
 /* ── Layout ── */
 .main{max-width:1260px;margin:0 auto;padding:52px 48px 100px}
@@ -1319,21 +1307,13 @@ async function renderOverview(trigger){
           <div id="ov-urna-list" style="display:flex;flex-direction:column;gap:7px;flex:1"><div style="opacity:.35;font-size:.74rem;color:var(--muted)">carregando urnas…</div></div>
         </div>
       </div>
-      <div class="ov-metas-row">
-        <div>
-          <div class="eyebrow" style="margin-bottom:14px">Metas mensais por pesquisa</div>
-          <div class="ov-cards ov-cards--pesq">
-            <div id="ov-card-spa" class="ov-card" style="opacity:.35" data-goto="spa"><div class="ov-card-label">Gran SPA</div><div class="ov-card-total">—</div><div class="ov-card-mes">— este mês</div></div>
-            ${progressCard('geral','Geral da Qualidade','geral',0)}
-            ${progressCard('pdvs','PDVs','pdvs',0)}
-            ${progressCard('eventos-corp','Corporativos','eventos-corp',0)}
-            ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
-          </div>
-        </div>
-        <div id="ov-urnas-col" style="display:none">
-          <div class="eyebrow" style="margin-bottom:14px">Metas mensais por urna</div>
-          <div class="ov-urna-metas" id="ov-urnas-cards"></div>
-        </div>
+      <div class="eyebrow" style="margin-bottom:14px">Metas mensais por pesquisa</div>
+      <div class="ov-cards">
+        <div id="ov-card-spa" class="ov-card" style="opacity:.35" data-goto="spa"><div class="ov-card-label">Gran SPA</div><div class="ov-card-total">—</div><div class="ov-card-mes">— este mês</div></div>
+        ${progressCard('geral','Geral da Qualidade','geral',0)}
+        ${progressCard('pdvs','PDVs','pdvs',0)}
+        ${progressCard('eventos-corp','Corporativos','eventos-corp',0)}
+        ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
       </div>
       <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
       <div class="filter-box" style="margin-bottom:12px">
@@ -1461,26 +1441,6 @@ async function renderOverview(trigger){
           const zeroPart=zeros.length?`<div class="ov-urna-zeros">${zeros.join('')}</div>`:'';
           urnaList.innerHTML=activePart+zeroPart;
         }
-      }
-      // Seção "Metas mensais por urna" — cards individuais para todas as urnas do Hub
-      if(allUrnas.length){
-        const _PT={'geral':'Geral','geral-granclass':'Gran Class','pdvs':'PDVs','pdvs-granclass':'PDVs GC','spa':'SPA','eventos-sociais':'Sociais','eventos-corp':'Corp.','eventos-corporativos':'Corp.'};
-        const progressCardUrna=(nome,pesquisas,count,meta)=>{
-          const pct=meta>0?Math.min(100,Math.round(count/meta*100)):null;
-          const cls=pct!=null?(pct>=100?'ok':pct>=60?'mid':'low'):'';
-          const faltam=meta>0?Math.max(0,meta-count):null;
-          const statusLabel=meta>0?(pct>=100?'✓ Meta atingida':`faltam ${faltam} · meta ${meta}`):'sem meta';
-          return `<div class="ov-urna-row${cls?' '+cls:''}"><div class="ov-urna-info"><div class="ov-urna-name-row"><div class="ov-urna-name">${esc(nome)}</div>${pct!=null?`<div class="ov-urna-pct ${cls}">${pct}%</div>`:''}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${cls}" style="width:${pct!=null?pct:0}%"></div></div><div class="ov-urna-sub ${cls}">${statusLabel}</div></div><div class="ov-urna-count">${count}</div></div>`;
-        };
-        const urnaMetaHtml=allUrnas.map(u=>{
-          const count=urnaCountMap[String(u.id)]||0;
-          const meta=METAS['urna:'+String(u.id)]||0;
-          return progressCardUrna(u.nome||`Urna ${String(u.id).slice(0,8)}`,u.pesquisas||[],count,meta);
-        }).join('');
-        const urnaColEl=main.querySelector('#ov-urnas-col');
-        const urnaCardsEl=main.querySelector('#ov-urnas-cards');
-        if(urnaColEl)urnaColEl.style.display='';
-        if(urnaCardsEl)urnaCardsEl.innerHTML=urnaMetaHtml;
       }
     }).catch(()=>{});
   }catch(e){
