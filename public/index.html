@@ -181,6 +181,15 @@ body{
 .ov-urna-pill{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--gold-dim2);color:var(--muted2);border:1px solid var(--gold-dim)}
 .ov-card--urna{cursor:default}
 .ov-card--urna:hover{border-color:var(--border-soft);box-shadow:none}
+.ov-urna-active{display:flex;flex-direction:column;gap:6px}
+.ov-urna-zeros{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px}
+.ov-urna-zero{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:5px 9px;background:var(--surface2);border-radius:7px}
+.ov-urna-zero-n{font-size:.67rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ov-urna-zero-v{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;color:var(--muted);flex-shrink:0}
+.ov-urna-metas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:56px}
+.ov-urna-metas .ov-urna-row.ok{border-left:2px solid var(--success)}
+.ov-urna-metas .ov-urna-row.mid{border-left:2px solid var(--warn)}
+.ov-urna-metas .ov-urna-row.low{border-left:2px solid var(--danger)}
 
 /* ── Layout ── */
 .main{max-width:1260px;margin:0 auto;padding:52px 48px 100px}
@@ -1313,7 +1322,7 @@ async function renderOverview(trigger){
         ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
       </div>
       <div class="eyebrow" id="ov-urnas-hdr" style="margin-bottom:14px;display:none">Metas mensais por urna</div>
-      <div class="ov-cards" id="ov-urnas-cards" style="margin-bottom:56px;display:none"></div>
+      <div class="ov-urna-metas" id="ov-urnas-cards" style="display:none"></div>
       <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
       <div class="filter-box" style="margin-bottom:12px">
         <div class="filter-group">
@@ -1428,12 +1437,17 @@ async function renderOverview(trigger){
             return `<div class="ov-urna-row"><div class="ov-urna-info"><div class="ov-urna-name-row"><div class="ov-urna-name">${esc(nome)}</div>${hasMeta?`<div class="ov-urna-pct ${cls}">${pct}%</div>`:''}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${cls}" style="width:${pct}%"></div></div>${statusLabel?`<div class="ov-urna-sub ${cls}">${statusLabel}</div>`:''}</div><div class="ov-urna-count">${total}</div></div>`;
           };
           const spaMeta=METAS['spa']||0;
-          const spaRow=spaSiteCount>0?renderUrnaRow(spaSiteCount,'Gran SPA · site',spaMeta,spaMeta>0):'';
-          const urnaRows=allForPanel.map(r=>{
+          const mkZero=(n)=>`<div class="ov-urna-zero"><div class="ov-urna-zero-n">${esc(n)}</div><div class="ov-urna-zero-v">0</div></div>`;
+          const active=[],zeros=[];
+          if(spaSiteCount>0)active.push(renderUrnaRow(spaSiteCount,'Gran SPA · site',spaMeta,spaMeta>0));
+          allForPanel.forEach(r=>{
             const urnaMeta=METAS['urna:'+r.urna_id]||0;
-            return renderUrnaRow(r.total,r.nome,urnaMeta,urnaMeta>0);
-          }).join('');
-          urnaList.innerHTML=spaRow+urnaRows;
+            if(r.total>0||urnaMeta>0)active.push(renderUrnaRow(r.total,r.nome,urnaMeta,urnaMeta>0));
+            else zeros.push(mkZero(r.nome));
+          });
+          const activePart=active.length?`<div class="ov-urna-active">${active.join('')}</div>`:'';
+          const zeroPart=zeros.length?`<div class="ov-urna-zeros">${zeros.join('')}</div>`:'';
+          urnaList.innerHTML=activePart+zeroPart;
         }
       }
       // Seção "Metas mensais por urna" — cards individuais para todas as urnas do Hub
@@ -1443,9 +1457,8 @@ async function renderOverview(trigger){
           const pct=meta>0?Math.min(100,Math.round(count/meta*100)):null;
           const cls=pct!=null?(pct>=100?'ok':pct>=60?'mid':'low'):'';
           const faltam=meta>0?Math.max(0,meta-count):null;
-          const statusLabel=pct!=null?(pct>=100?'✓ Meta atingida':`faltam ${faltam}`):'sem meta';
-          const pills=(pesquisas||[]).map(p=>`<span class="ov-urna-pill">${esc(_PT[p]||p)}</span>`).join('');
-          return `<div class="ov-card ov-card--urna${pct!=null?' ov-card--'+cls:''}"><div class="ov-card-label">${esc(nome)}</div>${pills?`<div class="ov-urna-pills">${pills}</div>`:''}<div class="ov-card-kpi"><div class="ov-card-total">${count}</div>${pct!=null?`<div class="ov-card-pct ${cls}">${pct}%</div>`:''}</div><div class="ov-card-mes">${count}${meta>0?' de '+meta:''} este mês</div>${pct!=null?`<div class="ov-progress-bar"><div class="ov-progress-fill ${cls}" style="width:${pct}%"></div></div>`:''}<div class="ov-meta-badge ${cls}">${statusLabel}</div></div>`;
+          const statusLabel=meta>0?(pct>=100?'✓ Meta atingida':`faltam ${faltam} · meta ${meta}`):'sem meta';
+          return `<div class="ov-urna-row${cls?' '+cls:''}"><div class="ov-urna-info"><div class="ov-urna-name-row"><div class="ov-urna-name">${esc(nome)}</div>${pct!=null?`<div class="ov-urna-pct ${cls}">${pct}%</div>`:''}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${cls}" style="width:${pct!=null?pct:0}%"></div></div><div class="ov-urna-sub ${cls}">${statusLabel}</div></div><div class="ov-urna-count">${count}</div></div>`;
         };
         const urnaMetaHtml=allUrnas.map(u=>{
           const count=urnaCountMap[String(u.id)]||0;
