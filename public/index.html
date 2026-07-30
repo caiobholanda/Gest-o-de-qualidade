@@ -186,7 +186,9 @@ body{
 .ov-urna-zero{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 13px;background:var(--surface2);border-radius:9px;border:1px solid var(--border-soft)}
 .ov-urna-zero-n{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
 .ov-urna-zero-v{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:500;color:var(--text);line-height:1}
-.ov-urna-metas{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:56px}
+.ov-metas-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-bottom:56px}
+.ov-cards--pesq{grid-template-columns:repeat(2,1fr)!important}
+.ov-urna-metas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ov-urna-metas .ov-urna-row{padding:14px 16px;background:var(--surface);border:1px solid var(--border-soft);align-items:start}
 .ov-urna-metas .ov-urna-row.ok{border-left:3px solid var(--success)}
 .ov-urna-metas .ov-urna-row.mid{border-left:3px solid var(--warn)}
@@ -1317,16 +1319,22 @@ async function renderOverview(trigger){
           <div id="ov-urna-list" style="display:flex;flex-direction:column;gap:7px;flex:1"><div style="opacity:.35;font-size:.74rem;color:var(--muted)">carregando urnas…</div></div>
         </div>
       </div>
-      <div class="eyebrow" style="margin-bottom:14px">Metas mensais por pesquisa</div>
-      <div class="ov-cards">
-        <div id="ov-card-spa" class="ov-card" style="opacity:.35" data-goto="spa"><div class="ov-card-label">Gran SPA</div><div class="ov-card-total">—</div><div class="ov-card-mes">— este mês</div></div>
-        ${progressCard('geral','Geral da Qualidade','geral',0)}
-        ${progressCard('pdvs','PDVs','pdvs',0)}
-        ${progressCard('eventos-corp','Corporativos','eventos-corp',0)}
-        ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
+      <div class="ov-metas-row">
+        <div>
+          <div class="eyebrow" style="margin-bottom:14px">Metas mensais por pesquisa</div>
+          <div class="ov-cards ov-cards--pesq">
+            <div id="ov-card-spa" class="ov-card" style="opacity:.35" data-goto="spa"><div class="ov-card-label">Gran SPA</div><div class="ov-card-total">—</div><div class="ov-card-mes">— este mês</div></div>
+            ${progressCard('geral','Geral da Qualidade','geral',0)}
+            ${progressCard('pdvs','PDVs','pdvs',0)}
+            ${progressCard('eventos-corp','Corporativos','eventos-corp',0)}
+            ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
+          </div>
+        </div>
+        <div id="ov-urnas-col" style="display:none">
+          <div class="eyebrow" style="margin-bottom:14px">Metas mensais por urna</div>
+          <div class="ov-urna-metas" id="ov-urnas-cards"></div>
+        </div>
       </div>
-      <div class="eyebrow" id="ov-urnas-hdr" style="margin-bottom:14px;display:none">Metas mensais por urna</div>
-      <div class="ov-urna-metas" id="ov-urnas-cards" style="display:none"></div>
       <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
       <div class="filter-box" style="margin-bottom:12px">
         <div class="filter-group">
@@ -1469,10 +1477,10 @@ async function renderOverview(trigger){
           const meta=METAS['urna:'+String(u.id)]||0;
           return progressCardUrna(u.nome||`Urna ${String(u.id).slice(0,8)}`,u.pesquisas||[],count,meta);
         }).join('');
-        const urnaHdrEl=main.querySelector('#ov-urnas-hdr');
+        const urnaColEl=main.querySelector('#ov-urnas-col');
         const urnaCardsEl=main.querySelector('#ov-urnas-cards');
-        if(urnaHdrEl)urnaHdrEl.style.display='';
-        if(urnaCardsEl){urnaCardsEl.style.display='';urnaCardsEl.innerHTML=urnaMetaHtml;}
+        if(urnaColEl)urnaColEl.style.display='';
+        if(urnaCardsEl)urnaCardsEl.innerHTML=urnaMetaHtml;
       }
     }).catch(()=>{});
   }catch(e){
