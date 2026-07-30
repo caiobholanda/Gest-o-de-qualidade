@@ -127,6 +127,8 @@ const _LRATING_KEYS = {
                            'inf_conforto','inf_temperatura','inf_iluminacao','inf_limpeza','inf_acesso',
                            'wifi_apresentacao','wifi_facilidade','wifi_sinal','wifi_velocidade',
                            'ter_manobristas','ter_allug','ter_celular'],
+  spa: ['servicos_expectativa','servicos_explicacao','servicos_atitude','servicos_tecnica',
+        'instalacoes_conforto','instalacoes_organizacao','instalacoes_conveniencia'],
 };
 
 function computeLocalScore(tipo, payload) {
@@ -201,6 +203,12 @@ export function contarPorUrna({ mes = null } = {}) {
     GROUP BY JSON_EXTRACT(payload,'$.urna_id')
     ORDER BY total DESC
   `).all(...args);
+}
+
+export function contarSpaSite({ mes = null } = {}) {
+  const where = mes ? "WHERE app_origem='spa' AND substr(submitted_at,1,7) = ?" : "WHERE app_origem='spa'";
+  const args = mes ? [mes] : [];
+  return db.prepare(`SELECT COUNT(*) AS total FROM resposta ${where}`).get(...args).total;
 }
 
 export function listarMetas() {

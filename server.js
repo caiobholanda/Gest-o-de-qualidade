@@ -2,7 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { inserirResposta, listarRespostas, contarRespostas, buscarResposta, atualizarResposta, contarPorUrna, listarMetas, upsertMetas, listarAdmins, upsertAdmin, removerAdmin, buscarNivelAdmin } from './db.js';
+import { inserirResposta, listarRespostas, contarRespostas, buscarResposta, atualizarResposta, contarPorUrna, contarSpaSite, listarMetas, upsertMetas, listarAdmins, upsertAdmin, removerAdmin, buscarNivelAdmin } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -420,7 +420,7 @@ app.get('/api/stats-local', requireSession, (_req, res) => {
 app.get('/api/urnas-stats', requireSession, (req, res) => {
   try {
     const mes = req.query.mes || new Date().toISOString().slice(0, 7);
-    res.json({ ok: true, mes: contarPorUrna({ mes }) });
+    res.json({ ok: true, mes: contarPorUrna({ mes }), spa_site: contarSpaSite({ mes }) });
   } catch(e) { console.error('[urnas-stats]', e); res.status(500).json({ ok: false }); }
 });
 

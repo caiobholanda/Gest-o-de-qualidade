@@ -1397,24 +1397,30 @@ async function renderOverview(trigger){
       if(!stats||signal.aborted)return;
       const nameMap={};(hubUrnas||[]).forEach(u=>{nameMap[String(u.id)]=u.nome;});
       const rows=stats.mes||[];
-      const vinculado=rows.filter(r=>r.urna_id!=null).reduce((s,r)=>s+r.total,0);
+      const spaSiteCount=stats.spa_site||0;
+      const comUrna=rows.filter(r=>r.urna_id!=null);
+      const vinculado=comUrna.reduce((s,r)=>s+r.total,0)+spaSiteCount;
       const urnaTotal=main.querySelector('#ov-urna-total');
       if(urnaTotal)urnaTotal.innerHTML=`${vinculado}<span></span>`;
       const urnaList=main.querySelector('#ov-urna-list');
       if(!urnaList)return;
-      const comUrna=rows.filter(r=>r.urna_id!=null);
-      if(!comUrna.length){urnaList.innerHTML='<div style="opacity:.35;font-size:.74rem;color:var(--muted)">Nenhuma avaliação vinculada a urnas este mês.</div>';return;}
-      const maxVal=Math.max(...rows.map(r=>r.total),1);
-      urnaList.innerHTML=rows.map(r=>{
-        const nome=r.urna_id?(nameMap[String(r.urna_id)]||`Urna ${String(r.urna_id).slice(0,8)}`):'Sem urna';
-        const urnaMeta=r.urna_id?(METAS['urna:'+String(r.urna_id)]||0):0;
-        const hasMeta=urnaMeta>0;
-        const urnaPct=hasMeta?Math.min(100,Math.round(r.total/urnaMeta*100)):Math.round(r.total/maxVal*100);
-        const urnaCls=hasMeta?(urnaPct>=100?'ok':urnaPct>=60?'mid':'low'):'';
-        const urnaFaltam=hasMeta?Math.max(0,urnaMeta-r.total):null;
-        const urnaStatusLabel=hasMeta?(urnaPct>=100?'✓ Meta atingida':`faltam ${urnaFaltam} · meta ${urnaMeta}`):null;
-        return `<div class="ov-urna-row"><div class="ov-urna-info"><div class="ov-urna-name-row"><div class="ov-urna-name">${esc(nome)}</div>${hasMeta?`<div class="ov-urna-pct ${urnaCls}">${urnaPct}%</div>`:''}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${urnaCls}" style="width:${urnaPct}%"></div></div>${urnaStatusLabel?`<div class="ov-urna-sub ${urnaCls}">${urnaStatusLabel}</div>`:''}</div><div class="ov-urna-count">${r.total}</div></div>`;
+      if(!comUrna.length&&!spaSiteCount){urnaList.innerHTML='<div style="opacity:.35;font-size:.74rem;color:var(--muted)">Nenhuma avaliação vinculada a urnas este mês.</div>';return;}
+      const maxVal=Math.max(...comUrna.map(r=>r.total),spaSiteCount,1);
+      function renderUrnaRow(total,nome,urnaMeta,hasMeta){
+        const pct=hasMeta?Math.min(100,Math.round(total/urnaMeta*100)):Math.round(total/maxVal*100);
+        const cls=hasMeta?(pct>=100?'ok':pct>=60?'mid':'low'):'';
+        const faltam=hasMeta?Math.max(0,urnaMeta-total):null;
+        const statusLabel=hasMeta?(pct>=100?'✓ Meta atingida':`faltam ${faltam} · meta ${urnaMeta}`):null;
+        return `<div class="ov-urna-row"><div class="ov-urna-info"><div class="ov-urna-name-row"><div class="ov-urna-name">${esc(nome)}</div>${hasMeta?`<div class="ov-urna-pct ${cls}">${pct}%</div>`:''}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${cls}" style="width:${pct}%"></div></div>${statusLabel?`<div class="ov-urna-sub ${cls}">${statusLabel}</div>`:''}</div><div class="ov-urna-count">${total}</div></div>`;
+      }
+      const spaMeta=METAS['spa']||0;
+      const spaRow=spaSiteCount>0?renderUrnaRow(spaSiteCount,'Gran SPA · site',spaMeta,spaMeta>0):'';
+      const urnaRows=comUrna.map(r=>{
+        const nome=nameMap[String(r.urna_id)]||`Urna ${String(r.urna_id).slice(0,8)}`;
+        const urnaMeta=METAS['urna:'+String(r.urna_id)]||0;
+        return renderUrnaRow(r.total,nome,urnaMeta,urnaMeta>0);
       }).join('');
+      urnaList.innerHTML=spaRow+urnaRows;
     }).catch(()=>{});
   }catch(e){
     if(e.name==='AbortError')return;
