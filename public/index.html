@@ -502,19 +502,26 @@ body{
   .fi input,.fi select{font-size:16px}
 }
 /* ── Settings Overlay ── */
-.cfg-overlay{position:fixed;inset:0;z-index:600;display:flex;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .22s ease}
+.cfg-overlay{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:28px;opacity:0;pointer-events:none;transition:opacity .22s ease}
 .cfg-overlay.cfg-open{opacity:1;pointer-events:all}
 .cfg-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.cfg-panel{position:relative;width:500px;max-width:100vw;height:100%;background:var(--surface);border-left:1px solid var(--border-soft);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.25,.46,.45,.94);box-shadow:-24px 0 80px rgba(0,0,0,.18)}
-.cfg-overlay.cfg-open .cfg-panel{transform:translateX(0)}
-.cfg-hdr{position:sticky;top:0;z-index:2;background:var(--surface);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft)}
+.cfg-panel{position:relative;width:min(920px,100%);max-height:min(780px,94vh);background:var(--surface);border:1px solid var(--border-soft);border-radius:18px;display:flex;flex-direction:column;transform:translateY(16px) scale(.98);transition:transform .28s cubic-bezier(.16,1,.3,1);box-shadow:0 32px 90px rgba(0,0,0,.26);overflow:hidden}
+.cfg-overlay.cfg-open .cfg-panel{transform:translateY(0) scale(1)}
+.cfg-hdr{position:sticky;top:0;z-index:2;background:var(--surface);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft);flex-shrink:0}
 .cfg-hdr-left{display:flex;align-items:center;gap:12px}
 .cfg-gear-deco{width:28px;height:28px;background:var(--gold-dim);border:1px solid var(--gold-dim2);border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0}
 .cfg-title{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
 .cfg-close{background:none;border:1px solid var(--border-soft);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s;flex-shrink:0}
 .cfg-close:hover{border-color:var(--gold);color:var(--gold)}
-.cfg-body{flex:1;overflow-y:auto;padding:24px}
-.cfg-sec{margin-bottom:28px}
+.cfg-body{flex:1;overflow-y:auto;padding:26px 30px 30px}
+.cfg-cols{display:grid;grid-template-columns:minmax(280px,330px) 1px 1fr;gap:0 36px;align-items:start}
+.cfg-vdiv{width:1px;align-self:stretch;background:linear-gradient(to bottom,transparent,var(--gold-dim) 14%,var(--gold-dim) 86%,transparent)}
+.cfg-urna-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
+.cfg-urna-grid .cfg-row{padding:8px 0}
+.cfg-urna-grid .cfg-row-label{font-size:.8rem}
+.cfg-urna-grid .cfg-input{width:60px;font-size:.92rem;padding:5px 0}
+.cfg-urna-grid .cfg-input-unit{display:none}
+.cfg-sec{margin-bottom:0}
 .cfg-sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)}
 .cfg-sec-num{width:20px;height:20px;border-radius:50%;background:var(--gold-dim);color:var(--gold);font-size:.6rem;font-weight:800;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cfg-sec-title{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
@@ -526,14 +533,17 @@ body{
 .cfg-input:focus{border-color:var(--gold)}
 .cfg-input-unit{font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-align:center;margin-top:2px}
 .cfg-input-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
-.cfg-footer{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border-soft);padding:14px 24px;display:flex;align-items:center;gap:12px}
-.btn-cfg-save{flex:1;padding:11px 0;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .15s,opacity .15s}
+.cfg-footer{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border-soft);padding:14px 28px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.cfg-footer .cfg-msg{flex:1}
+.btn-cfg-save{margin-left:auto;padding:12px 30px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .15s,opacity .15s;flex-shrink:0}
 .btn-cfg-save:hover{background:var(--gold-dark)}
 .btn-cfg-save:disabled{opacity:.45;cursor:not-allowed}
 .cfg-msg{font-size:.78rem;padding:8px 12px;border-radius:7px;display:none}
 .cfg-msg.ok{color:var(--success);background:var(--success-dim)}
 .cfg-msg.err{color:var(--danger);background:var(--danger-dim)}
-.cfg-urnas-loading{padding:20px 0;text-align:center;color:var(--muted);font-size:.82rem}
+.cfg-urnas-loading{grid-column:1/-1;padding:20px 0;text-align:center;color:var(--muted);font-size:.82rem}
+@media(max-width:860px){.cfg-cols{grid-template-columns:1fr;gap:26px 0}.cfg-vdiv{display:none}.cfg-overlay{padding:14px}}
+@media(max-width:560px){.cfg-urna-grid{grid-template-columns:1fr}}
 .admin-wrap{max-width:700px;margin:32px auto;padding:0 20px}
 .admin-section{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;overflow:hidden;margin-bottom:20px}
 .admin-section-hdr{padding:14px 18px;border-bottom:1px solid var(--border-soft);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
@@ -2360,19 +2370,22 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
       : '<div class="cfg-urnas-loading">Carregando urnas…</div>';
 
     cfgBod.innerHTML = `
-      <div class="cfg-sec">
-        <div class="cfg-sec-hdr">
-          <div class="cfg-sec-num">1</div>
-          <span class="cfg-sec-title">Metas das Pesquisas</span>
+      <div class="cfg-cols">
+        <div class="cfg-sec">
+          <div class="cfg-sec-hdr">
+            <div class="cfg-sec-num">1</div>
+            <span class="cfg-sec-title">Metas das Pesquisas</span>
+          </div>
+          ${pesquisasRows}
         </div>
-        ${pesquisasRows}
-      </div>
-      <div class="cfg-sec">
-        <div class="cfg-sec-hdr">
-          <div class="cfg-sec-num">2</div>
-          <span class="cfg-sec-title">Metas das Urnas</span>
+        <div class="cfg-vdiv"></div>
+        <div class="cfg-sec">
+          <div class="cfg-sec-hdr">
+            <div class="cfg-sec-num">2</div>
+            <span class="cfg-sec-title">Metas das Urnas · por mês</span>
+          </div>
+          <div id="_cfgUrnasList" class="cfg-urna-grid">${urnasContent}</div>
         </div>
-        <div id="_cfgUrnasList">${urnasContent}</div>
       </div>`;
 
     if (!urnasCached) {
