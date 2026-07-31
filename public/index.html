@@ -502,10 +502,10 @@ body{
   .fi input,.fi select{font-size:16px}
 }
 /* ── Settings Overlay ── */
-.cfg-overlay{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:28px;opacity:0;pointer-events:none;transition:opacity .22s ease}
+.cfg-overlay{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .22s ease}
 .cfg-overlay.cfg-open{opacity:1;pointer-events:all}
 .cfg-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.cfg-panel{position:relative;width:min(920px,100%);max-height:min(780px,94vh);background:var(--surface);border:1px solid var(--border-soft);border-radius:18px;display:flex;flex-direction:column;transform:translateY(16px) scale(.98);transition:transform .28s cubic-bezier(.16,1,.3,1);box-shadow:0 32px 90px rgba(0,0,0,.26);overflow:hidden}
+.cfg-panel{position:relative;width:min(1080px,100%);max-height:96vh;background:var(--surface);border:1px solid var(--border-soft);border-radius:18px;display:flex;flex-direction:column;transform:translateY(16px) scale(.98);transition:transform .28s cubic-bezier(.16,1,.3,1);box-shadow:0 32px 90px rgba(0,0,0,.26);overflow:hidden}
 .cfg-overlay.cfg-open .cfg-panel{transform:translateY(0) scale(1)}
 .cfg-hdr{position:sticky;top:0;z-index:2;background:var(--surface);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft);flex-shrink:0}
 .cfg-hdr-left{display:flex;align-items:center;gap:12px}
@@ -513,20 +513,21 @@ body{
 .cfg-title{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
 .cfg-close{background:none;border:1px solid var(--border-soft);border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s;flex-shrink:0}
 .cfg-close:hover{border-color:var(--gold);color:var(--gold)}
-.cfg-body{flex:1;overflow-y:auto;padding:26px 30px 30px}
-.cfg-cols{display:grid;grid-template-columns:minmax(280px,330px) 1px 1fr;gap:0 36px;align-items:start}
+.cfg-body{flex:1;overflow-y:auto;padding:18px 26px 20px}
+.cfg-cols{display:grid;grid-template-columns:minmax(250px,300px) 1px 1fr;gap:0 30px;align-items:start}
 .cfg-vdiv{width:1px;align-self:stretch;background:linear-gradient(to bottom,transparent,var(--gold-dim) 14%,var(--gold-dim) 86%,transparent)}
-.cfg-urna-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
-.cfg-urna-grid .cfg-row{padding:7px 6px}
-.cfg-urna-grid .cfg-row-label{font-size:.8rem}
-.cfg-urna-grid .cfg-input{width:56px;font-size:.88rem;padding:5px 4px}
+.cfg-urna-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 22px}
+.cfg-urna-grid .cfg-row{padding:5px 6px;border-bottom:none}
+.cfg-urna-grid .cfg-row-label{font-size:.76rem}
+.cfg-urna-grid .cfg-input{width:50px;font-size:.84rem;padding:4px 3px}
+.cfg-urna-grid .cfg-input-unit{font-size:.56rem}
 .cfg-sec{margin-bottom:0}
 .cfg-sec-hdr{display:flex;align-items:baseline;gap:16px;margin-bottom:12px}
 .cfg-sec-hdr .ovx-band-rule{transform:translateY(-3px)}
 .cfg-sec-title{font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
-.cfg-group-cap{grid-column:1/-1;font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin:14px 0 2px;padding-bottom:5px;border-bottom:1px solid var(--gold-dim)}
+.cfg-group-cap{grid-column:1/-1;font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin:10px 0 1px;padding-bottom:4px;border-bottom:1px solid var(--gold-dim)}
 .cfg-group-cap:first-child{margin-top:0}
-.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:9px 6px;border-bottom:1px solid var(--border-soft);gap:16px;border-radius:7px;transition:background .15s}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:7px 6px;border-bottom:1px solid var(--border-soft);gap:14px;border-radius:7px;transition:background .15s}
 .cfg-row:hover{background:var(--gold-dim2)}
 .cfg-row:last-child{border-bottom:none}
 .cfg-row-label{font-size:.86rem;color:var(--text);flex:1;line-height:1.35}
@@ -535,7 +536,7 @@ body{
 .cfg-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
 .cfg-input-unit{font-size:.62rem;color:var(--muted);letter-spacing:.04em;white-space:nowrap}
 .cfg-input-wrap{display:flex;align-items:center;gap:7px;flex-shrink:0}
-.cfg-footer{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border-soft);padding:14px 28px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.cfg-footer{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border-soft);padding:10px 26px;display:flex;align-items:center;gap:14px;flex-shrink:0}
 .cfg-footer .cfg-msg{flex:1}
 .btn-cfg-save{margin-left:auto;padding:12px 30px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .15s,opacity .15s;flex-shrink:0}
 .btn-cfg-save:hover{background:var(--gold-dark)}
@@ -544,7 +545,8 @@ body{
 .cfg-msg.ok{color:var(--success);background:var(--success-dim)}
 .cfg-msg.err{color:var(--danger);background:var(--danger-dim)}
 .cfg-urnas-loading{grid-column:1/-1;padding:20px 0;text-align:center;color:var(--muted);font-size:.82rem}
-@media(max-width:860px){.cfg-cols{grid-template-columns:1fr;gap:26px 0}.cfg-vdiv{display:none}.cfg-overlay{padding:14px}}
+@media(max-width:1120px){.cfg-urna-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.cfg-cols{grid-template-columns:1fr;gap:26px 0}.cfg-vdiv{display:none}.cfg-overlay{padding:12px}}
 @media(max-width:560px){.cfg-urna-grid{grid-template-columns:1fr}}
 .admin-wrap{max-width:700px;margin:32px auto;padding:0 20px}
 .admin-section{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;overflow:hidden;margin-bottom:20px}
@@ -2470,7 +2472,7 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
 
   document.getElementById('btnSettings')?.addEventListener('click', cfgOpen);
   document.addEventListener('click', e => {
-    if (e.target.id === 'cfgClose' || e.target.id === 'cfgBackdrop') cfgClose();
+    if (e.target.id === 'cfgClose') cfgClose();
     if (e.target.id === 'btnCfgSave') _saveCfg();
   });
   document.addEventListener('keydown', e => {
