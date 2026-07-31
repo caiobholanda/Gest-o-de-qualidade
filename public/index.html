@@ -517,22 +517,24 @@ body{
 .cfg-cols{display:grid;grid-template-columns:minmax(280px,330px) 1px 1fr;gap:0 36px;align-items:start}
 .cfg-vdiv{width:1px;align-self:stretch;background:linear-gradient(to bottom,transparent,var(--gold-dim) 14%,var(--gold-dim) 86%,transparent)}
 .cfg-urna-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
-.cfg-urna-grid .cfg-row{padding:8px 0}
+.cfg-urna-grid .cfg-row{padding:7px 6px}
 .cfg-urna-grid .cfg-row-label{font-size:.8rem}
-.cfg-urna-grid .cfg-input{width:60px;font-size:.92rem;padding:5px 0}
-.cfg-urna-grid .cfg-input-unit{display:none}
+.cfg-urna-grid .cfg-input{width:56px;font-size:.88rem;padding:5px 4px}
 .cfg-sec{margin-bottom:0}
-.cfg-sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)}
-.cfg-sec-num{width:20px;height:20px;border-radius:50%;background:var(--gold-dim);color:var(--gold);font-size:.6rem;font-weight:800;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cfg-sec-title{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border-soft);gap:16px}
+.cfg-sec-hdr{display:flex;align-items:baseline;gap:16px;margin-bottom:12px}
+.cfg-sec-hdr .ovx-band-rule{transform:translateY(-3px)}
+.cfg-sec-title{font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.cfg-group-cap{grid-column:1/-1;font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin:14px 0 2px;padding-bottom:5px;border-bottom:1px solid var(--gold-dim)}
+.cfg-group-cap:first-child{margin-top:0}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:9px 6px;border-bottom:1px solid var(--border-soft);gap:16px;border-radius:7px;transition:background .15s}
+.cfg-row:hover{background:var(--gold-dim2)}
 .cfg-row:last-child{border-bottom:none}
-.cfg-row-label{font-size:.88rem;color:var(--text);flex:1;line-height:1.35}
-.cfg-row-sub{font-size:.68rem;color:var(--muted);margin-top:1px}
-.cfg-input{width:76px;padding:7px 0;border:none;border-bottom:2px solid var(--border);background:transparent;color:var(--text);font-size:1rem;font-family:'JetBrains Mono',ui-monospace,monospace;text-align:center;outline:none;transition:border-color .18s}
-.cfg-input:focus{border-color:var(--gold)}
-.cfg-input-unit{font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-align:center;margin-top:2px}
-.cfg-input-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.cfg-row-label{font-size:.86rem;color:var(--text);flex:1;line-height:1.35}
+.cfg-row-sub{font-size:.66rem;color:var(--muted);margin-top:1px}
+.cfg-input{width:62px;padding:7px 4px;border:1px solid var(--border-soft);border-radius:8px;background:var(--surface2);color:var(--text);font-size:.94rem;text-align:center;outline:none;transition:border-color .18s,box-shadow .18s;font-variant-numeric:tabular-nums}
+.cfg-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+.cfg-input-unit{font-size:.62rem;color:var(--muted);letter-spacing:.04em;white-space:nowrap}
+.cfg-input-wrap{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .cfg-footer{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border-soft);padding:14px 28px;display:flex;align-items:center;gap:14px;flex-shrink:0}
 .cfg-footer .cfg-msg{flex:1}
 .btn-cfg-save{margin-left:auto;padding:12px 30px;background:var(--gold);color:#fff;border:none;border-radius:9px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .15s,opacity .15s;flex-shrink:0}
@@ -2331,15 +2333,32 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
 
   function _cfgUrnasRows(urnas) {
     if (!urnas || !urnas.length)
-      return '<div style="padding:16px 0;color:var(--muted);font-size:.82rem">Nenhuma urna cadastrada no Hub.</div>';
-    return urnas.map(u => `
+      return '<div style="padding:16px 0;color:var(--muted);font-size:.82rem;grid-column:1/-1">Nenhuma urna cadastrada no Hub.</div>';
+    const grupos = [
+      ['Hotel · Geral', u => (u.pesquisas||[]).some(t => t.startsWith('geral'))],
+      ['Restaurantes & Bares', u => (u.pesquisas||[]).some(t => t.startsWith('pdvs'))],
+      ['Eventos', u => (u.pesquisas||[]).some(t => t.startsWith('eventos'))],
+      ['Gran SPA', u => (u.pesquisas||[]).includes('spa')],
+    ];
+    const usadas = new Set();
+    const row = u => `
       <div class="cfg-row">
         <div class="cfg-row-label">${esc(u.nome||String(u.id))}</div>
         <div class="cfg-input-wrap">
           <input class="cfg-input" type="number" min="0" step="1" id="cfgU_${esc(String(u.id))}" value="${METAS['urna:'+u.id]||0}" inputmode="numeric">
           <div class="cfg-input-unit">/ mês</div>
         </div>
-      </div>`).join('');
+      </div>`;
+    let html = '';
+    for (const [titulo, pred] of grupos) {
+      const doGrupo = urnas.filter(u => !usadas.has(u.id) && pred(u));
+      if (!doGrupo.length) continue;
+      doGrupo.forEach(u => usadas.add(u.id));
+      html += `<div class="cfg-group-cap">${titulo}</div>` + doGrupo.map(row).join('');
+    }
+    const resto = urnas.filter(u => !usadas.has(u.id));
+    if (resto.length) html += `<div class="cfg-group-cap">Outras</div>` + resto.map(row).join('');
+    return html;
   }
 
   function cfgOpen() {
@@ -2373,16 +2392,16 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
       <div class="cfg-cols">
         <div class="cfg-sec">
           <div class="cfg-sec-hdr">
-            <div class="cfg-sec-num">1</div>
             <span class="cfg-sec-title">Metas das Pesquisas</span>
+            <span class="ovx-band-rule"></span>
           </div>
           ${pesquisasRows}
         </div>
         <div class="cfg-vdiv"></div>
         <div class="cfg-sec">
           <div class="cfg-sec-hdr">
-            <div class="cfg-sec-num">2</div>
-            <span class="cfg-sec-title">Metas das Urnas · por mês</span>
+            <span class="cfg-sec-title">Metas das Urnas</span>
+            <span class="ovx-band-rule"></span>
           </div>
           <div id="_cfgUrnasList" class="cfg-urna-grid">${urnasContent}</div>
         </div>
