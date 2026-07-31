@@ -462,6 +462,7 @@ body{
   .ov-cards{grid-template-columns:1fr 1fr;margin-bottom:44px}
 }
 @media(max-width:480px){
+  .ov-urna-grid{grid-template-columns:1fr}
   .hdr{padding:0 14px;height:52px}
   .hdr-brand em{display:none}
   .hdr-sep{display:none}
@@ -627,6 +628,7 @@ Promise.all([
   }
   if (met.ok && met.metas) {
     Object.assign(METAS, met.metas);
+    if (activeTab === 'overview') render('metas');
   }
 });
 
@@ -2419,6 +2421,7 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
       if (!d.ok) throw new Error(d.error || 'Erro');
       entries.forEach(e => { METAS[e.tipo] = e.valor; });
       _cfgShow('Salvo com sucesso ✓', 'ok');
+      render('metas');
     } catch(e) {
       _cfgShow(e.message, 'err');
     } finally {
