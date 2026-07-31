@@ -1417,8 +1417,13 @@ async function renderOverview(trigger){
             return `<div class="ov-card ${cls}" style="cursor:default"><div class="ovx-row-label">${esc(nome)}</div><div class="ovx-row-frac"><b>${total}</b>${hasMeta?` / ${meta}`:''}</div><div class="ovx-row-bar"><i class="${cls}" style="width:${pct}%"></i></div><div class="ovx-row-pct ${cls}">${hasMeta?pct+'%':'—'}</div><div class="ovx-row-status ${cls}">${status}</div></div>`;
           };
           const cells=[];
-          if(spaSiteCount>0)cells.push({nome:'Gran SPA · site',total:spaSiteCount,meta:METAS['spa']||0});
           allForPanel.forEach(r=>cells.push({nome:r.nome||'',total:r.total,meta:METAS['urna:'+r.urna_id]||0}));
+          if(spaSiteCount>0){
+            // Pesquisas do site do SPA contam na urna física "Gran SPA"
+            const spaCell=cells.find(c=>/gran\s*spa/i.test(c.nome));
+            if(spaCell){spaCell.total+=spaSiteCount;if(!(spaCell.meta>0))spaCell.meta=METAS['spa']||0;}
+            else cells.push({nome:'Gran SPA',total:spaSiteCount,meta:METAS['spa']||0});
+          }
           cells.sort((a,b)=>(b.total-a.total)||((b.meta>0)-(a.meta>0))||a.nome.localeCompare(b.nome));
           const ativos=cells.filter(c=>c.total>0||c.meta>0);
           const zerados=cells.filter(c=>!(c.total>0||c.meta>0));
