@@ -1414,7 +1414,7 @@ async function renderOverview(trigger){
             const hasMeta=meta>0;
             const pct=hasMeta?Math.min(100,Math.round(total/meta*100)):0;
             const cls=hasMeta?(pct>=100?'ok':pct>=60?'mid':'low'):'';
-            const status=hasMeta?(pct>=100?'✓ Meta atingida':`faltam ${Math.max(0,meta-total)} · meta ${meta}`):'sem meta';
+            const status=hasMeta?(pct>=100?'✓ Meta atingida':`faltam ${Math.max(0,meta-total)}`):'sem meta';
             return `<div class="ov-card ${cls}" style="cursor:default"><div class="ovx-row-label">${esc(nome)}</div><div class="ovx-row-frac"><b>${total}</b>${hasMeta?` / ${meta}`:''}</div><div class="ovx-row-bar"><i class="${cls}" style="width:${pct}%"></i></div><div class="ovx-row-pct ${cls}">${hasMeta?pct+'%':'—'}</div><div class="ovx-row-status ${cls}">${status}</div></div>`;
           };
           const cells=[];
