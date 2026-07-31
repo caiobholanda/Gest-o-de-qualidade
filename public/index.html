@@ -1388,18 +1388,17 @@ async function renderOverview(trigger){
     // Urnas stats — cruza GQ local com nomes do Hub
     Promise.all([
       fetch('/api/urnas-stats',{signal}).then(r=>r.ok?r.json():null).catch(()=>null),
-      _loadUrnas()
-    ]).then(([stats,hubUrnas])=>{
+      _loadUrnas(),
+      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${today}`,{signal}).then(r=>r.ok?r.json():null).catch(()=>null)
+    ]).then(([stats,hubUrnas,spaStats])=>{
       if(!stats||signal.aborted)return;
       const allUrnas=hubUrnas||[];
       const nameMap={};allUrnas.forEach(u=>{nameMap[String(u.id)]=u.nome;});
       const rows=stats.mes||[];
-      const spaSiteCount=stats.spa_site||0;
+      // A urna Gran SPA só recebe pesquisas do site — espelha o total do SPA no mês
+      const spaSiteCount=Math.max(spaStats?.total||0,stats.spa_site||0);
       const comUrna=rows.filter(r=>r.urna_id!=null);
       const urnaCountMap={};comUrna.forEach(r=>{if(r.urna_id!=null)urnaCountMap[String(r.urna_id)]=r.total;});
-      const vinculado=comUrna.reduce((s,r)=>s+r.total,0)+spaSiteCount;
-      const urnaTotal=main.querySelector('#ov-urna-total');
-      if(urnaTotal)urnaTotal.innerHTML=`${vinculado}<small>vinculadas este mês</small>`;
       const urnaList=main.querySelector('#ov-urna-list');
       if(urnaList){
         // Painel herói: mostra todas as urnas do Hub (mesmo com 0 avaliações)
@@ -1408,6 +1407,8 @@ async function renderOverview(trigger){
           :comUrna.map(r=>({urna_id:String(r.urna_id),total:r.total,nome:nameMap[String(r.urna_id)]||`Urna ${String(r.urna_id).slice(0,8)}`}));
         if(!allForPanel.length&&!spaSiteCount){
           urnaList.innerHTML='<div style="opacity:.35;font-size:.74rem;color:var(--muted);padding:14px 10px">Nenhuma urna cadastrada no Hub.</div>';
+          const ut0=main.querySelector('#ov-urna-total');
+          if(ut0)ut0.innerHTML='0<small>vinculadas este mês</small>';
         }else{
           const mkRow=(nome,total,meta)=>{
             const hasMeta=meta>0;
@@ -1418,12 +1419,13 @@ async function renderOverview(trigger){
           };
           const cells=[];
           allForPanel.forEach(r=>cells.push({nome:r.nome||'',total:r.total,meta:METAS['urna:'+r.urna_id]||0}));
-          if(spaSiteCount>0){
-            // Pesquisas do site do SPA contam na urna física "Gran SPA"
-            const spaCell=cells.find(c=>/gran\s*spa/i.test(c.nome));
-            if(spaCell){spaCell.total+=spaSiteCount;if(!(spaCell.meta>0))spaCell.meta=METAS['spa']||0;}
-            else cells.push({nome:'Gran SPA',total:spaSiteCount,meta:METAS['spa']||0});
-          }
+          // A urna Gran SPA espelha o total de pesquisas do site (única fonte dela)
+          const spaCell=cells.find(c=>/gran\s*spa/i.test(c.nome));
+          if(spaCell){spaCell.total=spaSiteCount;if(!(spaCell.meta>0))spaCell.meta=METAS['spa']||0;}
+          else if(spaSiteCount>0)cells.push({nome:'Gran SPA',total:spaSiteCount,meta:METAS['spa']||0});
+          const vinculado=cells.reduce((s,c)=>s+c.total,0);
+          const urnaTotal=main.querySelector('#ov-urna-total');
+          if(urnaTotal)urnaTotal.innerHTML=`${vinculado}<small>vinculadas este mês</small>`;
           cells.sort((a,b)=>(b.total-a.total)||((b.meta>0)-(a.meta>0))||a.nome.localeCompare(b.nome));
           const ativos=cells.filter(c=>c.total>0||c.meta>0);
           const zerados=cells.filter(c=>!(c.total>0||c.meta>0));
