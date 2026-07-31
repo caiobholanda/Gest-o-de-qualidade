@@ -6,7 +6,7 @@
 <title>Gestão da Qualidade — Gran Marquise</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='5' fill='%239C5843'/><text x='16' y='23' font-size='19' fill='white' font-family='Georgia,serif' text-anchor='middle'>G</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -121,60 +121,58 @@ body{
 .tab:hover:not(.tab-active){color:var(--gold-dark)}
 
 /* ── Overview ── */
-.ov-hero-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:52px;align-items:start}
-.ov-hero{border:1px solid var(--border);border-radius:16px;padding:28px 28px 22px;display:flex;flex-direction:column;gap:14px}
-.ov-hero-val{font-family:'Helvetica Neue',Arial,sans-serif;font-weight:200;font-size:4rem;line-height:1;color:var(--text);letter-spacing:-.03em}
-.ov-hero-val span{font-size:2rem;color:var(--gold);font-weight:300}
-.ov-hero-sub{font-size:.7rem;color:var(--muted)}
-.ov-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
-.ov-stat{background:var(--surface2);border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:3px}
-.ov-stat-val{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:500;color:var(--text)}
-.ov-stat-label{font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.ov-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:56px}
-.ov-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:13px;padding:20px 20px 16px;display:flex;flex-direction:column;gap:9px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
-.ov-card:hover{border-color:var(--border);box-shadow:0 4px 28px var(--gold-dim)}
-.ov-card-label{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
-.ov-card-total{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:2rem;line-height:1;color:var(--text)}
-.ov-card-mes{font-size:.7rem;color:var(--muted)}
 @keyframes _barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.ov-progress-bar{height:5px;border-radius:3px;background:var(--border-soft);overflow:hidden;margin:1px 0}
-.ov-progress-fill{height:100%;border-radius:3px;transform-origin:left;animation:_barIn .75s cubic-bezier(.16,1,.3,1) both}
-.ov-progress-fill.ok{background:var(--success)}
-.ov-progress-fill.mid{background:var(--warn)}
-.ov-progress-fill.low{background:var(--danger)}
-.ov-card--ok{border-left:3px solid var(--success)}
-.ov-card--mid{border-left:3px solid var(--warn)}
-.ov-card--low{border-left:3px solid var(--danger)}
-.ov-card-kpi{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
-.ov-card-pct{font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;padding:3px 8px;border-radius:6px;line-height:1.5;white-space:nowrap;flex-shrink:0}
-.ov-card-pct.ok{color:var(--success);background:var(--success-dim)}
-.ov-card-pct.mid{color:var(--warn);background:var(--warn-dim)}
-.ov-card-pct.low{color:var(--danger);background:var(--danger-dim)}
-.ov-meta-badge{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;width:fit-content}
-.ov-meta-badge.ok{color:var(--success);background:var(--success-dim)}
-.ov-meta-badge.mid{color:var(--warn);background:var(--warn-dim)}
-.ov-meta-badge.low{color:var(--danger);background:var(--danger-dim)}
-.ov-tipo-row{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border-soft)}
+@keyframes _rowIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* ── Visão Geral · ledger editorial ── */
+.ovx-hero{display:grid;grid-template-columns:minmax(250px,.85fr) 1px 1.35fr;gap:0 44px;align-items:center;padding:38px 8px 44px;border-bottom:1px solid var(--border-soft);margin-bottom:46px;animation:_rowIn .5s cubic-bezier(.16,1,.3,1) both}
+.ovx-hero-num{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:6.4rem;line-height:.9;color:var(--text);letter-spacing:-.02em;font-variant-numeric:lining-nums}
+.ovx-hero-num em{font-style:normal;font-size:1.9rem;color:var(--gold);margin-left:6px;letter-spacing:.02em}
+.ovx-hero-sub{font-size:.72rem;color:var(--muted);margin-top:12px}
+.ovx-hero-div{width:1px;align-self:stretch;background:linear-gradient(to bottom,transparent,var(--gold-dim) 18%,var(--gold-dim) 82%,transparent)}
+.ov-tipo-row{display:grid;grid-template-columns:118px 1fr 48px;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft)}
 .ov-tipo-row:last-child{border-bottom:0}
-.ov-tipo-name{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.ov-tipo-bar{height:3px;background:var(--border-soft);border-radius:2px;overflow:hidden}
+.ov-tipo-name{font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ov-tipo-bar{height:2px;background:var(--border-soft);border-radius:2px;overflow:hidden}
 .ov-tipo-bar-fill{height:100%;background:var(--gold);border-radius:2px;transform-origin:left;animation:_barIn .75s cubic-bezier(.16,1,.3,1) both}
-.ov-tipo-bar-fill.ok{background:var(--success)}
-.ov-tipo-bar-fill.mid{background:var(--warn)}
-.ov-tipo-bar-fill.low{background:var(--danger)}
-.ov-tipo-count{font-family:'JetBrains Mono',monospace;font-size:.92rem;font-weight:600;color:var(--text);text-align:right}
-.ov-urna-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ov-urna-cell{display:flex;flex-direction:column;gap:7px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border-soft);border-radius:10px;min-width:0;transition:border-color .15s}
-.ov-urna-cell:hover{border-color:var(--gold-dim)}
-.ov-urna-cell-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-.ov-urna-cell-n{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ov-urna-cell-v{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:500;color:var(--text);line-height:1;flex-shrink:0}
-.ov-urna-cell .ov-tipo-bar{height:3px}
-.ov-urna-cell-sub{font-size:.56rem;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px}
-.ov-urna-cell-sub .pct{font-family:'JetBrains Mono',monospace;font-weight:700}
-.ov-urna-cell-sub.ok,.ov-urna-cell-sub.ok .pct{color:var(--success)}
-.ov-urna-cell-sub.mid,.ov-urna-cell-sub.mid .pct{color:var(--warn)}
-.ov-urna-cell-sub.low,.ov-urna-cell-sub.low .pct{color:var(--danger)}
+.ov-tipo-count{font-family:'JetBrains Mono',monospace;font-size:.92rem;font-weight:600;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+
+.ovx-band{margin-bottom:52px}
+.ovx-band-hd{display:flex;align-items:baseline;gap:18px;margin-bottom:6px}
+.ovx-band-hd .eyebrow{flex-shrink:0}
+.ovx-band-rule{flex:1;height:1px;background:linear-gradient(to right,var(--gold-dim),transparent);transform:translateY(-3px)}
+.ovx-band-kpi{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;color:var(--gold);flex-shrink:0}
+.ovx-band-kpi small{font-family:'Helvetica Neue',Arial,sans-serif;font-size:.62rem;font-weight:400;color:var(--muted);margin-left:5px}
+
+.ovx-ledger{display:flex;flex-direction:column}
+.ov-card{display:grid;grid-template-columns:minmax(150px,220px) 86px 1fr 54px minmax(120px,150px);align-items:center;gap:18px;padding:15px 10px;border-bottom:1px solid var(--border-soft);cursor:pointer;position:relative;transition:background .18s;animation:_rowIn .5s cubic-bezier(.16,1,.3,1) both}
+.ov-card:nth-child(2){animation-delay:.05s}.ov-card:nth-child(3){animation-delay:.1s}.ov-card:nth-child(4){animation-delay:.15s}.ov-card:nth-child(5){animation-delay:.2s}
+.ov-card:last-child{border-bottom:0}
+.ov-card[data-goto]:hover{background:var(--gold-dim2)}
+.ov-card::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:2px;border-radius:2px;background:transparent}
+.ov-card.ok::before{background:var(--success)}
+.ov-card.mid::before{background:var(--warn)}
+.ov-card.low::before{background:var(--danger)}
+.ovx-row-label{font-size:.78rem;font-weight:500;color:var(--text);padding-left:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ovx-row-frac{font-family:'JetBrains Mono',monospace;font-size:.84rem;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ovx-row-frac b{font-size:1.02rem;font-weight:600;color:var(--text)}
+.ovx-row-bar{height:2px;background:var(--border-soft);border-radius:2px;overflow:hidden}
+.ovx-row-bar i{display:block;height:100%;border-radius:2px;background:var(--gold);transform-origin:left;animation:_barIn .8s cubic-bezier(.16,1,.3,1) both}
+.ovx-row-bar i.ok{background:var(--success)}
+.ovx-row-bar i.mid{background:var(--warn)}
+.ovx-row-bar i.low{background:var(--danger)}
+.ovx-row-pct{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.ovx-row-pct.ok{color:var(--success)}
+.ovx-row-pct.mid{color:var(--warn)}
+.ovx-row-pct.low{color:var(--danger)}
+.ovx-row-status{font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:var(--muted2);text-align:right;white-space:nowrap}
+.ovx-row-status.ok{color:var(--success)}
+.ovx-row-status.mid{color:var(--warn)}
+.ovx-row-status.low{color:var(--danger)}
+
+.ovx-zeros{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:16px 10px 0}
+.ovx-zeros-label{font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--muted2);margin-right:6px}
+.ovx-pill{font-size:.64rem;color:var(--muted);padding:4px 11px;border:1px solid var(--border-soft);border-radius:20px;background:var(--surface);white-space:nowrap}
 
 /* ── Layout ── */
 .main{max-width:1260px;margin:0 auto;padding:52px 48px 100px}
@@ -445,7 +443,8 @@ body{
   .tab{white-space:nowrap;flex:none;margin-bottom:0}
   .main{padding:28px 20px 60px}
   .kpi-grid{grid-template-columns:1fr 1fr}
-  .ov-cards{grid-template-columns:repeat(3,1fr)}
+  .ov-card{grid-template-columns:minmax(110px,1fr) 76px 1fr 46px;gap:12px}
+  .ovx-row-status{display:none}
   .q-row{grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:10px 12px}
   .q-bar{grid-column:1/-1}
   .comment-grid{grid-template-columns:1fr}
@@ -458,11 +457,10 @@ body{
   .q-list{margin-bottom:48px}
 }
 @media(max-width:680px){
-  .ov-hero-row{grid-template-columns:1fr;gap:14px;margin-bottom:40px}
-  .ov-cards{grid-template-columns:1fr 1fr;margin-bottom:44px}
+  .ovx-hero{grid-template-columns:1fr;gap:26px;padding:20px 0 30px;margin-bottom:36px}
+  .ovx-hero-div{display:none}
 }
 @media(max-width:480px){
-  .ov-urna-grid{grid-template-columns:1fr}
   .hdr{padding:0 14px;height:52px}
   .hdr-brand em{display:none}
   .hdr-sep{display:none}
@@ -495,8 +493,9 @@ body{
   .tbl-wrap{border-radius:10px}
   .btn-nova-pesquisa{padding:8px 12px;font-size:.6rem;letter-spacing:.08em}
   .hdr-brand img{height:22px}
-  .ov-hero{padding:20px 18px 16px}
-  .ov-hero-val{font-size:3rem}
+  .ovx-hero-num{font-size:4.4rem}
+  .ov-card{grid-template-columns:1fr 70px 44px;gap:10px}
+  .ovx-row-bar{display:none}
   .ov-tipo-row{grid-template-columns:84px 1fr 36px;gap:8px}
   .ov-tipo-name{white-space:normal}
   /* iOS Safari: inputs/selects com fonte <16px disparam zoom no foco. */
@@ -1263,15 +1262,12 @@ async function renderOverview(trigger){
       const cls=pct>=100?'ok':pct>=60?'mid':'low';
       const faltam=Math.max(0,meta-mes);
       const statusLabel=pct>=100?'✓ Meta atingida':`faltam ${faltam}`;
-      return `<div class="ov-card ov-card--${cls}" data-goto="${tab}">
-        <div class="ov-card-label">${esc(label)}</div>
-        <div class="ov-card-kpi">
-          <div class="ov-card-total">${key==='spa'?spaMes:total}</div>
-          <div class="ov-card-pct ${cls}">${pct}%</div>
-        </div>
-        <div class="ov-card-mes">${mes} de ${meta} este mês</div>
-        <div class="ov-progress-bar"><div class="ov-progress-fill ${cls}" style="width:${pct}%"></div></div>
-        <div class="ov-meta-badge ${cls}">${statusLabel}</div>
+      return `<div class="ov-card ${cls}" data-goto="${tab}">
+        <div class="ovx-row-label">${esc(label)}</div>
+        <div class="ovx-row-frac"><b>${mes}</b> / ${meta}</div>
+        <div class="ovx-row-bar"><i class="${cls}" style="width:${pct}%"></i></div>
+        <div class="ovx-row-pct ${cls}">${pct}%</div>
+        <div class="ovx-row-status ${cls}">${statusLabel}</div>
       </div>`;
     }
 
@@ -1285,30 +1281,29 @@ async function renderOverview(trigger){
     const _tipoMax=Math.max(localMes,1);
     const tipoRowsHtml=[..._tipoData,{key:'spa',label:'Gran SPA',val:0}].map(t=>`<div class="ov-tipo-row" id="ov-tipo-${t.key}"><div class="ov-tipo-name">${t.label}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill" id="ov-bar-${t.key}" style="width:${t.key==='spa'?0:Math.round(t.val/_tipoMax*100)}%"></div></div><div class="ov-tipo-count" id="ov-cnt-${t.key}">${t.key==='spa'?'<span style="opacity:.3">—</span>':t.val}</div></div>`).join('');
     main.innerHTML=`
-      <div class="eyebrow" style="margin-bottom:6px">Bom dia</div>
-      <div class="kpis-hdr" style="margin-bottom:36px"><div class="eyebrow">Visão geral — todas as pesquisas</div></div>
-      <div class="ov-hero-row">
-        <div class="ov-hero" style="background:linear-gradient(140deg,var(--surface) 0%,var(--gold-dim2) 100%);box-shadow:0 6px 32px var(--gold-dim);gap:0">
-          <div class="ov-card-label" style="margin-bottom:10px">Pesquisas este mês</div>
-          <div class="ov-hero-val" id="ov-total-val">${localMes}<span></span></div>
-          <div class="ov-hero-sub" id="ov-acumulado-sub" style="margin-bottom:20px">avaliações em todos os setores · acumulado: ${localTotal}</div>
-          <div>${tipoRowsHtml}</div>
+      <div class="ovx-hero">
+        <div>
+          <div class="eyebrow" style="margin-bottom:14px">Bom dia · Visão geral</div>
+          <div class="ovx-hero-num" id="ov-total-val">${localMes}<em>mês</em></div>
+          <div class="ovx-hero-sub" id="ov-acumulado-sub">avaliações em todos os setores · acumulado: ${localTotal}</div>
         </div>
-        <div class="ov-hero" id="ov-urna-panel" style="background:linear-gradient(140deg,var(--surface) 0%,rgba(21,112,90,.05) 100%);border-color:rgba(21,112,90,.15);gap:0">
-          <div class="ov-card-label" style="margin-bottom:10px">Pesquisas por urna</div>
-          <div class="ov-hero-val" id="ov-urna-total">—<span></span></div>
-          <div class="ov-hero-sub" style="margin-bottom:20px">avaliações este mês vinculadas a urnas</div>
-          <div id="ov-urna-list" style="display:flex;flex-direction:column;gap:7px;flex:1"><div style="opacity:.35;font-size:.74rem;color:var(--muted)">carregando urnas…</div></div>
+        <div class="ovx-hero-div"></div>
+        <div>${tipoRowsHtml}</div>
+      </div>
+      <section class="ovx-band">
+        <div class="ovx-band-hd"><span class="eyebrow">Metas do mês</span><span class="ovx-band-rule"></span></div>
+        <div class="ovx-ledger">
+          <div id="ov-card-spa" class="ov-card" style="opacity:.4" data-goto="spa"><div class="ovx-row-label">Gran SPA</div><div class="ovx-row-frac">—</div><div class="ovx-row-bar"><i style="width:0%"></i></div><div class="ovx-row-pct">—</div><div class="ovx-row-status">carregando…</div></div>
+          ${progressCard('geral','Geral da Qualidade','geral',0)}
+          ${progressCard('pdvs','PDVs','pdvs',0)}
+          ${progressCard('eventos-corp','Corporativos','eventos-corp',0)}
+          ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
         </div>
-      </div>
-      <div class="eyebrow" style="margin-bottom:14px">Metas mensais por pesquisa</div>
-      <div class="ov-cards">
-        <div id="ov-card-spa" class="ov-card" style="opacity:.35" data-goto="spa"><div class="ov-card-label">Gran SPA</div><div class="ov-card-total">—</div><div class="ov-card-mes">— este mês</div></div>
-        ${progressCard('geral','Geral da Qualidade','geral',0)}
-        ${progressCard('pdvs','PDVs','pdvs',0)}
-        ${progressCard('eventos-corp','Corporativos','eventos-corp',0)}
-        ${progressCard('eventos-soc','Sociais','eventos-soc',0)}
-      </div>
+      </section>
+      <section class="ovx-band">
+        <div class="ovx-band-hd"><span class="eyebrow">Pesquisas por urna</span><span class="ovx-band-rule"></span><span class="ovx-band-kpi" id="ov-urna-total">—<small>vinculadas este mês</small></span></div>
+        <div id="ov-urna-list"><div style="opacity:.35;font-size:.74rem;color:var(--muted);padding:14px 10px">carregando urnas…</div></div>
+      </section>
       <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
       <div class="filter-box" style="margin-bottom:12px">
         <div class="filter-group">
@@ -1370,7 +1365,7 @@ async function renderOverview(trigger){
         const spaMes=spa.total||0;
         const spaTotal=spaAll?.total||0;
         const heroVal=main.querySelector('#ov-total-val');
-        if(heroVal)heroVal.innerHTML=`${localMes+spaMes}<span></span>`;
+        if(heroVal)heroVal.innerHTML=`${localMes+spaMes}<em>mês</em>`;
         const subEl=main.querySelector('#ov-acumulado-sub');
         if(subEl)subEl.textContent=`avaliações em todos os setores · acumulado: ${localTotal+spaTotal}`;
         const cntSpa=main.querySelector('#ov-cnt-spa');
@@ -1404,7 +1399,7 @@ async function renderOverview(trigger){
       const urnaCountMap={};comUrna.forEach(r=>{if(r.urna_id!=null)urnaCountMap[String(r.urna_id)]=r.total;});
       const vinculado=comUrna.reduce((s,r)=>s+r.total,0)+spaSiteCount;
       const urnaTotal=main.querySelector('#ov-urna-total');
-      if(urnaTotal)urnaTotal.innerHTML=`${vinculado}<span></span>`;
+      if(urnaTotal)urnaTotal.innerHTML=`${vinculado}<small>vinculadas este mês</small>`;
       const urnaList=main.querySelector('#ov-urna-list');
       if(urnaList){
         // Painel herói: mostra todas as urnas do Hub (mesmo com 0 avaliações)
@@ -1412,20 +1407,24 @@ async function renderOverview(trigger){
           ?allUrnas.map(u=>({urna_id:String(u.id),total:urnaCountMap[String(u.id)]||0,nome:u.nome}))
           :comUrna.map(r=>({urna_id:String(r.urna_id),total:r.total,nome:nameMap[String(r.urna_id)]||`Urna ${String(r.urna_id).slice(0,8)}`}));
         if(!allForPanel.length&&!spaSiteCount){
-          urnaList.innerHTML='<div style="opacity:.35;font-size:.74rem;color:var(--muted)">Nenhuma urna cadastrada no Hub.</div>';
+          urnaList.innerHTML='<div style="opacity:.35;font-size:.74rem;color:var(--muted);padding:14px 10px">Nenhuma urna cadastrada no Hub.</div>';
         }else{
-          const mkCell=(nome,total,meta)=>{
+          const mkRow=(nome,total,meta)=>{
             const hasMeta=meta>0;
             const pct=hasMeta?Math.min(100,Math.round(total/meta*100)):0;
             const cls=hasMeta?(pct>=100?'ok':pct>=60?'mid':'low'):'';
-            const sub=hasMeta?(pct>=100?'✓ Meta atingida':`faltam ${Math.max(0,meta-total)} · meta ${meta}`):'sem meta';
-            return `<div class="ov-urna-cell"><div class="ov-urna-cell-top"><div class="ov-urna-cell-n">${esc(nome)}</div><div class="ov-urna-cell-v">${total}</div></div>${hasMeta?`<div class="ov-tipo-bar"><div class="ov-tipo-bar-fill ${cls}" style="width:${pct}%"></div></div>`:''}<div class="ov-urna-cell-sub${cls?' '+cls:''}"><span>${sub}</span>${hasMeta?`<span class="pct">${pct}%</span>`:''}</div></div>`;
+            const status=hasMeta?(pct>=100?'✓ Meta atingida':`faltam ${Math.max(0,meta-total)} · meta ${meta}`):'sem meta';
+            return `<div class="ov-card ${cls}" style="cursor:default"><div class="ovx-row-label">${esc(nome)}</div><div class="ovx-row-frac"><b>${total}</b>${hasMeta?` / ${meta}`:''}</div><div class="ovx-row-bar"><i class="${cls}" style="width:${pct}%"></i></div><div class="ovx-row-pct ${cls}">${hasMeta?pct+'%':'—'}</div><div class="ovx-row-status ${cls}">${status}</div></div>`;
           };
           const cells=[];
           if(spaSiteCount>0)cells.push({nome:'Gran SPA · site',total:spaSiteCount,meta:METAS['spa']||0});
           allForPanel.forEach(r=>cells.push({nome:r.nome||'',total:r.total,meta:METAS['urna:'+r.urna_id]||0}));
           cells.sort((a,b)=>(b.total-a.total)||((b.meta>0)-(a.meta>0))||a.nome.localeCompare(b.nome));
-          urnaList.innerHTML=`<div class="ov-urna-grid">${cells.map(c=>mkCell(c.nome,c.total,c.meta)).join('')}</div>`;
+          const ativos=cells.filter(c=>c.total>0||c.meta>0);
+          const zerados=cells.filter(c=>!(c.total>0||c.meta>0));
+          const rowsHtml=ativos.length?`<div class="ovx-ledger">${ativos.map(c=>mkRow(c.nome,c.total,c.meta)).join('')}</div>`:'';
+          const pillsHtml=zerados.length?`<div class="ovx-zeros"><span class="ovx-zeros-label">Sem registros no mês</span>${zerados.map(c=>`<span class="ovx-pill">${esc(c.nome)}</span>`).join('')}</div>`:'';
+          urnaList.innerHTML=rowsHtml+pillsHtml;
         }
       }
     }).catch(()=>{});
