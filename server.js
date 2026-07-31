@@ -123,7 +123,7 @@ app.get('/sso', (req, res) => {
       console.warn('[SSO] acesso negado a GQ (sem autorizacao no Hub):', email);
       return res.redirect('/acesso-hub.html?erro=sem_acesso');
     }
-    const token = jwt.sign({ sub: 0, username: email, role }, JWT_SECRET, { expiresIn: '8h' });
+    const token = jwt.sign({ sub: 0, username: email, role, nome: (payload.nome || null) }, JWT_SECRET, { expiresIn: '8h' });
     setCookie(res, token);
     if (theme) res.appendHeader('Set-Cookie', `gq_theme=${theme}; Max-Age=31536000; Path=/; SameSite=Lax`);
     const safeNext = nextPath && /^\/(?!\/)/.test(nextPath) ? nextPath : '/';
@@ -267,7 +267,29 @@ app.post('/api/metas', requireMaster, (req, res) => {
 
 app.get('/api/me', requireSession, (req, res) => {
   const d = jwt.decode(req.gqToken);
-  res.json({ ok: true, email: d?.username || '', role: d?.role || '' });
+  res.json({ ok: true, email: d?.username || '', role: d?.role || '', nome: d?.nome || null });
+});
+
+// Foto de perfil vem do Hub; token curto assinado com SSO_SECRET (gq_sess usa JWT_SECRET)
+app.get('/api/me/foto', requireSession, async (req, res) => {
+  try {
+    const d = jwt.decode(req.gqToken);
+    const email = d?.username || '';
+    if (!email.includes('@')) return res.status(404).end();
+    const tok = jwt.sign({ app: 'gq' }, SSO_SECRET, { expiresIn: '2m' });
+    const r = await fetchWithTimeout(`https://hub-granmarquise.fly.dev/api/foto?email=${encodeURIComponent(email)}`, {
+      headers: { Authorization: `Bearer ${tok}` }
+    });
+    // Cacheia o 404 também: sem isso, cada page load de quem não tem foto
+    // dispara uma chamada GQ->Hub.
+    if (!r.ok) { res.setHeader('Cache-Control', 'private, max-age=300'); return res.status(404).end(); }
+    const buf = Buffer.from(await r.arrayBuffer());
+    res.setHeader('Content-Type', 'image/jpeg');
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    res.end(buf);
+  } catch {
+    res.status(404).end();
+  }
 });
 
 app.get('/api/admins', requireMaster, (_req, res) => {
