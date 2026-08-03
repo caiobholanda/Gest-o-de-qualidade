@@ -23,8 +23,14 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          track_progress: true
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
             Revise este pull request. Aponte bugs, riscos de segurança e
             problemas de qualidade relevantes. Seja objetivo e conciso.
+            Use comentários inline para apontamentos específicos e um
+            comentário geral para observações amplas.
           claude_args: |
-            --allowedTools "Read,Grep,Glob"
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
