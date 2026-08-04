@@ -877,15 +877,24 @@ async function openLocalDetail(id){
 
     }else if(it.app_origem==='spa'){
       const tc={lazer:'Lazer',negocios:'Negócios',evento:'Evento',passante:'Passante',hospede:'Hóspede'};
-      const _hParts=[];
-      if(p.email)_hParts.push(esc(p.email));
-      if(p.tipo_cliente)_hParts.push(tc[p.tipo_cliente]||p.tipo_cliente);
-      headerSub=_hParts.join(' · ');
+      // Linha 1: email · tipo_cliente [· Apto X se hospede]
+      const _h1=[];
+      if(p.email)_h1.push(esc(p.email));
+      if(p.tipo_cliente){
+        let _ts=tc[p.tipo_cliente]||p.tipo_cliente;
+        if(p.apto)_ts+=` &nbsp;·&nbsp; Apto <strong style="color:var(--text)">${esc(p.apto)}</strong>`;
+        _h1.push(_ts);
+      }
+      headerSub=_h1.join(' · ');
+      // Linha 2: Massoterapeuta + Tratamento
       const _mParts=[];
       if(p.nome_massoterapeuta)_mParts.push(`Massoterapeuta: <strong style="color:var(--text)">${esc(p.nome_massoterapeuta)}</strong>`);
       if(p.tratamento_realizado)_mParts.push(`Tratamento: <strong style="color:var(--text)">${esc(p.tratamento_realizado)}</strong>`);
-      if(_mParts.length)headerSub+=(headerSub?'<br>':'')+`<span style="margin-top:6px;display:inline-block">${_mParts.join(' &nbsp;·&nbsp; ')}</span>`;
-      if(p.controle_interno)headerSub+=`<br><span style="margin-top:4px;display:inline-block">Controle: <strong style="color:var(--text)">${esc(p.controle_interno)}</strong></span>`;
+      if(_mParts.length)headerSub+=`<br><span style="margin-top:6px;display:inline-block">${_mParts.join(' &nbsp;·&nbsp; ')}</span>`;
+      // Linha 3: Controle interno
+      if(p.controle_interno)headerSub+=`<br><span style="margin-top:4px;display:inline-block">Controle interno: <strong style="color:var(--text)">${esc(p.controle_interno)}</strong></span>`;
+      // Linha 4: Inserido por (top-level, não vem no payload)
+      if(it.inserido_por)headerSub+=`<br><span style="margin-top:4px;display:inline-block">Inserido por: <strong style="color:var(--text)">${esc(it.inserido_por)}</strong></span>`;
       content=rSec('01','SERVIÇOS',_SEC1,p.servicos_comentario,RATS_STD)
         +rSec('02','INSTALAÇÕES',_SEC2,p.instalacoes_comentario,RATS_STD)
         +`<div style="margin-bottom:64px"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em">03</span><span style="font-weight:500;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--text)">VOCÊ RECOMENDARIA ALGUM TRATAMENTO EM PARTICULAR?</span></div>${rRadio(p.recomenda==='sim','Sim',p.recomenda_qual||null)}${rRadio(p.recomenda==='nao'||p.recomenda==='não','Não',p.recomenda_porque||null)}</div><div style="margin-bottom:32px"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em">04</span><span style="font-weight:500;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--text)">TIPO DE CLIENTE</span></div><div style="display:flex;gap:28px;flex-wrap:wrap">${[{v:'lazer',l:'Lazer'},{v:'negocios',l:'Negócios'},{v:'evento',l:'Evento'},{v:'passante',l:'Passante'},{v:'hospede',l:'Hóspede'}].map(o=>rRadio(p.tipo_cliente===o.v,o.l,null)).join('')}</div></div>`;
