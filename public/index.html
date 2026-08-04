@@ -737,7 +737,7 @@ async function openDetail(id){
       <div style="max-width:720px;margin:0 auto;padding:40px clamp(14px,4vw,32px) 80px">
         <div style="margin-bottom:52px">
           <div style="font-weight:500;font-size:1.3rem;color:var(--text);margin-bottom:5px">${esc(it.nome||'Sem nome')}</div>
-          <div style="font-size:.82rem;color:var(--muted2)">${esc(it.email||'—')} · ${esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente||'—')} · ${esc(dtFmt(it.submitted_at))}</div>
+          <div style="font-size:.82rem;color:var(--muted2)">${esc(it.email||'—')} · ${(()=>{let _t=esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente||'—');if(it.quarto)_t+=` &nbsp;·&nbsp; Apto <strong style="color:var(--text)">${esc(it.quarto)}</strong>`;return _t;})()} · ${esc(dtFmt(it.submitted_at))}</div>
           ${it.nome_massoterapeuta?`<div style="font-size:.8rem;color:var(--muted);margin-top:10px">Massoterapeuta: <strong style="color:var(--text)">${esc(it.nome_massoterapeuta)}</strong>${it.tratamento_realizado?` &nbsp;·&nbsp; Tratamento: <strong style="color:var(--text)">${esc(it.tratamento_realizado)}</strong>`:''}</div>`:''}
           ${it.controle_interno?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Controle interno: <strong style="color:var(--text)">${esc(it.controle_interno)}</strong></div>`:''}
           ${it.inserido_por?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Inserido por: <strong style="color:var(--text)">${esc(it.inserido_por)}</strong> em ${it.submitted_at?dtFmt(it.submitted_at)+' '+it.submitted_at.slice(11,16):'—'}</div>`:''}
