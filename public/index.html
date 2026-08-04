@@ -1737,12 +1737,10 @@ async function renderOverviewTable(containerEl){
     const {tipo,from,to,q,page}=ovState;
     const OV_LIMIT=20;
     let items=[],total=0,totalPages=1;
-    const isLocal=!tipo||tipo==='geral'||tipo==='pdvs'||tipo==='eventos'||tipo==='eventos-corp'||tipo==='eventos-soc';
-    const isSpa=!tipo||tipo==='spa';
+    const mapSpaItem=i=>({id:i.id,date:i.date,nome:i.nome,email:i.email,tipo_pesquisa:'spa',inserido_por:i.origem==='colaborador'?'Colaborador':'Hóspede',_src:'spa',media:i.media});
 
-    if(isLocal&&tipo!=='spa'){
-      const qs=new URLSearchParams({from:from||'',to:to||'',q:q||'',page:tipo?page:1,limit:tipo?OV_LIMIT:15});
-      if(tipo)qs.set('tipo',tipo);
+    if(tipo&&tipo!=='spa'){
+      const qs=new URLSearchParams({tipo,from:from||'',to:to||'',q:q||'',page,limit:OV_LIMIT});
       const r=await fetch('/api/respostas-local?'+qs,{signal});
       if(r.status===401){location.href='/acesso-hub.html';return;}
       const d=await r.json();
@@ -1750,24 +1748,44 @@ async function renderOverviewTable(containerEl){
       items=(d.items||[]).map(i=>({...i,_src:'local'}));
       total=d.total||0;
       totalPages=Math.ceil(total/OV_LIMIT)||1;
-    }
-
-    if(isSpa){
-      const qs2=new URLSearchParams({slug:'spa-locc-v1',from:from||'',to:to||'',q:q||'',page:tipo==='spa'?page:1,limit:tipo==='spa'?OV_LIMIT:15});
+    } else if(tipo==='spa'){
+      const qs2=new URLSearchParams({slug:'spa-locc-v1',from:from||'',to:to||'',q:q||'',page,limit:OV_LIMIT});
       const r2=await fetch('/api/respostas?'+qs2,{signal});
       if(r2.status===401){location.href='/acesso-hub.html';return;}
       const d2=await r2.json();
-      const spaItems=(d2.items||[]).map(i=>({id:i.id,date:i.date,nome:i.nome,email:i.email,tipo_pesquisa:'spa',inserido_por:i.origem==='colaborador'?'Colaborador':'Hóspede',_src:'spa',media:i.media}));
-      if(tipo==='spa'){
-        items=spaItems;total=d2.total||0;totalPages=Math.ceil(total/OV_LIMIT)||1;
-      } else {
-        items=[...items,...spaItems].sort((a,b)=>{
-          const da=a.date.split('/').reverse().join(''),db=b.date.split('/').reverse().join('');
-          return da<db?1:da>db?-1:0;
-        }).slice(0,OV_LIMIT);
-        total=total+(d2.total||0);
-        totalPages=1;
-      }
+      items=(d2.items||[]).map(mapSpaItem);
+      total=d2.total||0;
+      totalPages=Math.ceil(total/OV_LIMIT)||1;
+    } else {
+      // "Todos": paginação mesclada — busca de cada fonte o suficiente para cobrir a página pedida
+      const need=page*OV_LIMIT;
+      const fetchSrc=async(url,base,cap)=>{
+        const out=[];let tot=0,p=1;
+        while(out.length<need){
+          const qs=new URLSearchParams({...base,page:p,limit:cap});
+          const r=await fetch(url+'?'+qs,{signal});
+          if(r.status===401){location.href='/acesso-hub.html';throw new Error('Não autenticado');}
+          const d=await r.json();
+          if(!d.ok)throw new Error(d.error||'Erro');
+          tot=d.total||0;
+          const got=d.items||[];
+          out.push(...got);
+          if(!got.length||out.length>=tot)break;
+          p++;
+        }
+        return {items:out,total:tot};
+      };
+      const [loc,spa]=await Promise.all([
+        fetchSrc('/api/respostas-local',{from:from||'',to:to||'',q:q||''},50),
+        fetchSrc('/api/respostas',{slug:'spa-locc-v1',from:from||'',to:to||'',q:q||''},100)
+      ]);
+      const merged=[...loc.items.map(i=>({...i,_src:'local'})),...spa.items.map(mapSpaItem)].sort((a,b)=>{
+        const da=a.date.split('/').reverse().join(''),db=b.date.split('/').reverse().join('');
+        return da<db?1:da>db?-1:0;
+      });
+      total=(loc.total||0)+(spa.total||0);
+      items=merged.slice((page-1)*OV_LIMIT,page*OV_LIMIT);
+      totalPages=Math.ceil(total/OV_LIMIT)||1;
     }
     ovState.totalPages=totalPages;
 
