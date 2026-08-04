@@ -885,6 +885,7 @@ async function openLocalDetail(id){
         if(p.apto)_ts+=` &nbsp;·&nbsp; Apto <strong style="color:var(--text)">${esc(p.apto)}</strong>`;
         _h1.push(_ts);
       }
+      _h1.push(esc(dtFmt(it.submitted_at)));
       headerSub=_h1.join(' · ');
       // Linha 2: Massoterapeuta + Tratamento
       const _mParts=[];
@@ -921,7 +922,7 @@ async function openLocalDetail(id){
         <div style="margin-bottom:52px">
           <div style="font-weight:500;font-size:1.3rem;color:var(--text);margin-bottom:5px">${esc(p.nome||p.empresa||'Sem nome')}</div>
           ${headerSub?`<div style="font-size:.82rem;color:var(--muted2);margin-bottom:4px">${headerSub}</div>`:''}
-          <div style="font-size:.82rem;color:var(--muted2)">${esc(dtFmt(it.submitted_at))}${it.app_origem==='gestao-qualidade'?(it.inserido_por?` · Inserido por <strong style="color:var(--text)">${esc(it.inserido_por)}</strong>`:''): ` · ${_extOrigem(it.app_origem)}`}</div>
+          ${it.app_origem!=='spa'?`<div style="font-size:.82rem;color:var(--muted2)">${esc(dtFmt(it.submitted_at))}${it.app_origem==='gestao-qualidade'?(it.inserido_por?` · Inserido por <strong style="color:var(--text)">${esc(it.inserido_por)}</strong>`:''): ` · ${_extOrigem(it.app_origem)}`}</div>`:''}
         </div>
         ${content}
       </div>
