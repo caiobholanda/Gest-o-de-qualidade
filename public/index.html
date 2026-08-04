@@ -324,6 +324,54 @@ body{
 .btn-filtrar{align-self:stretch;border-radius:0;padding:0 36px;margin-left:auto;min-height:52px;letter-spacing:.16em}
 .btn-filtrar:active{transform:none}
 
+/* ── Overview filter ── */
+.ovf{margin-bottom:28px}
+.ovf-hd{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.ovf-rule{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.ovf-clear{
+  background:none;border:none;cursor:pointer;padding:2px 0;
+  font-family:'Helvetica Neue',Arial,sans-serif;
+  font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);transition:color .18s;white-space:nowrap
+}
+.ovf-clear:hover{color:var(--gold)}
+.ovf-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.ovf-pill{
+  padding:8px 20px;border-radius:999px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;color:var(--muted);
+  font-family:'Helvetica Neue',Arial,sans-serif;
+  font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  transition:background .18s,border-color .18s,color .18s,box-shadow .18s
+}
+.ovf-pill:hover{border-color:var(--gold);color:var(--gold)}
+.ovf-pill.active{background:var(--gold);border-color:var(--gold);color:#F5EFE5;box-shadow:0 4px 14px var(--gold-dim)}
+.ovf-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
+.ovf-field{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:999px;padding:10px 20px;
+  transition:border-color .18s,box-shadow .18s
+}
+.ovf-field:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+.ovf-field input{
+  background:none;border:none;outline:none;
+  font-family:'Helvetica Neue',Arial,sans-serif;font-size:.86rem;color:var(--text);
+  min-width:0;cursor:pointer
+}
+.ovf-field input[type=text]{cursor:text}
+.ovf-field svg{flex:none;color:var(--muted);transition:color .18s}
+.ovf-field:focus-within svg{color:var(--gold)}
+.ovf-q{flex:1;min-width:240px}
+.ovf-q input{flex:1}
+.ovf-dates span{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gold);user-select:none}
+.ovf-apply{
+  font-family:'Helvetica Neue',Arial,sans-serif;
+  font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:#F5EFE5;background:var(--gold);border:none;border-radius:999px;
+  padding:0 28px;cursor:pointer;transition:background .18s
+}
+.ovf-apply:hover{background:var(--gold-dark)}
+
 /* ── Chips ── */
 .chips{
   display:flex;gap:8px;flex-wrap:wrap;align-items:center;
@@ -537,6 +585,12 @@ body{
   .q-nota{font-size:1.3rem}
   .q-list{margin-bottom:40px}
   .comment-grid{margin-bottom:44px}
+  .ovf-bar{flex-direction:column}
+  .ovf-field,.ovf-dates{width:100%}
+  .ovf-dates{justify-content:space-between}
+  .ovf-dates input{flex:1}
+  .ovf-apply{width:100%;padding:13px 0}
+  .ovf-field input{font-size:16px}
   .filter-shell{margin-bottom:32px}
   .filter-head{padding:11px 16px}
   .filter-box{flex-direction:column}
@@ -1458,41 +1512,26 @@ async function renderOverview(trigger){
         <div class="ovx-band-hd"><span class="eyebrow">Pesquisas por urna</span><span class="ovx-band-rule"></span><span class="ovx-band-kpi" id="ov-urna-total">—<small>vinculadas este mês</small></span></div>
         <div id="ov-urna-list"><div style="opacity:.35;font-size:.74rem;color:var(--muted);padding:14px 10px">carregando urnas…</div></div>
       </section>
-      <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
-      <div class="filter-shell" style="margin-bottom:24px">
-        <div class="filter-head">
-          <span class="filter-num">◆</span>
-          <span class="filter-label">Filtros</span>
-          <span class="filter-rule"></span>
+      <div class="ovf">
+        <div class="ovf-hd">
+          <span class="eyebrow">Todas as avaliações</span>
+          <span class="ovf-rule"></span>
+          <button class="ovf-clear" id="btnOvClear">Limpar filtros</button>
         </div>
-        <div class="filter-box">
-          <div class="filter-group">
-            <span class="fl">Tipo</span>
-            <div class="fi"><select id="ovTipo">
-              <option value="">Todos</option>
-              <option value="spa" ${ovState.tipo==='spa'?'selected':''}>Gran SPA</option>
-              <option value="geral" ${ovState.tipo==='geral'?'selected':''}>Geral</option>
-              <option value="pdvs" ${ovState.tipo==='pdvs'?'selected':''}>PDVs</option>
-              <option value="eventos-corp" ${ovState.tipo==='eventos-corp'?'selected':''}>Corporativos</option>
-              <option value="eventos-soc" ${ovState.tipo==='eventos-soc'?'selected':''}>Sociais</option>
-            </select><svg class="fi-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="ovf-pills" id="ovPills">
+          ${[{v:'',l:'Todos'},{v:'spa',l:'Gran SPA'},{v:'geral',l:'Geral'},{v:'pdvs',l:'PDVs'},{v:'eventos-corp',l:'Corporativos'},{v:'eventos-soc',l:'Sociais'}].map(t=>`<button class="ovf-pill${ovState.tipo===t.v?' active':''}" data-val="${t.v}">${t.l}</button>`).join('')}
+        </div>
+        <div class="ovf-bar">
+          <div class="ovf-field ovf-q">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            <input type="text" id="ovQ" placeholder="Buscar por nome, e-mail ou empresa…" value="${esc(ovState.q)}">
           </div>
-          <div class="filter-group">
-            <span class="fl">Período</span>
-            <div class="fi-range">
-              <input type="date" id="ovFrom" value="${ovState.from}" max="${today}">
-              <span class="fi-arrow">→</span>
-              <input type="date" id="ovTo" value="${ovState.to}" max="${today}">
-            </div>
+          <div class="ovf-field ovf-dates">
+            <input type="date" id="ovFrom" value="${ovState.from}" max="${today}">
+            <span>→</span>
+            <input type="date" id="ovTo" value="${ovState.to}" max="${today}">
           </div>
-          <div class="filter-group filter-flex">
-            <span class="fl">Busca</span>
-            <div class="fi">
-              <svg class="fi-lupa" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
-              <input type="text" id="ovQ" placeholder="Nome, empresa…" value="${esc(ovState.q)}">
-            </div>
-          </div>
-          <button class="btn-gold btn-filtrar" id="btnOvF">Filtrar</button>
+          <button class="ovf-apply" id="btnOvF">Aplicar</button>
         </div>
       </div>
       <div id="ovTable"></div>
@@ -1509,7 +1548,6 @@ async function renderOverview(trigger){
     document.getElementById('ovPrevMes')?.addEventListener('click',()=>{_ovMes=_addMonths(ovMesKey,-1);renderOverview('month');});
     document.getElementById('ovNextMes')?.addEventListener('click',()=>{if(!isCurrentMonth){_ovMes=_addMonths(ovMesKey,1);if(_ovMes===nowYM)_ovMes='';renderOverview('month');}});
     const applyOvFilter=()=>{
-      ovState.tipo=document.getElementById('ovTipo')?.value||'';
       ovState.from=document.getElementById('ovFrom')?.value||'';
       ovState.to=document.getElementById('ovTo')?.value||'';
       ovState.q=document.getElementById('ovQ')?.value||'';
@@ -1518,6 +1556,18 @@ async function renderOverview(trigger){
     };
     document.getElementById('btnOvF')?.addEventListener('click',applyOvFilter);
     document.getElementById('ovQ')?.addEventListener('keydown',e=>{if(e.key==='Enter')applyOvFilter();});
+    main.querySelectorAll('.ovf-pill').forEach(p=>p.addEventListener('click',()=>{
+      ovState.tipo=p.dataset.val;
+      main.querySelectorAll('.ovf-pill').forEach(x=>x.classList.toggle('active',x===p));
+      applyOvFilter();
+    }));
+    document.getElementById('btnOvClear')?.addEventListener('click',()=>{
+      ovState.tipo='';
+      const f=document.getElementById('ovFrom'),t=document.getElementById('ovTo'),q=document.getElementById('ovQ');
+      if(f)f.value='';if(t)t.value='';if(q)q.value='';
+      main.querySelectorAll('.ovf-pill').forEach(x=>x.classList.toggle('active',x.dataset.val===''));
+      applyOvFilter();
+    });
 
     // 3) SPA data — background; atualiza DOM quando chegar
     Promise.all([
