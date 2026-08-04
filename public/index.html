@@ -875,6 +875,14 @@ async function openLocalDetail(id){
         +rSec('07','SERVIÇOS DE TERCEIROS',S7,null,RATS_AM)
         +`<div style="margin-bottom:64px">${secHdr('08','AVALIAÇÃO GERAL')}${snRow('Suas expectativas em relação ao evento foram atendidas?',p.ec_expectativas)}${snRow('Você voltaria a realizar eventos em nosso hotel?',p.ec_voltaria)}${cmtBlock(p.justificativa)}${cmtBlock(p.comentarios)}</div>`;
 
+    }else if(it.app_origem==='spa'){
+      // Gran SPA via ingest — mesma visualização do openDetail
+      const tc={lazer:'Lazer',negocios:'Negócios',evento:'Evento',passante:'Passante',hospede:'Hóspede'};
+      headerSub=[p.tipo_cliente?tc[p.tipo_cliente]||p.tipo_cliente:null,p.nome_massoterapeuta?`Massoterapeuta: ${esc(p.nome_massoterapeuta)}`:null,p.tratamento_realizado?esc(p.tratamento_realizado):null].filter(Boolean).join(' · ');
+      content=rSec('01','SERVIÇOS',_SEC1,p.servicos_comentario,RATS_STD)
+        +rSec('02','INSTALAÇÕES',_SEC2,p.instalacoes_comentario,RATS_STD)
+        +`<div style="margin-bottom:60px"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em">03</span><span style="font-weight:500;font-size:14px;letter-spacing:.13em;text-transform:uppercase;color:var(--text)">VOCÊ RECOMENDARIA ALGUM TRATAMENTO EM PARTICULAR?</span></div>${rRadio(p.recomenda==='sim','Sim',p.recomenda_qual||null)}${rRadio(p.recomenda==='nao'||p.recomenda==='não','Não',p.recomenda_porque||null)}</div><div style="margin-bottom:60px"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em">04</span><span style="font-weight:500;font-size:14px;letter-spacing:.13em;text-transform:uppercase;color:var(--text)">TIPO DE CLIENTE</span></div>${[{v:'lazer',l:'Lazer'},{v:'negocios',l:'Negócios'},{v:'evento',l:'Evento'},{v:'passante',l:'Passante'},{v:'hospede',l:'Hóspede'}].map(o=>rRadio(p.tipo_cliente===o.v,o.l,null)).join('')}</div>`;
+
     }else{
       // Fallback: generic key-value for unknown/legacy types
       const RATING_MAP={otimo:'⬤ Ótimo',bom:'⬤ Bom',regular:'⬤ Regular',ruim:'⬤ À Melhorar',amelhorar:'⬤ A Melhorar',muitobom:'⬤ Muito Bom'};
