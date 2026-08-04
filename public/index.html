@@ -324,6 +324,19 @@ body{
 .btn-filtrar{align-self:stretch;border-radius:0;padding:0 36px;margin-left:auto;min-height:52px;letter-spacing:.16em}
 .btn-filtrar:active{transform:none}
 
+/* ── Detalhe: grade de campos (padrão do formulário do SPA) ── */
+.det-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 24px;margin-bottom:14px}
+.det-field{border-bottom:1px solid var(--border-soft);padding-bottom:7px;min-width:0}
+.det-field-lbl{font-size:.58rem;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:5px}
+.det-field-lbl .en{font-weight:400;font-style:italic;text-transform:none;letter-spacing:.02em;opacity:.75}
+.det-field-val{font-size:.94rem;color:var(--text);overflow-wrap:break-word}
+.det-field-val.empty{color:var(--muted);opacity:.6}
+.det-field-full{grid-column:1/-1}
+.det-meta-sub{font-size:.76rem;color:var(--muted);margin-bottom:0}
+.det-meta-sub strong{color:var(--text);font-weight:600}
+@media(max-width:680px){.det-meta{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.det-meta{grid-template-columns:1fr;gap:12px}}
+
 /* ── Overview filter ── */
 .ovf{margin-bottom:28px}
 .ovf-hd{display:flex;align-items:center;gap:14px;margin-bottom:16px}
@@ -793,6 +806,7 @@ function _addMonths(ym,n){const[y,m]=ym.split('-').map(Number);const d=new Date(
 
 function _localDateStr(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${dd}`;}
 function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+function _detField(pt,en,val){const has=val!=null&&val!=='';return `<div class="det-field"><div class="det-field-lbl">${pt}${en?` <span class="en">/ ${en}</span>`:''}</div><div class="det-field-val${has?'':' empty'}">${has?esc(String(val)):'—'}</div></div>`;}
 function scoreClass(s){ if(s==='—')return'nenhum'; if(s===null||s===undefined||s==='')return'nenhum'; const n=parseInt(s); if(n>=85)return'alto'; if(n>=60)return'medio'; return'baixo'; }
 function _extOrigem(app){ const l={'spa':'Gran SPA · site'}[app]||'Site externo'; return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:.68rem;color:var(--muted2);background:var(--surface2);border:1px solid var(--border-soft);border-radius:10px;padding:2px 8px;letter-spacing:.02em;font-style:italic">↗ ${esc(l)}</span>`; }
 
@@ -845,11 +859,21 @@ async function openDetail(id){
       <div style="display:flex;gap:6px;padding:0 24px">${bars}</div>
       <div style="max-width:720px;margin:0 auto;padding:40px clamp(14px,4vw,32px) 80px">
         <div style="margin-bottom:52px">
-          <div style="font-weight:500;font-size:1.3rem;color:var(--text);margin-bottom:5px">${esc(it.nome||'Sem nome')}</div>
-          <div style="font-size:.82rem;color:var(--muted2)">${[esc(it.email||'—'),it.telefone?`Tel <strong style="color:var(--text)">${esc(it.telefone)}</strong>`:null,esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente||'—'),it.apto?`Apto <strong style="color:var(--text)">${esc(it.apto)}</strong>`:null,esc(dtFmt(it.submitted_at))].filter(Boolean).join(' &nbsp;·&nbsp; ')}</div>
-          ${(()=>{const _tp=[];if(it.tratamento_realizado)_tp.push(`Tratamento: <strong style="color:var(--text)">${esc(it.tratamento_realizado)}</strong>`);if(it.data_tratamento)_tp.push(`Data do tratamento: <strong style="color:var(--text)">${esc(dtFmt(it.data_tratamento))}</strong>`);if(it.nome_massoterapeuta)_tp.push(`Massoterapeuta: <strong style="color:var(--text)">${esc(it.nome_massoterapeuta)}</strong>`);return _tp.length?`<div style="font-size:.8rem;color:var(--muted);margin-top:10px">${_tp.join(' &nbsp;·&nbsp; ')}</div>`:'';})()}
-          ${it.controle_interno?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Controle interno: <strong style="color:var(--text)">${esc(it.controle_interno)}</strong></div>`:''}
-          ${it.inserido_por?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Inserido por: <strong style="color:var(--text)">${esc(it.inserido_por)}</strong> em ${it.submitted_at?dtFmt(it.submitted_at)+' '+it.submitted_at.slice(11,16):'—'}</div>`:''}
+          <div style="font-weight:500;font-size:1.3rem;color:var(--text);margin-bottom:20px">${esc(it.nome||'Sem nome')}</div>
+          <div class="det-meta">
+            ${_detField('Nº do Apto','Room number',it.apto)}
+            ${_detField('E-mail',null,it.email)}
+            ${_detField('Tel / WhatsApp','Phone',it.telefone)}
+            ${_detField('Data','Date',it.data_tratamento?dtFmt(it.data_tratamento):null)}
+            ${_detField('Tratamento realizado','Spa treatment provided',it.tratamento_realizado)}
+            ${_detField('Nome da massoterapeuta',"Massage therapist's name",it.nome_massoterapeuta)}
+          </div>
+          <div class="det-meta-sub">${[
+            `Enviado em <strong>${esc(dtFmt(it.submitted_at))}</strong>`,
+            it.tipo_cliente?`<strong>${esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente)}</strong>`:null,
+            it.controle_interno?`Controle interno: <strong>${esc(it.controle_interno)}</strong>`:null,
+            it.inserido_por?`Inserido por: <strong>${esc(it.inserido_por)}</strong>`:null
+          ].filter(Boolean).join(' &nbsp;·&nbsp; ')}</div>
         </div>
         ${rSec('01','SERVIÇOS',_SEC1,it.servicos_comentario)}
         ${rSec('02','INSTALAÇÕES',_SEC2,it.instalacoes_comentario)}
@@ -986,25 +1010,24 @@ async function openLocalDetail(id){
 
     }else if(it.app_origem==='spa'){
       const tc={lazer:'Lazer',negocios:'Negócios',evento:'Evento',passante:'Passante',hospede:'Hóspede'};
-      // Linha 1: email · tel · tipo_cliente · Apto · data
-      const _h1=[];
-      if(p.email)_h1.push(esc(p.email));
-      if(p.telefone)_h1.push(`Tel <strong style="color:var(--text)">${esc(p.telefone)}</strong>`);
-      if(p.tipo_cliente)_h1.push(esc(tc[p.tipo_cliente]||p.tipo_cliente));
-      if(p.apto)_h1.push(`Apto <strong style="color:var(--text)">${esc(p.apto)}</strong>`);
-      _h1.push(esc(dtFmt(it.submitted_at)));
-      headerSub=_h1.join(' &nbsp;·&nbsp; ');
-      // Linha 2: Tratamento + data + Massoterapeuta
-      const _mParts=[];
-      if(p.tratamento_realizado)_mParts.push(`Tratamento: <strong style="color:var(--text)">${esc(p.tratamento_realizado)}</strong>`);
-      if(p.data_tratamento)_mParts.push(`Data do tratamento: <strong style="color:var(--text)">${esc(dtFmt(p.data_tratamento))}</strong>`);
-      if(p.nome_massoterapeuta)_mParts.push(`Massoterapeuta: <strong style="color:var(--text)">${esc(p.nome_massoterapeuta)}</strong>`);
-      if(_mParts.length)headerSub+=`<br><span style="margin-top:6px;display:inline-block">${_mParts.join(' &nbsp;·&nbsp; ')}</span>`;
-      // Linha 3: Controle interno
-      if(p.controle_interno)headerSub+=`<br><span style="margin-top:4px;display:inline-block">Controle interno: <strong style="color:var(--text)">${esc(p.controle_interno)}</strong></span>`;
-      // Linha 4: Inserido por (top-level, não vem no payload)
-      if(it.inserido_por)headerSub+=`<br><span style="margin-top:4px;display:inline-block">Inserido por: <strong style="color:var(--text)">${esc(it.inserido_por)}</strong></span>`;
-      content=rSec('01','SERVIÇOS',_SEC1,p.servicos_comentario,RATS_STD)
+      // Grade de campos no padrão do formulário do SPA (headerSub fica vazio)
+      headerSub='';
+      const _metaGrid=`<div class="det-meta" style="margin-top:14px">
+        ${_detField('Nº do Apto','Room number',p.apto)}
+        ${_detField('E-mail',null,p.email)}
+        ${_detField('Tel / WhatsApp','Phone',p.telefone)}
+        ${_detField('Data','Date',p.data_tratamento?dtFmt(p.data_tratamento):null)}
+        ${_detField('Tratamento realizado','Spa treatment provided',p.tratamento_realizado)}
+        ${_detField('Nome da massoterapeuta',"Massage therapist's name",p.nome_massoterapeuta)}
+      </div>
+      <div class="det-meta-sub" style="margin-bottom:44px">${[
+        `Enviado em <strong>${esc(dtFmt(it.submitted_at))}</strong>`,
+        p.tipo_cliente?`<strong>${esc(tc[p.tipo_cliente]||p.tipo_cliente)}</strong>`:null,
+        p.controle_interno?`Controle interno: <strong>${esc(p.controle_interno)}</strong>`:null,
+        it.inserido_por?`Inserido por: <strong>${esc(it.inserido_por)}</strong>`:null
+      ].filter(Boolean).join(' &nbsp;·&nbsp; ')}</div>`;
+      content=_metaGrid
+        +rSec('01','SERVIÇOS',_SEC1,p.servicos_comentario,RATS_STD)
         +rSec('02','INSTALAÇÕES',_SEC2,p.instalacoes_comentario,RATS_STD)
         +`<div style="margin-bottom:64px"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em">03</span><span style="font-weight:500;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--text)">VOCÊ RECOMENDARIA ALGUM TRATAMENTO EM PARTICULAR?</span></div>${rRadio(p.recomenda==='sim','Sim',p.recomenda_qual||null)}${rRadio(p.recomenda==='nao'||p.recomenda==='não','Não',p.recomenda_porque||null)}</div><div style="margin-bottom:32px"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em">04</span><span style="font-weight:500;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--text)">TIPO DE CLIENTE</span></div><div style="display:flex;gap:28px;flex-wrap:wrap">${[{v:'lazer',l:'Lazer'},{v:'negocios',l:'Negócios'},{v:'evento',l:'Evento'},{v:'passante',l:'Passante'},{v:'hospede',l:'Hóspede'}].map(o=>rRadio(p.tipo_cliente===o.v,o.l,null)).join('')}</div></div>`;
 
