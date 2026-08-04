@@ -271,24 +271,47 @@ body{
 .comment-meta .mono{font-family:'JetBrains Mono',monospace;letter-spacing:0;text-transform:none}
 
 /* ── Filters ── */
-.filter-label{font-size:.59rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:12px}
-.filter-box{
+.filter-shell{
   background:var(--surface);border:1px solid var(--border);
-  border-radius:14px;padding:18px 20px;margin-bottom:12px;
-  display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;
-  box-shadow:0 2px 16px var(--gold-dim)
+  border-radius:16px;margin-bottom:46px;overflow:hidden;
+  box-shadow:0 4px 24px var(--gold-dim)
 }
-.filter-group{display:flex;flex-direction:column;gap:6px}
-.filter-group .fl{font-size:.59rem;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--muted)}
-.fi{
-  display:flex;align-items:center;gap:10px;
-  background:var(--surface2);border:1px solid var(--border-soft);
-  border-radius:8px;padding:9px 14px;transition:border-color .18s
+.filter-head{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 24px;border-bottom:1px solid var(--border-soft);
+  background:var(--surface2)
 }
-.fi:focus-within{border-color:var(--gold)}
-.fi input,.fi select{background:none;border:none;outline:none;font-family:'Helvetica Neue',Arial,sans-serif;font-size:.82rem;color:var(--text);cursor:pointer}
+.filter-num{font-family:'JetBrains Mono',monospace;font-size:.66rem;font-weight:600;color:var(--gold);letter-spacing:.08em}
+.filter-label{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--text)}
+.filter-rule{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.filter-hint{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.05em;white-space:nowrap}
+.filter-box{display:flex;align-items:stretch;flex-wrap:wrap}
+.filter-group{
+  display:flex;flex-direction:column;justify-content:center;gap:8px;
+  padding:15px 22px 13px;border-right:1px solid var(--border-soft);
+  position:relative
+}
+.filter-group::after{
+  content:'';position:absolute;left:22px;right:22px;bottom:0;height:2px;
+  background:var(--gold);transform:scaleX(0);transform-origin:left;
+  transition:transform .28s cubic-bezier(.16,1,.3,1)
+}
+.filter-group:focus-within::after{transform:scaleX(1)}
+.filter-group .fl{font-size:.57rem;letter-spacing:.17em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.fi{display:flex;align-items:center;gap:9px}
+.fi input,.fi select,.fi-range input{
+  background:none;border:none;outline:none;appearance:none;-webkit-appearance:none;
+  font-family:'Helvetica Neue',Arial,sans-serif;font-size:.85rem;color:var(--text);
+  cursor:pointer;padding:2px 0;min-width:0
+}
 .fi select option{background:var(--surface);color:var(--text)}
-.filter-flex{flex:1;min-width:200px}
+.fi-chev,.fi-lupa{flex:none;color:var(--muted);pointer-events:none;transition:color .18s}
+.filter-group:focus-within .fi-chev,.filter-group:focus-within .fi-lupa{color:var(--gold)}
+.fi-range{display:flex;align-items:center;gap:10px}
+.fi-arrow{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gold);flex:none;user-select:none}
+.filter-flex{flex:1;min-width:220px}
+.filter-flex .fi{width:100%}
+.filter-flex .fi input{flex:1}
 .btn-gold{
   font-family:'Helvetica Neue',Arial,sans-serif;
   font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
@@ -298,9 +321,14 @@ body{
 }
 .btn-gold:hover{background:var(--gold-dark)}
 .btn-gold:active{transform:scale(.98)}
+.btn-filtrar{align-self:stretch;border-radius:0;padding:0 36px;margin-left:auto;min-height:52px;letter-spacing:.16em}
+.btn-filtrar:active{transform:none}
 
 /* ── Chips ── */
-.chips{display:flex;gap:8px;margin-bottom:44px;flex-wrap:wrap;min-height:24px}
+.chips{
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  padding:11px 24px;border-top:1px solid var(--border-soft)
+}
 .chip{
   display:inline-flex;align-items:center;gap:8px;
   background:var(--gold-dim);border:1px solid rgba(156,88,67,.18);
@@ -311,28 +339,48 @@ body{
 .chip-x:hover{opacity:1}
 
 /* ── Table ── */
-.tbl-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+.tbl-hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
 .tbl-title{font-family:'Helvetica Neue',Arial,sans-serif;font-weight:400;font-size:1.4rem;color:var(--text);letter-spacing:-.01em}
-.tbl-count{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)}
-.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow-x:auto;overflow-y:hidden;box-shadow:0 4px 24px var(--gold-dim)}
-.tbl-head{display:grid;grid-template-columns:110px 1.35fr 1.75fr 118px 104px 96px 60px;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--border);background:var(--surface2)}
-.tbl-head div{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
-.tbl-row{display:grid;grid-template-columns:110px 1.35fr 1.75fr 118px 104px 96px 60px;gap:16px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--border-soft);transition:background .15s;cursor:pointer}
+.tbl-count{
+  font-family:'JetBrains Mono',monospace;font-size:.64rem;font-weight:600;
+  color:var(--gold-dark);background:var(--gold-dim);
+  border:1px solid rgba(156,88,67,.18);border-radius:999px;
+  padding:4px 13px;letter-spacing:.05em;white-space:nowrap;margin-bottom:4px
+}
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow-x:auto;overflow-y:hidden;box-shadow:0 4px 24px var(--gold-dim)}
+.tbl-head{display:grid;grid-template-columns:110px 1.35fr 1.75fr 118px 104px 96px 60px;gap:16px;align-items:center;padding:13px 24px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.tbl-head div{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.tbl-row{display:grid;grid-template-columns:110px 1.35fr 1.75fr 118px 104px 96px 60px;gap:16px;align-items:center;padding:13px 24px;border-bottom:1px solid var(--border-soft);transition:background .15s,box-shadow .15s;cursor:pointer}
 .tbl-row:last-child{border-bottom:none}
-.tbl-row:hover{background:var(--gold-dim2)}
+.tbl-row:hover{background:var(--gold-dim2);box-shadow:inset 3px 0 0 var(--gold)}
 .tbl-date{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)}
-.tbl-nome{font-size:.86rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbl-nome{font-size:.87rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tbl-email{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tbl-tipo span{display:inline-block;font-size:.65rem;font-weight:600;letter-spacing:.03em;color:var(--muted);border:1px solid var(--border-soft);border-radius:999px;padding:3px 10px;background:var(--surface2)}
 .tbl-orig{font-size:.8rem;color:var(--muted)}
+.pgn{display:flex;align-items:center;justify-content:center;gap:20px;padding:22px 0}
+.pgn-btn{
+  font-family:'Helvetica Neue',Arial,sans-serif;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  background:none;border:1px solid var(--border-soft);border-radius:999px;
+  padding:8px 18px;cursor:pointer;color:var(--muted);
+  transition:border-color .18s,color .18s
+}
+.pgn-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.pgn-btn:disabled{opacity:.35;cursor:default}
+.pgn-info{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:.04em}
 .score{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;letter-spacing:.03em;border-radius:6px;padding:4px 10px;min-width:46px;text-align:center;border:1px solid transparent}
 .score.alto{color:var(--success);background:var(--success-dim)}
 .score.medio{color:var(--gold-dark);background:var(--gold-dim)}
 .score.baixo{color:var(--danger);background:var(--danger-dim)}
 .score.nenhum{color:var(--muted);background:transparent;border-color:var(--border-soft)}
 .score.warn{color:var(--warn);background:var(--warn-dim)}
-.tbl-ver span{font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);cursor:pointer;border-bottom:1px solid transparent;transition:border-color .2s}
-.tbl-ver span:hover{border-bottom-color:var(--gold)}
+.tbl-ver span{
+  display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(156,88,67,.28);border-radius:999px;
+  padding:4px 13px;cursor:pointer;transition:background .18s,color .18s,border-color .18s
+}
+.tbl-row:hover .tbl-ver span{background:var(--gold);border-color:var(--gold);color:#F5EFE5}
 .empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:.88rem}
 
 /* ── Picker overlay ── */
@@ -459,6 +507,9 @@ body{
   .tbl-head div:nth-child(3),.tbl-head div:nth-child(4),.tbl-head div:nth-child(5){display:none}
   .sec-legend{flex-wrap:wrap;gap:10px}
   .q-list{margin-bottom:48px}
+  .filter-group{padding:13px 18px 11px}
+  .filter-group::after{left:18px;right:18px}
+  .btn-filtrar{padding:0 26px}
 }
 @media(max-width:680px){
   .ovx-hero{grid-template-columns:1fr;gap:26px;padding:20px 0 30px;margin-bottom:36px}
@@ -486,11 +537,15 @@ body{
   .q-nota{font-size:1.3rem}
   .q-list{margin-bottom:40px}
   .comment-grid{margin-bottom:44px}
-  .filter-box{padding:14px 12px;gap:10px}
-  .filter-group{width:100%}
-  .fi{width:100%}
-  .btn-gold{width:100%;text-align:center}
-  .chips{margin-bottom:28px}
+  .filter-shell{margin-bottom:32px}
+  .filter-head{padding:11px 16px}
+  .filter-box{flex-direction:column}
+  .filter-group{width:100%;border-right:none;border-bottom:1px solid var(--border-soft);padding:12px 16px 11px}
+  .filter-group::after{left:16px;right:16px}
+  .fi,.fi-range{width:100%}
+  .fi-range input{flex:1}
+  .btn-filtrar{width:100%;margin-left:0;min-height:48px;padding:14px 0;text-align:center}
+  .chips{padding:10px 16px}
   /* 4 colunas: data, nome, media/vazio, botao editar — as linhas geradas
      tem 4 celulas visiveis apos esconder e-mail/tipo/origem no MQ 900. */
   .tbl-head,.tbl-row{grid-template-columns:70px 1fr 50px 34px;gap:10px;padding:10px 12px}
@@ -503,7 +558,7 @@ body{
   .ov-tipo-row{grid-template-columns:84px 1fr 36px;gap:8px}
   .ov-tipo-name{white-space:normal}
   /* iOS Safari: inputs/selects com fonte <16px disparam zoom no foco. */
-  .fi input,.fi select{font-size:16px}
+  .fi input,.fi select,.fi-range input{font-size:16px}
 }
 /* ── Settings Overlay ── */
 .cfg-overlay{position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .22s ease}
@@ -1147,45 +1202,52 @@ function renderFilters(){
   if(state.tipo) chips.push({l:`Tipo: ${_tipoLabel[state.tipo]||state.tipo}`,k:'tipo'});
   if(state.origem) chips.push({l:`Origem: ${_origemLabel[state.origem]||state.origem}`,k:'origem'});
   if(state.q) chips.push({l:`Busca: ${state.q}`,k:'q'});
-  return `<div class="filter-label">Filtros</div>
-  <div class="filter-box">
-    <div class="filter-group">
-      <span class="fl">De</span>
-      <div class="fi"><input type="date" id="fFrom" value="${state.from}" max="${_localDateStr()}"></div>
+  return `<div class="filter-shell">
+    <div class="filter-head">
+      <span class="filter-num">◆</span>
+      <span class="filter-label">Filtros</span>
+      <span class="filter-rule"></span>
+      <span class="filter-hint">${chips.length?`${chips.length} filtro${chips.length>1?'s':''} ativo${chips.length>1?'s':''}`:'sem filtros ativos'}</span>
     </div>
-    <div class="filter-group">
-      <span class="fl">Até</span>
-      <div class="fi"><input type="date" id="fTo" value="${state.to}" max="${_localDateStr()}"></div>
-    </div>
-    <div class="filter-group">
-      <span class="fl">Origem</span>
-      <div class="fi"><select id="fOrigem">
-        <option value="">Todas</option>
-        <option value="hospede" ${state.origem==='hospede'?'selected':''}>Hóspede</option>
-        <option value="colaborador" ${state.origem==='colaborador'?'selected':''}>Colaborador</option>
-      </select></div>
-    </div>
-    <div class="filter-group">
-      <span class="fl">Tipo</span>
-      <div class="fi"><select id="fTipo">
-        <option value="">Todos</option>
-        <option value="lazer" ${state.tipo==='lazer'?'selected':''}>Lazer</option>
-        <option value="negocios" ${state.tipo==='negocios'?'selected':''}>Negócios</option>
-        <option value="evento" ${state.tipo==='evento'?'selected':''}>Evento</option>
-        <option value="passante" ${state.tipo==='passante'?'selected':''}>Passante</option>
-        <option value="hospede" ${state.tipo==='hospede'?'selected':''}>Hóspede</option>
-      </select></div>
-    </div>
-    <div class="filter-group filter-flex">
-      <span class="fl">Busca</span>
-      <div class="fi">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
-        <input type="text" id="fQ" placeholder="Nome ou e-mail…" value="${esc(state.q)}" style="flex:1">
+    <div class="filter-box">
+      <div class="filter-group">
+        <span class="fl">Período</span>
+        <div class="fi-range">
+          <input type="date" id="fFrom" value="${state.from}" max="${_localDateStr()}">
+          <span class="fi-arrow">→</span>
+          <input type="date" id="fTo" value="${state.to}" max="${_localDateStr()}">
+        </div>
       </div>
+      <div class="filter-group">
+        <span class="fl">Origem</span>
+        <div class="fi"><select id="fOrigem">
+          <option value="">Todas</option>
+          <option value="hospede" ${state.origem==='hospede'?'selected':''}>Hóspede</option>
+          <option value="colaborador" ${state.origem==='colaborador'?'selected':''}>Colaborador</option>
+        </select><svg class="fi-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="filter-group">
+        <span class="fl">Tipo</span>
+        <div class="fi"><select id="fTipo">
+          <option value="">Todos</option>
+          <option value="lazer" ${state.tipo==='lazer'?'selected':''}>Lazer</option>
+          <option value="negocios" ${state.tipo==='negocios'?'selected':''}>Negócios</option>
+          <option value="evento" ${state.tipo==='evento'?'selected':''}>Evento</option>
+          <option value="passante" ${state.tipo==='passante'?'selected':''}>Passante</option>
+          <option value="hospede" ${state.tipo==='hospede'?'selected':''}>Hóspede</option>
+        </select><svg class="fi-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+      <div class="filter-group filter-flex">
+        <span class="fl">Busca</span>
+        <div class="fi">
+          <svg class="fi-lupa" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+          <input type="text" id="fQ" placeholder="Nome ou e-mail…" value="${esc(state.q)}">
+        </div>
+      </div>
+      <button class="btn-gold btn-filtrar" id="btnF">Filtrar</button>
     </div>
-    <button class="btn-gold" id="btnF">Filtrar</button>
-  </div>
-  <div class="chips" id="chips">${chips.map(c=>`<div class="chip">${esc(c.l)}<span class="chip-x" data-key="${c.k}">✕</span></div>`).join('')}</div>`;
+    ${chips.length?`<div class="chips" id="chips">${chips.map(c=>`<div class="chip">${esc(c.l)}<span class="chip-x" data-key="${c.k}">✕</span></div>`).join('')}</div>`:''}
+  </div>`;
 }
 
 function renderTable(rows, total, page){
@@ -1199,12 +1261,12 @@ function renderTable(rows, total, page){
     <div class="tbl-ver"><span>Ver</span></div>
   </div>`).join('');
   const totalPages=Math.ceil(total/LIMIT)||1;
-  const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
-    <button class="btn-icon" id="pgPrev" ${page<=1?'disabled':''} style="${page<=1?'opacity:.4;cursor:default':''}">← Anterior</button>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)">Página ${page} de ${totalPages}</span>
-    <button class="btn-icon" id="pgNext" ${page>=totalPages?'disabled':''} style="${page>=totalPages?'opacity:.4;cursor:default':''}">Próxima →</button>
+  const pgHtml=totalPages>1?`<div class="pgn">
+    <button class="pgn-btn" id="pgPrev" ${page<=1?'disabled':''}>← Anterior</button>
+    <span class="pgn-info">Página ${page} de ${totalPages}</span>
+    <button class="pgn-btn" id="pgNext" ${page>=totalPages?'disabled':''}>Próxima →</button>
   </div>`:'';
-  return `<div class="tbl-hdr"><div class="tbl-title">Avaliações</div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
+  return `<div class="tbl-hdr"><div><div class="eyebrow">Registro</div><div class="tbl-title">Avaliações</div></div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
   <div class="tbl-wrap">
     <div class="tbl-head"><div>Data</div><div>Nome</div><div>E-mail</div><div>Tipo</div><div>Origem</div><div>Média</div><div></div></div>
     ${rHtml||'<div class="empty">Nenhuma avaliação encontrada</div>'}
@@ -1244,26 +1306,33 @@ function renderLocalFilters(){
   if(state.from) chips.push({l:`De: ${state.from.split('-').reverse().join('/')}`,k:'from'});
   if(state.to) chips.push({l:`Até: ${state.to.split('-').reverse().join('/')}`,k:'to'});
   if(state.q) chips.push({l:`Busca: ${state.q}`,k:'q'});
-  return `<div class="filter-label">Filtros</div>
-  <div class="filter-box">
-    <div class="filter-group">
-      <span class="fl">De</span>
-      <div class="fi"><input type="date" id="fFrom" value="${state.from}" max="${_localDateStr()}"></div>
+  return `<div class="filter-shell">
+    <div class="filter-head">
+      <span class="filter-num">◆</span>
+      <span class="filter-label">Filtros</span>
+      <span class="filter-rule"></span>
+      <span class="filter-hint">${chips.length?`${chips.length} filtro${chips.length>1?'s':''} ativo${chips.length>1?'s':''}`:'sem filtros ativos'}</span>
     </div>
-    <div class="filter-group">
-      <span class="fl">Até</span>
-      <div class="fi"><input type="date" id="fTo" value="${state.to}" max="${_localDateStr()}"></div>
-    </div>
-    <div class="filter-group filter-flex">
-      <span class="fl">Busca</span>
-      <div class="fi">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
-        <input type="text" id="fQ" placeholder="Nome, empresa…" value="${esc(state.q)}" style="flex:1">
+    <div class="filter-box">
+      <div class="filter-group">
+        <span class="fl">Período</span>
+        <div class="fi-range">
+          <input type="date" id="fFrom" value="${state.from}" max="${_localDateStr()}">
+          <span class="fi-arrow">→</span>
+          <input type="date" id="fTo" value="${state.to}" max="${_localDateStr()}">
+        </div>
       </div>
+      <div class="filter-group filter-flex">
+        <span class="fl">Busca</span>
+        <div class="fi">
+          <svg class="fi-lupa" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+          <input type="text" id="fQ" placeholder="Nome, empresa…" value="${esc(state.q)}">
+        </div>
+      </div>
+      <button class="btn-gold btn-filtrar" id="btnF">Filtrar</button>
     </div>
-    <button class="btn-gold" id="btnF">Filtrar</button>
-  </div>
-  <div class="chips" id="chips">${chips.map(c=>`<div class="chip">${esc(c.l)}<span class="chip-x" data-key="${c.k}">✕</span></div>`).join('')}</div>`;
+    ${chips.length?`<div class="chips" id="chips">${chips.map(c=>`<div class="chip">${esc(c.l)}<span class="chip-x" data-key="${c.k}">✕</span></div>`).join('')}</div>`:''}
+  </div>`;
 }
 
 function renderLocalTable(rows,total,page){
@@ -1288,12 +1357,12 @@ function renderLocalTable(rows,total,page){
     <div></div><div style="display:flex;align-items:center;justify-content:center">${r.app_origem==='gestao-qualidade'?`<button class="btn-edit-local" title="Editar" onclick="event.stopPropagation();openLocalEdit(${r.id})">✎</button>`:''}</div>
   </div>`).join('');
   const totalPages=Math.ceil(total/LIMIT)||1;
-  const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
-    <button class="btn-icon" id="pgPrev" ${page<=1?'disabled':''} style="${page<=1?'opacity:.4;cursor:default':''}">← Anterior</button>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)">Página ${page} de ${totalPages}</span>
-    <button class="btn-icon" id="pgNext" ${page>=totalPages?'disabled':''} style="${page>=totalPages?'opacity:.4;cursor:default':''}">Próxima →</button>
+  const pgHtml=totalPages>1?`<div class="pgn">
+    <button class="pgn-btn" id="pgPrev" ${page<=1?'disabled':''}>← Anterior</button>
+    <span class="pgn-info">Página ${page} de ${totalPages}</span>
+    <button class="pgn-btn" id="pgNext" ${page>=totalPages?'disabled':''}>Próxima →</button>
   </div>`:'';
-  return `<div class="tbl-hdr"><div class="tbl-title">Avaliações</div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
+  return `<div class="tbl-hdr"><div><div class="eyebrow">Registro</div><div class="tbl-title">Avaliações</div></div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
   <div class="tbl-wrap">
     <div class="tbl-head"><div>Data</div><div>Nome</div><div>E-mail / Empresa</div><div>Tipo</div><div>Inserido por</div><div></div><div></div></div>
     ${rHtml||'<div class="empty">Nenhuma avaliação encontrada</div>'}
@@ -1390,34 +1459,41 @@ async function renderOverview(trigger){
         <div id="ov-urna-list"><div style="opacity:.35;font-size:.74rem;color:var(--muted);padding:14px 10px">carregando urnas…</div></div>
       </section>
       <div class="eyebrow" style="margin-bottom:14px">Todas as avaliações</div>
-      <div class="filter-box" style="margin-bottom:12px">
-        <div class="filter-group">
-          <span class="fl">Tipo</span>
-          <div class="fi"><select id="ovTipo">
-            <option value="">Todos</option>
-            <option value="spa" ${ovState.tipo==='spa'?'selected':''}>Gran SPA</option>
-            <option value="geral" ${ovState.tipo==='geral'?'selected':''}>Geral</option>
-            <option value="pdvs" ${ovState.tipo==='pdvs'?'selected':''}>PDVs</option>
-            <option value="eventos-corp" ${ovState.tipo==='eventos-corp'?'selected':''}>Corporativos</option>
-            <option value="eventos-soc" ${ovState.tipo==='eventos-soc'?'selected':''}>Sociais</option>
-          </select></div>
+      <div class="filter-shell" style="margin-bottom:24px">
+        <div class="filter-head">
+          <span class="filter-num">◆</span>
+          <span class="filter-label">Filtros</span>
+          <span class="filter-rule"></span>
         </div>
-        <div class="filter-group">
-          <span class="fl">De</span>
-          <div class="fi"><input type="date" id="ovFrom" value="${ovState.from}" max="${today}"></div>
-        </div>
-        <div class="filter-group">
-          <span class="fl">Até</span>
-          <div class="fi"><input type="date" id="ovTo" value="${ovState.to}" max="${today}"></div>
-        </div>
-        <div class="filter-group filter-flex">
-          <span class="fl">Busca</span>
-          <div class="fi">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
-            <input type="text" id="ovQ" placeholder="Nome, empresa…" value="${esc(ovState.q)}" style="flex:1">
+        <div class="filter-box">
+          <div class="filter-group">
+            <span class="fl">Tipo</span>
+            <div class="fi"><select id="ovTipo">
+              <option value="">Todos</option>
+              <option value="spa" ${ovState.tipo==='spa'?'selected':''}>Gran SPA</option>
+              <option value="geral" ${ovState.tipo==='geral'?'selected':''}>Geral</option>
+              <option value="pdvs" ${ovState.tipo==='pdvs'?'selected':''}>PDVs</option>
+              <option value="eventos-corp" ${ovState.tipo==='eventos-corp'?'selected':''}>Corporativos</option>
+              <option value="eventos-soc" ${ovState.tipo==='eventos-soc'?'selected':''}>Sociais</option>
+            </select><svg class="fi-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
           </div>
+          <div class="filter-group">
+            <span class="fl">Período</span>
+            <div class="fi-range">
+              <input type="date" id="ovFrom" value="${ovState.from}" max="${today}">
+              <span class="fi-arrow">→</span>
+              <input type="date" id="ovTo" value="${ovState.to}" max="${today}">
+            </div>
+          </div>
+          <div class="filter-group filter-flex">
+            <span class="fl">Busca</span>
+            <div class="fi">
+              <svg class="fi-lupa" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+              <input type="text" id="ovQ" placeholder="Nome, empresa…" value="${esc(ovState.q)}">
+            </div>
+          </div>
+          <button class="btn-gold btn-filtrar" id="btnOvF">Filtrar</button>
         </div>
-        <button class="btn-gold" id="btnOvF">Filtrar</button>
       </div>
       <div id="ovTable"></div>
     `;
@@ -1667,12 +1743,12 @@ async function renderOverviewTable(containerEl){
       <div>${r.media?`<span class="score ${scoreClass(r.media)}">${esc(r.media)}</span>`:''}</div>
       <div style="display:flex;align-items:center;justify-content:center">${r._src!=='spa'&&r.app_origem==='gestao-qualidade'?`<button class="btn-edit-local" title="Editar" onclick="event.stopPropagation();openLocalEdit(${r.id})">✎</button>`:''}</div>
     </div>`).join('');
-    const pgHtml=totalPages>1?`<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0">
-      <button class="btn-icon" id="ovPgPrev" ${page<=1?'disabled':''} style="${page<=1?'opacity:.4;cursor:default':''}">← Anterior</button>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)">Página ${page} de ${totalPages}</span>
-      <button class="btn-icon" id="ovPgNext" ${page>=totalPages?'disabled':''} style="${page>=totalPages?'opacity:.4;cursor:default':''}">Próxima →</button>
+    const pgHtml=totalPages>1?`<div class="pgn">
+      <button class="pgn-btn" id="ovPgPrev" ${page<=1?'disabled':''}>← Anterior</button>
+      <span class="pgn-info">Página ${page} de ${totalPages}</span>
+      <button class="pgn-btn" id="ovPgNext" ${page>=totalPages?'disabled':''}>Próxima →</button>
     </div>`:'';
-    containerEl.innerHTML=`<div class="tbl-hdr"><div class="tbl-title">Avaliações</div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
+    containerEl.innerHTML=`<div class="tbl-hdr"><div><div class="eyebrow">Registro</div><div class="tbl-title">Avaliações</div></div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
     <div class="tbl-wrap">
       <div class="tbl-head"><div>Data</div><div>Nome</div><div>E-mail / Empresa</div><div>Tipo</div><div>Inserido por</div><div>Média</div><div></div></div>
       ${rows||'<div class="empty">Nenhuma avaliação encontrada</div>'}
