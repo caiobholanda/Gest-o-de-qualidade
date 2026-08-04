@@ -737,8 +737,8 @@ async function openDetail(id){
       <div style="max-width:720px;margin:0 auto;padding:40px clamp(14px,4vw,32px) 80px">
         <div style="margin-bottom:52px">
           <div style="font-weight:500;font-size:1.3rem;color:var(--text);margin-bottom:5px">${esc(it.nome||'Sem nome')}</div>
-          <div style="font-size:.82rem;color:var(--muted2)">${esc(it.email||'—')} · ${(()=>{let _t=esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente||'—');if(it.apto)_t+=` &nbsp;·&nbsp; Apto <strong style="color:var(--text)">${esc(it.apto)}</strong>`;return _t;})()} · ${esc(dtFmt(it.submitted_at))}</div>
-          ${it.nome_massoterapeuta?`<div style="font-size:.8rem;color:var(--muted);margin-top:10px">Massoterapeuta: <strong style="color:var(--text)">${esc(it.nome_massoterapeuta)}</strong>${it.tratamento_realizado?` &nbsp;·&nbsp; Tratamento: <strong style="color:var(--text)">${esc(it.tratamento_realizado)}</strong>`:''}</div>`:''}
+          <div style="font-size:.82rem;color:var(--muted2)">${[esc(it.email||'—'),it.telefone?`Tel <strong style="color:var(--text)">${esc(it.telefone)}</strong>`:null,esc(tipoLabel[it.tipo_cliente]||it.tipo_cliente||'—'),it.apto?`Apto <strong style="color:var(--text)">${esc(it.apto)}</strong>`:null,esc(dtFmt(it.submitted_at))].filter(Boolean).join(' &nbsp;·&nbsp; ')}</div>
+          ${(()=>{const _tp=[];if(it.tratamento_realizado)_tp.push(`Tratamento: <strong style="color:var(--text)">${esc(it.tratamento_realizado)}</strong>`);if(it.data_tratamento)_tp.push(`Data do tratamento: <strong style="color:var(--text)">${esc(dtFmt(it.data_tratamento))}</strong>`);if(it.nome_massoterapeuta)_tp.push(`Massoterapeuta: <strong style="color:var(--text)">${esc(it.nome_massoterapeuta)}</strong>`);return _tp.length?`<div style="font-size:.8rem;color:var(--muted);margin-top:10px">${_tp.join(' &nbsp;·&nbsp; ')}</div>`:'';})()}
           ${it.controle_interno?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Controle interno: <strong style="color:var(--text)">${esc(it.controle_interno)}</strong></div>`:''}
           ${it.inserido_por?`<div style="font-size:.8rem;color:var(--muted);margin-top:8px">Inserido por: <strong style="color:var(--text)">${esc(it.inserido_por)}</strong> em ${it.submitted_at?dtFmt(it.submitted_at)+' '+it.submitted_at.slice(11,16):'—'}</div>`:''}
         </div>
@@ -877,20 +877,19 @@ async function openLocalDetail(id){
 
     }else if(it.app_origem==='spa'){
       const tc={lazer:'Lazer',negocios:'Negócios',evento:'Evento',passante:'Passante',hospede:'Hóspede'};
-      // Linha 1: email · tipo_cliente [· Apto X se hospede]
+      // Linha 1: email · tel · tipo_cliente · Apto · data
       const _h1=[];
       if(p.email)_h1.push(esc(p.email));
-      if(p.tipo_cliente){
-        let _ts=tc[p.tipo_cliente]||p.tipo_cliente;
-        if(p.apto)_ts+=` &nbsp;·&nbsp; Apto <strong style="color:var(--text)">${esc(p.apto)}</strong>`;
-        _h1.push(_ts);
-      }
+      if(p.telefone)_h1.push(`Tel <strong style="color:var(--text)">${esc(p.telefone)}</strong>`);
+      if(p.tipo_cliente)_h1.push(esc(tc[p.tipo_cliente]||p.tipo_cliente));
+      if(p.apto)_h1.push(`Apto <strong style="color:var(--text)">${esc(p.apto)}</strong>`);
       _h1.push(esc(dtFmt(it.submitted_at)));
-      headerSub=_h1.join(' · ');
-      // Linha 2: Massoterapeuta + Tratamento
+      headerSub=_h1.join(' &nbsp;·&nbsp; ');
+      // Linha 2: Tratamento + data + Massoterapeuta
       const _mParts=[];
-      if(p.nome_massoterapeuta)_mParts.push(`Massoterapeuta: <strong style="color:var(--text)">${esc(p.nome_massoterapeuta)}</strong>`);
       if(p.tratamento_realizado)_mParts.push(`Tratamento: <strong style="color:var(--text)">${esc(p.tratamento_realizado)}</strong>`);
+      if(p.data_tratamento)_mParts.push(`Data do tratamento: <strong style="color:var(--text)">${esc(dtFmt(p.data_tratamento))}</strong>`);
+      if(p.nome_massoterapeuta)_mParts.push(`Massoterapeuta: <strong style="color:var(--text)">${esc(p.nome_massoterapeuta)}</strong>`);
       if(_mParts.length)headerSub+=`<br><span style="margin-top:6px;display:inline-block">${_mParts.join(' &nbsp;·&nbsp; ')}</span>`;
       // Linha 3: Controle interno
       if(p.controle_interno)headerSub+=`<br><span style="margin-top:4px;display:inline-block">Controle interno: <strong style="color:var(--text)">${esc(p.controle_interno)}</strong></span>`;
