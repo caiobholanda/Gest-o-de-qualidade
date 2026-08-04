@@ -431,10 +431,10 @@ app.put('/api/resposta-local/:id', requireSession, (req, res) => {
   }
 });
 
-app.get('/api/stats-local', requireSession, (_req, res) => {
+app.get('/api/stats-local', requireSession, (req, res) => {
   try {
-    const { totais, mes, mesSub, totaisSub } = contarRespostas();
-    res.json({ ok: true, totais, mes, mesSub, totaisSub });
+    const stats = contarRespostas({ mes: req.query.mes || null });
+    res.json({ ok: true, ...stats });
   }
   catch (e) { console.error('[stats-local]', e); res.status(500).json({ ok: false, error: 'Erro' }); }
 });

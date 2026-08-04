@@ -90,10 +90,10 @@ export function inserirResposta({ tipo, app_origem = 'gestao-qualidade', fonte_i
   return { id: info.lastInsertRowid, duplicado: info.changes === 0 };
 }
 
-export function contarRespostas() {
-  const mesAtual = new Date().toISOString().slice(0, 7);
+export function contarRespostas({ mes = null } = {}) {
+  const mesAtual = mes || new Date().toISOString().slice(0, 7);
   const totais = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta GROUP BY tipo`).all();
-  const mes    = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta WHERE substr(submitted_at,1,7) = ? GROUP BY tipo`).all(mesAtual);
+  const mesRows = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta WHERE substr(submitted_at,1,7) = ? GROUP BY tipo`).all(mesAtual);
   const mesSub = db.prepare(`
     SELECT JSON_EXTRACT(payload,'$.tipo_pesquisa') AS subtipo, COUNT(*) AS total
     FROM resposta WHERE tipo='eventos' AND substr(submitted_at,1,7)=? GROUP BY subtipo
@@ -102,7 +102,7 @@ export function contarRespostas() {
     SELECT JSON_EXTRACT(payload,'$.tipo_pesquisa') AS subtipo, COUNT(*) AS total
     FROM resposta WHERE tipo='eventos' GROUP BY subtipo
   `).all();
-  return { totais, mes, mesSub, totaisSub };
+  return { totais, mes: mesRows, mesSub, totaisSub };
 }
 
 const _LSCORE = { otimo: 9, bom: 3, regular: 1, ruim: 0, muitobom: 9, amelhorar: 0 };

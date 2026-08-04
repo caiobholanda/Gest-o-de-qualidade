@@ -676,6 +676,11 @@ const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, 
     if(s.page) state.page=s.page;
   } catch(e){}
 })();
+let _ovMes='';
+function _fmtMes(ym){const M=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];const[y,m]=ym.split('-');return `${M[parseInt(m)-1]} ${y}`;}
+function _mesLastDay(ym){const[y,m]=ym.split('-').map(Number);return new Date(y,m,0).getDate();}
+function _addMonths(ym,n){const[y,m]=ym.split('-').map(Number);const d=new Date(y,m-1+n,1);const p=v=>String(v).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}`;}
+
 
 function _localDateStr(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${dd}`;}
 function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
@@ -1111,17 +1116,22 @@ function _defaultPeriod(){
 }
 function renderFilters(){
   const chips = [];
-  if(state.periodCustom&&state.from) chips.push({l:`Data: ${state.from.split('-').reverse().join('/')}`,k:'period'});
   const _tipoLabel={lazer:'Lazer',negocios:'Negócios',evento:'Evento',passante:'Passante',hospede:'Hóspede'};
   const _origemLabel={hospede:'Hóspede',colaborador:'Colaborador'};
+  if(state.from) chips.push({l:`De: ${state.from.split('-').reverse().join('/')}`,k:'from'});
+  if(state.to) chips.push({l:`Até: ${state.to.split('-').reverse().join('/')}`,k:'to'});
   if(state.tipo) chips.push({l:`Tipo: ${_tipoLabel[state.tipo]||state.tipo}`,k:'tipo'});
   if(state.origem) chips.push({l:`Origem: ${_origemLabel[state.origem]||state.origem}`,k:'origem'});
   if(state.q) chips.push({l:`Busca: ${state.q}`,k:'q'});
   return `<div class="filter-label">Filtros</div>
   <div class="filter-box">
     <div class="filter-group">
-      <span class="fl">Data</span>
-      <div class="fi"><input type="date" id="fDate" value="${state.from}" max="${_localDateStr()}"></div>
+      <span class="fl">De</span>
+      <div class="fi"><input type="date" id="fFrom" value="${state.from}" max="${_localDateStr()}"></div>
+    </div>
+    <div class="filter-group">
+      <span class="fl">Até</span>
+      <div class="fi"><input type="date" id="fTo" value="${state.to}" max="${_localDateStr()}"></div>
     </div>
     <div class="filter-group">
       <span class="fl">Origem</span>
@@ -1207,13 +1217,18 @@ function renderKpis(s){
 
 function renderLocalFilters(){
   const chips=[];
-  if(state.from) chips.push({l:`Data: ${state.from.split('-').reverse().join('/')}`,k:'from'});
+  if(state.from) chips.push({l:`De: ${state.from.split('-').reverse().join('/')}`,k:'from'});
+  if(state.to) chips.push({l:`Até: ${state.to.split('-').reverse().join('/')}`,k:'to'});
   if(state.q) chips.push({l:`Busca: ${state.q}`,k:'q'});
   return `<div class="filter-label">Filtros</div>
   <div class="filter-box">
     <div class="filter-group">
-      <span class="fl">Data</span>
-      <div class="fi"><input type="date" id="fDate" value="${state.from}" max="${_localDateStr()}"></div>
+      <span class="fl">De</span>
+      <div class="fi"><input type="date" id="fFrom" value="${state.from}" max="${_localDateStr()}"></div>
+    </div>
+    <div class="filter-group">
+      <span class="fl">Até</span>
+      <div class="fi"><input type="date" id="fTo" value="${state.to}" max="${_localDateStr()}"></div>
     </div>
     <div class="filter-group filter-flex">
       <span class="fl">Busca</span>
@@ -1269,11 +1284,16 @@ async function renderOverview(trigger){
   main.style.opacity='0.5';main.style.pointerEvents='none';
   try{
     const now=new Date(),pad=n=>String(n).padStart(2,'0');
-    const mesFrom=`${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
+    const nowYM=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
+    const ovMesKey=_ovMes||nowYM;
+    const isCurrentMonth=ovMesKey===nowYM;
+    const mesFrom=`${ovMesKey}-01`;
+    const mesTo=`${ovMesKey}-${pad(_mesLastDay(ovMesKey))}`;
     const today=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+    const spaTo=isCurrentMonth?today:mesTo;
 
     // 1) Local data first — DB local, resposta rápida
-    const localRes=await fetch('/api/stats-local',{signal});
+    const localRes=await fetch(`/api/stats-local?mes=${ovMesKey}`,{signal});
     if(localRes.status===401){location.href='/acesso-hub.html';return;}
     const local=await localRes.json();
     if(!local.ok) throw new Error(local.error||'Erro ao carregar estatísticas');
@@ -1316,11 +1336,17 @@ async function renderOverview(trigger){
     const _tipoMax=Math.max(localMes,1);
     const tipoRowsHtml=[..._tipoData,{key:'spa',label:'Gran SPA',val:0}].map(t=>`<div class="ov-tipo-row" id="ov-tipo-${t.key}"><div class="ov-tipo-name">${t.label}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill" id="ov-bar-${t.key}" style="width:${t.key==='spa'?0:Math.round(t.val/_tipoMax*100)}%"></div></div><div class="ov-tipo-count" id="ov-cnt-${t.key}">${t.key==='spa'?'<span style="opacity:.3">—</span>':t.val}</div></div>`).join('');
     main.innerHTML=`
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
+        <button class="btn-icon" id="ovPrevMes" title="Mês anterior" style="flex:none;font-size:.9rem">←</button>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.76rem;letter-spacing:.16em;color:var(--text);min-width:138px;text-align:center">${_fmtMes(ovMesKey)}</span>
+        <button class="btn-icon" id="ovNextMes" title="Próximo mês" ${isCurrentMonth?'disabled style="opacity:.4;cursor:default;flex:none;font-size:.9rem"':'style="flex:none;font-size:.9rem"'}>→</button>
+        ${!isCurrentMonth?`<span style="font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);padding:2px 9px;border:1px solid var(--gold-dim);border-radius:20px;flex:none">histórico</span>`:''}
+      </div>
       <div class="ovx-hero">
         <div>
-          <div class="eyebrow" style="margin-bottom:14px">Bom dia · Visão geral</div>
+          <div class="eyebrow" style="margin-bottom:14px">${isCurrentMonth?'Bom dia · Visão geral':_fmtMes(ovMesKey)}</div>
           <div class="ovx-hero-num" id="ov-total-val">${localMes}<em>mês</em></div>
-          <div class="ovx-hero-sub" id="ov-acumulado-sub">avaliações em todos os setores · acumulado: ${localTotal}</div>
+          <div class="ovx-hero-sub" id="ov-acumulado-sub">${isCurrentMonth?`avaliações em todos os setores · acumulado: ${localTotal}`:`avaliações em todos os setores no período`}</div>
         </div>
         <div class="ovx-hero-div"></div>
         <div>${tipoRowsHtml}</div>
@@ -1380,6 +1406,8 @@ async function renderOverview(trigger){
     });
     const tableEl=main.querySelector('#ovTable');
     renderOverviewTable(tableEl);
+    document.getElementById('ovPrevMes')?.addEventListener('click',()=>{_ovMes=_addMonths(ovMesKey,-1);renderOverview('month');});
+    document.getElementById('ovNextMes')?.addEventListener('click',()=>{if(!isCurrentMonth){_ovMes=_addMonths(ovMesKey,1);if(_ovMes===nowYM)_ovMes='';renderOverview('month');}});
     const applyOvFilter=()=>{
       ovState.tipo=document.getElementById('ovTipo')?.value||'';
       ovState.from=document.getElementById('ovFrom')?.value||'';
@@ -1393,7 +1421,7 @@ async function renderOverview(trigger){
 
     // 3) SPA data — background; atualiza DOM quando chegar
     Promise.all([
-      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${today}`,{signal}).then(r=>r.ok?r.json():null),
+      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${spaTo}`,{signal}).then(r=>r.ok?r.json():null),
       fetch(`/api/stats?slug=spa-locc-v1`,{signal}).then(r=>r.ok?r.json():null),
     ]).then(([spa,spaAll])=>{
         if(!spa||signal.aborted)return;
@@ -1402,7 +1430,7 @@ async function renderOverview(trigger){
         const heroVal=main.querySelector('#ov-total-val');
         if(heroVal)heroVal.innerHTML=`${localMes+spaMes}<em>mês</em>`;
         const subEl=main.querySelector('#ov-acumulado-sub');
-        if(subEl)subEl.textContent=`avaliações em todos os setores · acumulado: ${localTotal+spaTotal}`;
+        if(subEl)subEl.textContent=isCurrentMonth?`avaliações em todos os setores · acumulado: ${localTotal+spaTotal}`:`avaliações em todos os setores no período`;
         const cntSpa=main.querySelector('#ov-cnt-spa');
         if(cntSpa)cntSpa.textContent=spaMes;
         const barSpa=main.querySelector('#ov-bar-spa');
@@ -1422,9 +1450,9 @@ async function renderOverview(trigger){
       .catch(()=>{});
     // Urnas stats — cruza GQ local com nomes do Hub
     Promise.all([
-      fetch('/api/urnas-stats',{signal}).then(r=>r.ok?r.json():null).catch(()=>null),
+      fetch(`/api/urnas-stats?mes=${ovMesKey}`,{signal}).then(r=>r.ok?r.json():null).catch(()=>null),
       _loadUrnas(),
-      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${today}`,{signal}).then(r=>r.ok?r.json():null).catch(()=>null)
+      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${spaTo}`,{signal}).then(r=>r.ok?r.json():null).catch(()=>null)
     ]).then(([stats,hubUrnas,spaStats])=>{
       if(!stats||signal.aborted)return;
       const allUrnas=hubUrnas||[];
@@ -1507,21 +1535,24 @@ async function renderLocal(trigger){
     if(isAuto)window.scrollTo({top:savedScrollY,behavior:'instant'});
     else if(trigger==='filter'||trigger==='page')document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
     document.getElementById('btnF')?.addEventListener('click',()=>{
-      state.from=state.to=document.getElementById('fDate')?.value||'';
-      state.periodCustom=!!state.from;
+      state.from=document.getElementById('fFrom')?.value||'';
+      state.to=document.getElementById('fTo')?.value||'';
+      state.periodCustom=!!(state.from||state.to);
       state.q=document.getElementById('fQ')?.value||'';
       state.page=1;render('filter');
     });
     document.getElementById('fQ')?.addEventListener('keydown',e=>{
       if(e.key!=='Enter')return;
-      state.from=state.to=document.getElementById('fDate')?.value||'';
-      state.periodCustom=!!state.from;
+      state.from=document.getElementById('fFrom')?.value||'';
+      state.to=document.getElementById('fTo')?.value||'';
+      state.periodCustom=!!(state.from||state.to);
       state.q=document.getElementById('fQ').value||'';
       state.page=1;render('filter');
     });
     document.querySelectorAll('.chip-x').forEach(x=>x.addEventListener('click',()=>{
       const k=x.dataset.key;
-      if(k==='from'){state.from=state.to='';state.periodCustom=false;}
+      if(k==='from'){state.from='';state.periodCustom=!!(state.to);}
+      else if(k==='to'){state.to='';state.periodCustom=!!(state.from);}
       else if(k in state)state[k]='';
       state.page=1;render('chip');
     }));
@@ -1755,9 +1786,9 @@ async function render(trigger){
       document.querySelector('.tbl-hdr')?.scrollIntoView({behavior:'smooth',block:'start'});
     }
     document.getElementById('btnF')?.addEventListener('click',()=>{
-      const d=document.getElementById('fDate')?.value||'';
-      state.from=state.to=d;
-      state.periodCustom=!!d;
+      state.from=document.getElementById('fFrom')?.value||'';
+      state.to=document.getElementById('fTo')?.value||'';
+      state.periodCustom=!!(state.from||state.to);
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ')?.value||'';
@@ -1766,9 +1797,9 @@ async function render(trigger){
     });
     document.getElementById('fQ')?.addEventListener('keydown',e=>{
       if(e.key!=='Enter')return;
-      const d=document.getElementById('fDate')?.value||'';
-      state.from=state.to=d;
-      state.periodCustom=!!d;
+      state.from=document.getElementById('fFrom')?.value||'';
+      state.to=document.getElementById('fTo')?.value||'';
+      state.periodCustom=!!(state.from||state.to);
       state.tipo=document.getElementById('fTipo')?.value||'';
       state.origem=document.getElementById('fOrigem')?.value||'';
       state.q=document.getElementById('fQ').value||'';
@@ -1777,10 +1808,9 @@ async function render(trigger){
     });
     document.querySelectorAll('.chip-x').forEach(x=>x.addEventListener('click',()=>{
       const k=x.dataset.key;
-      if(k==='period'){
-        state.from=state.to='';
-        state.periodCustom=false;
-      } else if(k in state)state[k]='';
+      if(k==='from'){state.from='';state.periodCustom=!!(state.to);}
+      else if(k==='to'){state.to='';state.periodCustom=!!(state.from);}
+      else if(k in state)state[k]='';
       state.page=1;
       render('chip');
     }));
