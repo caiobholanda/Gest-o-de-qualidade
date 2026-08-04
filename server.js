@@ -324,6 +324,7 @@ function novaRespostaLocal(tipoPadrao) {
     try {
       const { id } = inserirResposta({
         tipo: typeof b.tipo === 'string' && b.tipo.trim() ? b.tipo.trim() : tipoPadrao,
+        submitted_at: b._submitted_at || null,
         inserido_por: decoded?.username || null,
         payload: b,
       });
