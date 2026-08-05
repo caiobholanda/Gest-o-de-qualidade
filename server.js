@@ -111,8 +111,14 @@ app.get('/sso', (req, res) => {
     const RANK = { master: 3, satisfacao: 2, admin: 1 };
     const candidatos = [];
     if (SPA_ADMIN_EMAILS.includes(email) || payload.is_master) candidatos.push('master'); // TI / master do Hub
-    if (RANK[roleGQ]) candidatos.push(roleGQ);                                            // papel do card da GQ
-    if (adminGQ) candidatos.push('admin');                                                // Liberacao da GQ
+    // Liberacao do card da GQ: quem o admin do Hub coloca la espera as "coisas
+    // de admin" — e aqui TODA a gestao (aba Admin, configuracoes, metas) e
+    // gated por 'master'; o papel local 'admin' e so leitura. Por isso o papel
+    // 'admin' gravado pela aba (o unico que a UI do Hub grava) vira 'master'.
+    // 'satisfacao' explicito (via S2S) continua sendo o nivel intermediario.
+    if (roleGQ === 'master' || roleGQ === 'admin') candidatos.push('master');
+    else if (roleGQ === 'satisfacao') candidatos.push('satisfacao');
+    else if (adminGQ) candidatos.push('master');
     if (siteRole === 'satisfacao' || siteRole === 'admin') candidatos.push(siteRole);     // legado via Pesquisa
     if (Array.isArray(payload.sites_admin) && payload.sites_admin.includes('pesquisa-satisfacao')) candidatos.push('admin');
     if (autorizadoPeloHub || payload.tipo === 'admin') candidatos.push('admin');          // liberado pelo Hub -> leitura
