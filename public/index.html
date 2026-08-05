@@ -398,6 +398,13 @@ body{
   padding:0 28px;cursor:pointer;transition:background .18s
 }
 .ovf-apply:hover{background:var(--gold-dark)}
+.ovf-clear-btn{
+  font-family:'Helvetica Neue',Arial,sans-serif;
+  font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);background:none;border:1px solid var(--border);border-radius:999px;
+  padding:0 20px;cursor:pointer;transition:color .18s,border-color .18s;white-space:nowrap
+}
+.ovf-clear-btn:hover{color:var(--gold);border-color:var(--gold)}
 
 /* ── Chips ── */
 .chips{
@@ -618,6 +625,7 @@ body{
   .ovf-field,.ovf-dates{width:100%}
   .ovf-dates{justify-content:space-between}
   .ovf-dates input{flex:1}
+  .ovf-clear-btn{width:100%;padding:13px 0}
   .ovf-apply{width:100%;padding:13px 0}
   .ovf-field input{font-size:16px}
   .filter-shell{margin-bottom:32px}
@@ -1565,7 +1573,6 @@ async function renderOverview(trigger){
         <div class="ovf-hd">
           <span class="eyebrow">Todas as avaliações</span>
           <span class="ovf-rule"></span>
-          <button class="ovf-clear" id="btnOvClear">Limpar filtros</button>
         </div>
         <div class="ovf-pills" id="ovPills">
           ${[{v:'',l:'Todos'},{v:'spa',l:'Gran SPA'},{v:'geral',l:'Geral'},{v:'pdvs',l:'PDVs'},{v:'eventos-corp',l:'Corporativos'},{v:'eventos-soc',l:'Sociais'}].map(t=>`<button class="ovf-pill${ovState.tipo===t.v?' active':''}" data-val="${t.v}">${t.l}</button>`).join('')}
@@ -1587,6 +1594,7 @@ async function renderOverview(trigger){
               <input type="date" id="ovTo" value="${ovState.to}" max="${today}">
             </div>
           </div>
+          <button class="ovf-clear-btn" id="btnOvClear">Limpar</button>
           <button class="ovf-apply" id="btnOvF">Aplicar</button>
         </div>
       </div>
