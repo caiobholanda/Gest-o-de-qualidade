@@ -410,6 +410,8 @@ body{
 
 /* ── Table ── */
 .tbl-hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+#ovTable{transition:opacity .15s}
+#ovTable.ov-fetching{opacity:.38;pointer-events:none}
 .tbl-title{font-family:'Helvetica Neue',Arial,sans-serif;font-weight:400;font-size:1.4rem;color:var(--text);letter-spacing:-.01em}
 .tbl-count{
   font-family:'JetBrains Mono',monospace;font-size:.64rem;font-weight:600;
@@ -808,6 +810,7 @@ const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, 
   } catch(e){}
 })();
 let _ovMes='';
+let _ovFetchCtrl=null;
 function _fmtMes(ym){const M=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];const[y,m]=ym.split('-');return `${M[parseInt(m)-1]} ${y}`;}
 function _mesLastDay(ym){const[y,m]=ym.split('-').map(Number);return new Date(y,m,0).getDate();}
 function _addMonths(ym,n){const[y,m]=ym.split('-').map(Number);const d=new Date(y,m-1+n,1);const p=v=>String(v).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}`;}
@@ -1775,8 +1778,12 @@ function renderEvSocPills(){
 }
 
 async function renderOverviewTable(containerEl){
-  containerEl.innerHTML='<div class="empty" style="padding:32px 0">Carregando...</div>';
-  const _ovAbort=new AbortController();const signal=_ovAbort.signal;
+  if(_ovFetchCtrl)_ovFetchCtrl.abort();
+  _ovFetchCtrl=new AbortController();
+  const signal=_ovFetchCtrl.signal;
+  const hasContent=!!containerEl.querySelector('.tbl-hdr');
+  if(hasContent)containerEl.classList.add('ov-fetching');
+  else containerEl.innerHTML='<div class="empty" style="padding:32px 0">Carregando...</div>';
   try{
     const {tipo,from,to,q,page}=ovState;
     const OV_LIMIT=20;
@@ -1860,6 +1867,7 @@ async function renderOverviewTable(containerEl){
       <span class="pgn-info">Página ${page} de ${totalPages}</span>
       <button class="pgn-btn" id="ovPgNext" ${page>=totalPages?'disabled':''}>Próxima →</button>
     </div>`:'';
+    containerEl.classList.remove('ov-fetching');
     containerEl.innerHTML=`<div class="tbl-hdr"><div><div class="eyebrow">Registro</div><div class="tbl-title">Avaliações</div></div><div class="tbl-count">${total} resultado${total!==1?'s':''}</div></div>
     <div class="tbl-wrap">
       <div class="tbl-head"><div>Data</div><div>Nome</div><div>E-mail / Empresa</div><div>Tipo</div><div>Inserido por</div><div>Média</div><div></div></div>
@@ -1876,6 +1884,8 @@ async function renderOverviewTable(containerEl){
       });
     });
   }catch(e){
+    if(e.name==='AbortError')return;
+    containerEl.classList.remove('ov-fetching');
     containerEl.innerHTML=`<div class="empty">Erro: ${esc(e.message)}</div>`;
   }
 }
