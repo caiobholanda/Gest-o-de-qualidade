@@ -96,21 +96,28 @@ app.get('/sso', (req, res) => {
     // O `role` abaixo define apenas a capacidade no proxy da Pesquisa
     // (master/satisfacao escrevem; admin e leitura).
     const SPA_ADMIN_EMAILS = ['richard@granmarquise.com.br', 'suporte.ti@granmarquise.com.br', 'estagio.ti@granmarquise.com.br'];
+    // Papel do PROPRIO card 'gestao-de-qualidade' na aba Liberacao do Hub —
+    // antes so o slug da Pesquisa era lido e a Liberacao da GQ nao tinha efeito.
+    const roleGQ = payload.site_roles && payload.site_roles['gestao-de-qualidade'];
+    const adminGQ = Array.isArray(payload.sites_admin) && payload.sites_admin.includes('gestao-de-qualidade');
+    // Legado: papeis da Pesquisa continuam valendo aqui (nao remover — ha
+    // contas que dependem disso desde antes da Liberacao propria da GQ).
     const siteRole = payload.site_roles && payload.site_roles['pesquisa-satisfacao'];
     const sistemas = Array.isArray(payload.sistemas) ? payload.sistemas : null;
     const autorizadoPeloHub = sistemas ? sistemas.includes('gestao-de-qualidade') : false;
-    let role;
-    if (SPA_ADMIN_EMAILS.includes(email) || payload.is_master) {
-      role = 'master';                                     // TI / master do Hub
-    } else if (siteRole === 'satisfacao' || siteRole === 'admin') {
-      role = siteRole;                                     // papel de qualidade explicito
-    } else if (Array.isArray(payload.sites_admin) && payload.sites_admin.includes('pesquisa-satisfacao')) {
-      role = 'admin';
-    } else if (autorizadoPeloHub || payload.tipo === 'admin') {
-      role = 'admin';                                      // liberado pelo Hub (card/admin) -> leitura
-    } else {
-      role = 'user';                                       // sem autorizacao no Hub
-    }
+    // O MAIOR papel entre todas as fontes vence (master > satisfacao > admin).
+    // Cadeia if/else rebaixava: quem tinha 'satisfacao' via Pesquisa E 'admin'
+    // via card da GQ cairia para admin (leitura) dependendo da ordem dos galhos.
+    const RANK = { master: 3, satisfacao: 2, admin: 1 };
+    const candidatos = [];
+    if (SPA_ADMIN_EMAILS.includes(email) || payload.is_master) candidatos.push('master'); // TI / master do Hub
+    if (RANK[roleGQ]) candidatos.push(roleGQ);                                            // papel do card da GQ
+    if (adminGQ) candidatos.push('admin');                                                // Liberacao da GQ
+    if (siteRole === 'satisfacao' || siteRole === 'admin') candidatos.push(siteRole);     // legado via Pesquisa
+    if (Array.isArray(payload.sites_admin) && payload.sites_admin.includes('pesquisa-satisfacao')) candidatos.push('admin');
+    if (autorizadoPeloHub || payload.tipo === 'admin') candidatos.push('admin');          // liberado pelo Hub -> leitura
+    let role = 'user';
+    for (const c of candidatos) if ((RANK[c] || 0) > (RANK[role] || 0)) role = c;
     // Tabela local gq_admins sobrescreve nível para não-masters
     if (role !== 'master') {
       const adminEntry = buscarNivelAdmin(email);
@@ -121,6 +128,8 @@ app.get('/sso', (req, res) => {
     const ROLES_GQ = new Set(['master', 'satisfacao', 'admin']);
     if (!ROLES_GQ.has(role)) {
       console.warn('[SSO] acesso negado a GQ (sem autorizacao no Hub):', email);
+      // Sessao antiga nao pode sobreviver ao rebaixamento no Hub.
+      clearCookie(res);
       return res.redirect('/acesso-hub.html?erro=sem_acesso');
     }
     const token = jwt.sign({ sub: 0, username: email, role, nome: (payload.nome || null) }, JWT_SECRET, { expiresIn: '8h' });
