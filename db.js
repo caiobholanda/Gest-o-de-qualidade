@@ -39,6 +39,16 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_resposta_tipo_data ON resposta(tipo, submitted_at);
 `);
 
+// Seed: garante que as chaves padrão existam no banco sem sobrescrever valores definidos pelo admin
+{
+  const _seed = db.prepare('INSERT OR IGNORE INTO gq_metas (tipo, valor) VALUES (?, ?)');
+  db.transaction(() => {
+    for (const [tipo, valor] of [
+      ['spa', 30], ['geral', 20], ['pdvs', 15], ['eventos-corp', 5], ['eventos-soc', 5],
+    ]) _seed.run(tipo, valor);
+  })();
+}
+
 // Migração única: JSONs legados (gravação efêmera antiga) → banco
 const LEGADOS = {
   'respostas-geral.json': 'geral',
