@@ -1596,7 +1596,10 @@ async function renderOverview(trigger){
       renderOverviewTable(tableEl);
     };
     document.getElementById('btnOvF')?.addEventListener('click',applyOvFilter);
-    document.getElementById('ovQ')?.addEventListener('keydown',e=>{if(e.key==='Enter')applyOvFilter();});
+    let _ovQTimer;
+    document.getElementById('ovQ')?.addEventListener('input',()=>{clearTimeout(_ovQTimer);_ovQTimer=setTimeout(applyOvFilter,320);});
+    document.getElementById('ovFrom')?.addEventListener('change',applyOvFilter);
+    document.getElementById('ovTo')?.addEventListener('change',applyOvFilter);
     main.querySelectorAll('.ovf-pill').forEach(p=>p.addEventListener('click',()=>{
       ovState.tipo=p.dataset.val;
       main.querySelectorAll('.ovf-pill').forEach(x=>x.classList.toggle('active',x===p));
