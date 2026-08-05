@@ -75,6 +75,15 @@ body{
   transition:border-color .18s,color .18s;line-height:1
 }
 .btn-icon:hover{border-color:var(--gold);color:var(--gold)}
+/* ── Navegação de mês (overview) ── */
+.ov-mes-nav{display:inline-flex;align-items:stretch;background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05);margin-bottom:28px}
+.ov-mes-btn{width:42px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--muted);transition:background .16s,color .16s;flex:none}
+.ov-mes-btn:hover:not(:disabled){background:var(--gold-dim);color:var(--gold)}
+.ov-mes-btn:disabled{opacity:.25;cursor:not-allowed}
+.ov-mes-mid{padding:10px 20px;text-align:center;border-left:1px solid var(--border-soft);border-right:1px solid var(--border-soft);min-width:148px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.ov-mes-nome{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.22em;color:var(--text);font-weight:600;line-height:1}
+.ov-mes-ano{font-size:.6rem;letter-spacing:.14em;color:var(--muted);line-height:1}
+.ov-hist-pill{display:inline-flex;align-items:center;gap:5px;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(156,88,67,.18);border-radius:20px;padding:4px 10px;margin-left:2px;white-space:nowrap}
 .btn-sair{
   font-family:'Helvetica Neue',Arial,sans-serif;
   font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
@@ -1506,11 +1515,20 @@ async function renderOverview(trigger){
     const _tipoMax=Math.max(localMes,1);
     const tipoRowsHtml=[..._tipoData,{key:'spa',label:'Gran SPA',val:0}].map(t=>`<div class="ov-tipo-row" id="ov-tipo-${t.key}"><div class="ov-tipo-name">${t.label}</div><div class="ov-tipo-bar"><div class="ov-tipo-bar-fill" id="ov-bar-${t.key}" style="width:${t.key==='spa'?0:Math.round(t.val/_tipoMax*100)}%"></div></div><div class="ov-tipo-count" id="ov-cnt-${t.key}">${t.key==='spa'?'<span style="opacity:.3">—</span>':t.val}</div></div>`).join('');
     main.innerHTML=`
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
-        <button class="btn-icon" id="ovPrevMes" title="Mês anterior" style="flex:none;font-size:.9rem">←</button>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:.76rem;letter-spacing:.16em;color:var(--text);min-width:138px;text-align:center">${_fmtMes(ovMesKey)}</span>
-        <button class="btn-icon" id="ovNextMes" title="Próximo mês" ${isCurrentMonth?'disabled style="opacity:.4;cursor:default;flex:none;font-size:.9rem"':'style="flex:none;font-size:.9rem"'}>→</button>
-        ${!isCurrentMonth?`<span style="font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);padding:2px 9px;border:1px solid var(--gold-dim);border-radius:20px;flex:none">histórico</span>`:''}
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="ov-mes-nav">
+          <button class="ov-mes-btn" id="ovPrevMes" title="Mês anterior" aria-label="Mês anterior">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M9.5 11.5L5.5 7.5L9.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="ov-mes-mid">
+            <div class="ov-mes-nome">${_fmtMes(ovMesKey).split(' ')[0]}</div>
+            <div class="ov-mes-ano">${ovMesKey.split('-')[0]}</div>
+          </div>
+          <button class="ov-mes-btn" id="ovNextMes" title="Próximo mês" aria-label="Próximo mês" ${isCurrentMonth?'disabled':''}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M5.5 3.5L9.5 7.5L5.5 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        ${!isCurrentMonth?`<span class="ov-hist-pill">↩ histórico</span>`:''}
       </div>
       <div class="ovx-hero">
         <div>
