@@ -177,8 +177,8 @@ export function listarRespostas({ tipo = null, subtipo = null, from = null, to =
   if (q)    {
     // Busca restrita a campos de identificação — LIKE no payload inteiro casava
     // chaves internas do JSON e fazia scan duplo da coluna
-    conds.push("(JSON_EXTRACT(payload,'$.nome') LIKE ? OR JSON_EXTRACT(payload,'$.email') LIKE ? OR JSON_EXTRACT(payload,'$.empresa') LIKE ? OR inserido_por LIKE ?)");
-    args.push(`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`);
+    conds.push("(JSON_EXTRACT(payload,'$.nome') LIKE ? OR JSON_EXTRACT(payload,'$.email') LIKE ? OR JSON_EXTRACT(payload,'$.empresa') LIKE ? OR JSON_EXTRACT(payload,'$.controle_interno') LIKE ? OR inserido_por LIKE ?)");
+    args.push(`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`);
   }
   const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
   const total = db.prepare(`SELECT COUNT(*) AS n FROM resposta ${where}`).get(...args).n;

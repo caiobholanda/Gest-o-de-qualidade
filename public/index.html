@@ -417,7 +417,7 @@ body{
   border-radius:999px;padding:4px 12px;
   font-size:.67rem;color:var(--gold-dark);font-weight:600;letter-spacing:.04em
 }
-.chip-x{cursor:pointer;opacity:.55;transition:opacity .2s;padding:6px;margin:-6px}
+.chip-x{cursor:pointer;opacity:.55;transition:opacity .2s;padding:6px;margin:-6px -6px -6px 0}
 .chip-x:hover{opacity:1}
 
 /* ── Table ── */
@@ -1155,12 +1155,12 @@ async function openLocalEdit(id){
 
       // Fecha via Escape sem deixar window.fetch patchado
       escHandler=e=>{if(e.key==='Escape'){
-        // Fecha o formulário aberto (não só despatcha o fetch) — senão o submit
-        // seguinte iria para /api/nova-resposta* e criaria registro duplicado.
-        [...document.querySelectorAll('body>div')]
-          .filter(d=>d.style.display==='block'&&parseInt(getComputedStyle(d).zIndex)>=999)
-          .forEach(d=>{d.style.display='none';});
-        document.body.style.overflow='';
+        // O handler global de ESC (com confirmação) fecha o overlay; aqui só
+        // despatchamos o fetch SE ele realmente fechou — se o usuário cancelou
+        // a confirmação, o modo edição continua ativo.
+        const aindaAberto=[...document.querySelectorAll('body>div')]
+          .some(d=>d.style.display==='block'&&parseInt(getComputedStyle(d).zIndex)>=999);
+        if(aindaAberto)return;
         cleanup();document.removeEventListener('keydown',escHandler);
       }};
       document.addEventListener('keydown',escHandler);
@@ -1859,8 +1859,9 @@ async function renderOverviewTable(containerEl){
       // Cache incremental por assinatura de filtro: paginar reaproveita o que já foi buscado.
       const need=page*OV_LIMIT;
       const sig=JSON.stringify([from||'',to||'',q||'']);
-      if(!_ovMergeCache||_ovMergeCache.sig!==sig)
-        _ovMergeCache={sig,loc:{items:[],total:null,page:0,done:false},spa:{items:[],total:null,page:0,done:false}};
+      // TTL de 60s: limita janela de inconsistência se outra origem inserir registros no meio da paginação
+      if(!_ovMergeCache||_ovMergeCache.sig!==sig||Date.now()-_ovMergeCache.ts>60*1000)
+        _ovMergeCache={sig,ts:Date.now(),loc:{items:[],total:null,page:0,done:false},spa:{items:[],total:null,page:0,done:false}};
       const fetchSrc=async(url,base,cap,st)=>{
         while(!st.done&&st.items.length<need){
           const qs=new URLSearchParams({...base,page:st.page+1,limit:cap});
@@ -2500,7 +2501,11 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
     if(e.key!=='Escape')return;
     if(pickerOverlay.classList.contains('open')){pickerClose();return;}
     const tops=[...document.querySelectorAll('body>div')].filter(d=>d.style.display==='block'&&parseInt(getComputedStyle(d).zIndex)>=999);
-    if(tops.length){tops.forEach(d=>{d.style.display='none';});document.body.style.overflow='';}
+    if(!tops.length)return;
+    // Form com dados preenchidos: pede confirmação antes de descartar (ESC acidental)
+    const sujo=tops.some(d=>d.querySelector('.smiley-btn.selected')||[...d.querySelectorAll('input[type=text],input[type=email],input[type=tel],input:not([type]),textarea')].some(i=>(i.value||'').trim()));
+    if(sujo&&!confirm('Descartar a pesquisa em andamento?'))return;
+    tops.forEach(d=>{d.style.display='none';});document.body.style.overflow='';
   });
   document.getElementById('pickerClose').addEventListener('click', pickerClose);
   pickerOverlay.querySelectorAll('.picker-item').forEach(btn=>{

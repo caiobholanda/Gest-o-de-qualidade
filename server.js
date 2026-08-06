@@ -208,6 +208,12 @@ function _gqSet(cacheKey, data) {
 
 const _gqNeg = new Map(); // cacheKey → ts da última falha (cache negativo: evita esperar timeout de novo)
 const GQ_NEG_TTL = 30 * 1000;
+function _gqNegSet(cacheKey) {
+  // Poda entradas vencidas ao inserir — sem isso o Map cresce sem limite
+  const agora = Date.now();
+  for (const [k, ts] of _gqNeg) if (agora - ts >= GQ_NEG_TTL) _gqNeg.delete(k);
+  _gqNeg.set(cacheKey, agora);
+}
 
 function _gqFallback(res, endpoint, cacheKey) {
   const stale = _gqCache.get(cacheKey);
@@ -238,7 +244,7 @@ async function proxyGQ(req, res, endpoint) {
     if (r.ok) { _gqSet(cacheKey, data); _gqNeg.delete(cacheKey); }
     res.status(r.status).json(data);
   } catch (e) {
-    _gqNeg.set(cacheKey, Date.now());
+    _gqNegSet(cacheKey);
     _gqFallback(res, endpoint, cacheKey);
   }
 }
