@@ -417,7 +417,7 @@ body{
   border-radius:999px;padding:4px 12px;
   font-size:.67rem;color:var(--gold-dark);font-weight:600;letter-spacing:.04em
 }
-.chip-x{cursor:pointer;opacity:.55;transition:opacity .2s}
+.chip-x{cursor:pointer;opacity:.55;transition:opacity .2s;padding:6px;margin:-6px}
 .chip-x:hover{opacity:1}
 
 /* ── Table ── */
@@ -642,6 +642,8 @@ body{
   .tbl-head,.tbl-row{grid-template-columns:70px 1fr 50px 34px;gap:10px;padding:10px 12px}
   .tbl-wrap{border-radius:10px}
   .btn-nova-pesquisa{padding:8px 12px;font-size:.6rem;letter-spacing:.08em}
+  .btn-edit-local{width:40px;height:40px}
+  #pickerModal .picker-close,.ps-close{width:40px;height:40px}
   .hdr-brand img{height:22px}
   .ovx-hero-num{font-size:4.4rem}
   .ov-card{grid-template-columns:1fr 70px 44px;gap:10px}
@@ -824,6 +826,7 @@ const state = { from:'', to:'', tipo:'', origem:'', q:'', page:1, totalPages:1, 
 })();
 let _ovMes='';
 let _ovFetchCtrl=null;
+let _ovMergeCache=null; // cache incremental da paginação mesclada "Todos" (por assinatura de filtro)
 function _fmtMes(ym){const M=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];const[y,m]=ym.split('-');return `${M[parseInt(m)-1]} ${y}`;}
 function _mesLastDay(ym){const[y,m]=ym.split('-').map(Number);return new Date(y,m,0).getDate();}
 function _addMonths(ym,n){const[y,m]=ym.split('-').map(Number);const d=new Date(y,m-1+n,1);const p=v=>String(v).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}`;}
@@ -1101,10 +1104,19 @@ const _EDIT_FIELD_IDS = {
 };
 const _EDIT_FORM_URLS = ['/api/nova-resposta','/api/nova-resposta-geral','/api/nova-resposta-pdvs','/api/nova-resposta-eventos'];
 let _hubUrnas=null;
-async function _loadUrnas(){try{const r=await fetch('https://hub-granmarquise.fly.dev/api/urnas',{signal:AbortSignal.timeout(5000)});const d=await r.json();_hubUrnas=d.urnas||[];}catch{if(!_hubUrnas)_hubUrnas=[];}return _hubUrnas;}
+let _hubUrnasAt=0;
+async function _loadUrnas(){
+  if(_hubUrnas&&_hubUrnas.length&&Date.now()-_hubUrnasAt<5*60*1000)return _hubUrnas;
+  try{const r=await fetch('https://hub-granmarquise.fly.dev/api/urnas',{signal:AbortSignal.timeout(5000)});const d=await r.json();_hubUrnas=d.urnas||[];_hubUrnasAt=Date.now();}catch{if(!_hubUrnas)_hubUrnas=[];}
+  return _hubUrnas;
+}
 function _fillUrna(sel,ids){if(!sel)return;sel.innerHTML='<option value="" disabled selected>— Urna —</option>';const _m=(_hubUrnas||[]).filter(u=>(u.pesquisas||[]).some(p=>ids.includes(p)));_m.forEach(u=>{const o=document.createElement('option');o.value=u.id;o.textContent=u.nome;sel.appendChild(o);});if(_m.length===1){sel.value=_m[0].id;sel.dispatchEvent(new Event('change',{bubbles:true}));}}
 
+let _editBusy=false;
 async function openLocalEdit(id){
+  if(_editBusy)return; // evita duplo clique disparar dois fluxos de edição
+  _editBusy=true;
+  document.body.style.cursor='progress';
   try{
     const r=await fetch(`/api/resposta-local/${id}`);
     const data=await r.json();
@@ -1142,7 +1154,15 @@ async function openLocalEdit(id){
       opener();
 
       // Fecha via Escape sem deixar window.fetch patchado
-      escHandler=e=>{if(e.key==='Escape'){cleanup();document.removeEventListener('keydown',escHandler);}};
+      escHandler=e=>{if(e.key==='Escape'){
+        // Fecha o formulário aberto (não só despatcha o fetch) — senão o submit
+        // seguinte iria para /api/nova-resposta* e criaria registro duplicado.
+        [...document.querySelectorAll('body>div')]
+          .filter(d=>d.style.display==='block'&&parseInt(getComputedStyle(d).zIndex)>=999)
+          .forEach(d=>{d.style.display='none';});
+        document.body.style.overflow='';
+        cleanup();document.removeEventListener('keydown',escHandler);
+      }};
       document.addEventListener('keydown',escHandler);
 
       // Pré-preenche após o DOM renderizar
@@ -1207,7 +1227,7 @@ async function openLocalEdit(id){
 
         // Observa quando o overlay fecha para restaurar fetch
         setTimeout(()=>{
-          const overlays=[...document.querySelectorAll('body>div')].filter(d=>d.style.display==='block'&&parseInt(d.style.zIndex)>=999);
+          const overlays=[...document.querySelectorAll('body>div')].filter(d=>d.style.display==='block'&&parseInt(getComputedStyle(d).zIndex)>=999);
           overlays.forEach(ov=>{
             new MutationObserver((muts,obs)=>{
               if(ov.style.display==='none'||ov.style.display===''){cleanup();obs.disconnect();}
@@ -1223,6 +1243,9 @@ async function openLocalEdit(id){
     alert('Edição genérica não disponível para este tipo. Abra o formulário pelo botão "Nova Pesquisa" para corrigir.');
   }catch(e){
     console.error('[openLocalEdit]',e);
+  }finally{
+    _editBusy=false;
+    document.body.style.cursor='';
   }
 }
 window.openLocalEdit = openLocalEdit;
@@ -1473,6 +1496,9 @@ async function renderOverview(trigger){
   if(_renderCtrl)_renderCtrl.abort();
   _renderCtrl=new AbortController();
   const {signal}=_renderCtrl;
+  const isAuto=!trigger;
+  const savedScrollY=window.scrollY;
+  _ovMergeCache=null; // re-render completo da visão geral invalida o cache da lista mesclada
   const main=document.getElementById('main');
   main.style.opacity='0.5';main.style.pointerEvents='none';
   try{
@@ -1599,6 +1625,7 @@ async function renderOverview(trigger){
       <div id="ovTable"></div>
     `;
     main.style.opacity='';main.style.pointerEvents='';
+    if(isAuto)window.scrollTo({top:savedScrollY,behavior:'instant'});
     main.querySelectorAll('.ov-card[data-goto]').forEach(card=>{
       card.addEventListener('click',()=>{
         const el=document.querySelector(`.tab[data-tab="${card.dataset.goto}"]`);
@@ -1635,8 +1662,10 @@ async function renderOverview(trigger){
     });
 
     // 3) SPA data — background; atualiza DOM quando chegar
+    // Promise única para /api/stats do mês — reutilizada pelo bloco de urnas abaixo
+    const _spaMesPromise=fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${spaTo}`,{signal}).then(r=>r.ok?r.json():null).catch(()=>null);
     Promise.all([
-      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${spaTo}`,{signal}).then(r=>r.ok?r.json():null),
+      _spaMesPromise,
       fetch(`/api/stats?slug=spa-locc-v1`,{signal}).then(r=>r.ok?r.json():null),
     ]).then(([spa,spaAll])=>{
         if(!spa||signal.aborted)return;
@@ -1667,7 +1696,7 @@ async function renderOverview(trigger){
     Promise.all([
       fetch(`/api/urnas-stats?mes=${ovMesKey}`,{signal}).then(r=>r.ok?r.json():null).catch(()=>null),
       _loadUrnas(),
-      fetch(`/api/stats?slug=spa-locc-v1&from=${mesFrom}&to=${spaTo}`,{signal}).then(r=>r.ok?r.json():null).catch(()=>null)
+      _spaMesPromise
     ]).then(([stats,hubUrnas,spaStats])=>{
       if(!stats||signal.aborted)return;
       const allUrnas=hubUrnas||[];
@@ -1826,27 +1855,30 @@ async function renderOverviewTable(containerEl){
       total=d2.total||0;
       totalPages=Math.ceil(total/OV_LIMIT)||1;
     } else {
-      // "Todos": paginação mesclada — busca de cada fonte o suficiente para cobrir a página pedida
+      // "Todos": paginação mesclada — busca de cada fonte o suficiente para cobrir a página.
+      // Cache incremental por assinatura de filtro: paginar reaproveita o que já foi buscado.
       const need=page*OV_LIMIT;
-      const fetchSrc=async(url,base,cap)=>{
-        const out=[];let tot=0,p=1;
-        while(out.length<need){
-          const qs=new URLSearchParams({...base,page:p,limit:cap});
+      const sig=JSON.stringify([from||'',to||'',q||'']);
+      if(!_ovMergeCache||_ovMergeCache.sig!==sig)
+        _ovMergeCache={sig,loc:{items:[],total:null,page:0,done:false},spa:{items:[],total:null,page:0,done:false}};
+      const fetchSrc=async(url,base,cap,st)=>{
+        while(!st.done&&st.items.length<need){
+          const qs=new URLSearchParams({...base,page:st.page+1,limit:cap});
           const r=await fetch(url+'?'+qs,{signal});
           if(r.status===401){location.href='/acesso-hub.html';throw new Error('Não autenticado');}
           const d=await r.json();
           if(!d.ok)throw new Error(d.error||'Erro');
-          tot=d.total||0;
+          st.total=d.total||0;
           const got=d.items||[];
-          out.push(...got);
-          if(!got.length||out.length>=tot)break;
-          p++;
+          st.items.push(...got);
+          st.page++;
+          if(!got.length||st.items.length>=st.total)st.done=true;
         }
-        return {items:out,total:tot};
+        return st;
       };
       const [loc,spa]=await Promise.all([
-        fetchSrc('/api/respostas-local',{from:from||'',to:to||'',q:q||''},50),
-        fetchSrc('/api/respostas',{slug:'spa-locc-v1',from:from||'',to:to||'',q:q||''},100)
+        fetchSrc('/api/respostas-local',{from:from||'',to:to||'',q:q||''},50,_ovMergeCache.loc),
+        fetchSrc('/api/respostas',{slug:'spa-locc-v1',from:from||'',to:to||'',q:q||''},100,_ovMergeCache.spa)
       ]);
       const merged=[...loc.items.map(i=>({...i,_src:'local'})),...spa.items.map(mapSpaItem)].sort((a,b)=>{
         const da=a.date.split('/').reverse().join(''),db=b.date.split('/').reverse().join('');
@@ -2088,7 +2120,14 @@ document.querySelectorAll('.tab[data-tab]').forEach(t=>{
   });
 });
 render('init');
-setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
+setInterval(()=>{
+  if(document.hidden)return;
+  if(Date.now()-_lastActivity<60000)return;
+  if(activeTab==='admin')return; // formulário de acessos não pode ser apagado
+  const _f=document.activeElement;
+  if(_f&&_f.closest&&_f.closest('#main')&&(_f.tagName==='INPUT'||_f.tagName==='TEXTAREA'||_f.tagName==='SELECT'))return;
+  render();
+},5*60*1000);
 
 // ── Modal: Nova Pesquisa ──
 {
@@ -2233,29 +2272,31 @@ setInterval(()=>{if(Date.now()-_lastActivity<60000)return;render();},5*60*1000);
   }
 
   async function psLoadLists(){
-    try {
-      if(!psMassos.length){
-        const r=await fetch('/api/massagistas');
-        const d=await r.json();
-        psMassos=(d.items||[])
-          .filter(m=>m.funcao&&m.funcao.toLowerCase().includes('massot'))
-          .map(m=>m.nome).filter(Boolean);
-      }
-    } catch(e){console.warn('[GQ] massagistas:',e);}
-    try {
-      if(!psTratamentos.length){
-        const r=await fetch('/api/tratamentos');
-        const d=await r.json();
-        psTratamentos=(d.items||[]).map(t=>t.nome).filter(Boolean);
-      }
-    } catch(e){console.warn('[GQ] tratamentos:',e);}
-    try {
-      if(!psAptos.length){
-        const r=await fetch('/api/quartos');
-        const d=await r.json();
-        psAptos=(d.items||[]).map(q=>q.numero).filter(Boolean);
-      }
-    } catch(e){console.warn('[GQ] quartos:',e);}
+    await Promise.all([
+      (async()=>{ try {
+        if(!psMassos.length){
+          const r=await fetch('/api/massagistas');
+          const d=await r.json();
+          psMassos=(d.items||[])
+            .filter(m=>m.funcao&&m.funcao.toLowerCase().includes('massot'))
+            .map(m=>m.nome).filter(Boolean);
+        }
+      } catch(e){console.warn('[GQ] massagistas:',e);} })(),
+      (async()=>{ try {
+        if(!psTratamentos.length){
+          const r=await fetch('/api/tratamentos');
+          const d=await r.json();
+          psTratamentos=(d.items||[]).map(t=>t.nome).filter(Boolean);
+        }
+      } catch(e){console.warn('[GQ] tratamentos:',e);} })(),
+      (async()=>{ try {
+        if(!psAptos.length){
+          const r=await fetch('/api/quartos');
+          const d=await r.json();
+          psAptos=(d.items||[]).map(q=>q.numero).filter(Boolean);
+        }
+      } catch(e){console.warn('[GQ] quartos:',e);} })(),
+    ]);
   }
 
   const _EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -2450,8 +2491,17 @@ document.getElementById('psSubmitBtn')?.addEventListener('click',psSubmit);
     <div class="picker-list">${buildPickerItems()}</div>
   </div>`;
   document.body.appendChild(pickerOverlay);
-  function pickerOpen(){ pickerOverlay.classList.add('open'); }
-  function pickerClose(){ pickerOverlay.classList.remove('open'); }
+  function pickerOpen(){ pickerOverlay.classList.add('open'); document.body.style.overflow='hidden'; }
+  function pickerClose(){ pickerOverlay.classList.remove('open'); document.body.style.overflow=''; }
+  pickerOverlay.addEventListener('click',e=>{ if(e.target===pickerOverlay) pickerClose(); });
+  // ESC fecha o picker e os formulários de pesquisa (ps/gq/pdv/ev/ec), como nos demais overlays.
+  // z-index vem do CSS (não do style inline), então o filtro usa getComputedStyle.
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape')return;
+    if(pickerOverlay.classList.contains('open')){pickerClose();return;}
+    const tops=[...document.querySelectorAll('body>div')].filter(d=>d.style.display==='block'&&parseInt(getComputedStyle(d).zIndex)>=999);
+    if(tops.length){tops.forEach(d=>{d.style.display='none';});document.body.style.overflow='';}
+  });
   document.getElementById('pickerClose').addEventListener('click', pickerClose);
   pickerOverlay.querySelectorAll('.picker-item').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -2764,6 +2814,7 @@ async function _loadGranClassAptos(){if(_gqPdvGranClassAptos!==null)return;try{c
   document.getElementById('btnSettings')?.addEventListener('click', cfgOpen);
   document.addEventListener('click', e => {
     if (e.target.id === 'cfgClose') cfgClose();
+    if (e.target.id === 'cfgBackdrop') cfgClose();
     if (e.target.id === 'btnCfgSave') _saveCfg();
   });
   document.addEventListener('keydown', e => {

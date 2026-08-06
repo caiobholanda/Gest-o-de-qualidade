@@ -195,6 +195,28 @@ const MOCK_RESPOSTAS = {
   ],
 };
 
+// Insere no cache com teto de tamanho: chaves incluem busca livre/datas/página,
+// então sem eviction o Map cresceria sem limite.
+function _gqSet(cacheKey, data) {
+  if (_gqCache.size >= 500) {
+    let oldK = null, oldTs = Infinity;
+    for (const [k, v] of _gqCache) if (v.ts < oldTs) { oldTs = v.ts; oldK = k; }
+    if (oldK) _gqCache.delete(oldK);
+  }
+  _gqCache.set(cacheKey, { data, ts: Date.now() });
+}
+
+const _gqNeg = new Map(); // cacheKey → ts da última falha (cache negativo: evita esperar timeout de novo)
+const GQ_NEG_TTL = 30 * 1000;
+
+function _gqFallback(res, endpoint, cacheKey) {
+  const stale = _gqCache.get(cacheKey);
+  if (stale) return res.json(stale.data);
+  if (endpoint === 'stats') return res.json(MOCK_STATS);
+  if (endpoint === 'respostas') return res.json(MOCK_RESPOSTAS);
+  res.status(502).json({ ok: false, error: 'Erro ao buscar dados' });
+}
+
 async function proxyGQ(req, res, endpoint) {
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(req.query)) if (GQ_ALLOWED_PARAMS.has(k)) params.set(k, v);
@@ -203,21 +225,21 @@ async function proxyGQ(req, res, endpoint) {
   const hit = _gqCache.get(cacheKey);
   if (hit && Date.now() - hit.ts < GQ_CACHE_TTL) return res.json(hit.data);
 
+  // SPA falhou há pouco: serve stale/mock imediato em vez de esperar o timeout de novo
+  const neg = _gqNeg.get(cacheKey);
+  if (neg && Date.now() - neg < GQ_NEG_TTL) return _gqFallback(res, endpoint, cacheKey);
+
   try {
     const url = `${PESQUISA_URL}/api/gq/${endpoint}?${params}`;
     const r = await fetchWithTimeout(url, {
       headers: { Authorization: `Bearer ${req.gqToken}` },
     });
     const data = await r.json();
-    if (r.ok) _gqCache.set(cacheKey, { data, ts: Date.now() });
+    if (r.ok) { _gqSet(cacheKey, data); _gqNeg.delete(cacheKey); }
     res.status(r.status).json(data);
   } catch (e) {
-    // Serve stale cache se existir (preferível ao mock)
-    const stale = _gqCache.get(cacheKey);
-    if (stale) return res.json(stale.data);
-    if (endpoint === 'stats') return res.json(MOCK_STATS);
-    if (endpoint === 'respostas') return res.json(MOCK_RESPOSTAS);
-    res.status(502).json({ ok: false, error: 'Erro ao buscar dados' });
+    _gqNeg.set(cacheKey, Date.now());
+    _gqFallback(res, endpoint, cacheKey);
   }
 }
 
@@ -387,35 +409,31 @@ app.post('/api/ingest/resposta', (req, res) => {
   }
 });
 
-app.get('/api/quartos', requireSession, async (req, res) => {
+// Dados de referência (dropdowns) — quase estáticos: cache com TTL próprio + stale em falha
+const REF_CACHE_TTL = 10 * 60 * 1000;
+async function proxyRef(res, cacheKey, url, errMsg) {
+  const hit = _gqCache.get(cacheKey);
+  if (hit && Date.now() - hit.ts < REF_CACHE_TTL) return res.json(hit.data);
   try {
-    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/quartos`);
+    const r = await fetchWithTimeout(url);
     const data = await r.json();
+    if (r.ok) _gqSet(cacheKey, data);
     res.status(r.status).json(data);
   } catch (e) {
-    res.status(502).json({ ok: false, error: 'Erro ao buscar quartos' });
+    const stale = _gqCache.get(cacheKey);
+    if (stale) return res.json(stale.data);
+    res.status(502).json({ ok: false, error: errMsg });
   }
-});
+}
 
-app.get('/api/massagistas', requireSession, async (req, res) => {
-  try {
-    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/massagistas-ativas`);
-    const data = await r.json();
-    res.status(r.status).json(data);
-  } catch (e) {
-    res.status(502).json({ ok: false, error: 'Erro ao buscar massagistas' });
-  }
-});
+app.get('/api/quartos', requireSession, (_req, res) =>
+  proxyRef(res, 'ref:quartos', `${PESQUISA_URL}/api/quartos`, 'Erro ao buscar quartos'));
 
-app.get('/api/tratamentos', requireSession, async (req, res) => {
-  try {
-    const r = await fetchWithTimeout(`${PESQUISA_URL}/api/tipos-massagem-ativos`);
-    const data = await r.json();
-    res.status(r.status).json(data);
-  } catch (e) {
-    res.status(502).json({ ok: false, error: 'Erro ao buscar tratamentos' });
-  }
-});
+app.get('/api/massagistas', requireSession, (_req, res) =>
+  proxyRef(res, 'ref:massagistas', `${PESQUISA_URL}/api/massagistas-ativas`, 'Erro ao buscar massagistas'));
+
+app.get('/api/tratamentos', requireSession, (_req, res) =>
+  proxyRef(res, 'ref:tratamentos', `${PESQUISA_URL}/api/tipos-massagem-ativos`, 'Erro ao buscar tratamentos'));
 
 app.get('/api/resposta-local/:id', requireSession, (req, res) => {
   const id = parseInt(req.params.id);

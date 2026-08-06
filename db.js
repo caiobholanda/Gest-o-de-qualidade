@@ -100,14 +100,23 @@ export function inserirResposta({ tipo, app_origem = 'gestao-qualidade', fonte_i
   return { id: info.lastInsertRowid, duplicado: info.changes === 0 };
 }
 
+// Range [primeiro dia do mês, primeiro dia do mês seguinte) — comparação direta na
+// coluna permite usar o índice, ao contrário de substr(submitted_at,1,7).
+function _mesRange(mes) {
+  const [y, m] = mes.split('-').map(Number);
+  const fim = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`;
+  return [`${mes}-01`, fim];
+}
+
 export function contarRespostas({ mes = null } = {}) {
   const mesAtual = mes || new Date().toISOString().slice(0, 7);
+  const [mIni, mFim] = _mesRange(mesAtual);
   const totais = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta GROUP BY tipo`).all();
-  const mesRows = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta WHERE substr(submitted_at,1,7) = ? GROUP BY tipo`).all(mesAtual);
+  const mesRows = db.prepare(`SELECT tipo, COUNT(*) AS total FROM resposta WHERE submitted_at >= ? AND submitted_at < ? GROUP BY tipo`).all(mIni, mFim);
   const mesSub = db.prepare(`
     SELECT JSON_EXTRACT(payload,'$.tipo_pesquisa') AS subtipo, COUNT(*) AS total
-    FROM resposta WHERE tipo='eventos' AND substr(submitted_at,1,7)=? GROUP BY subtipo
-  `).all(mesAtual);
+    FROM resposta WHERE tipo='eventos' AND submitted_at >= ? AND submitted_at < ? GROUP BY subtipo
+  `).all(mIni, mFim);
   const totaisSub = db.prepare(`
     SELECT JSON_EXTRACT(payload,'$.tipo_pesquisa') AS subtipo, COUNT(*) AS total
     FROM resposta WHERE tipo='eventos' GROUP BY subtipo
@@ -163,9 +172,14 @@ export function listarRespostas({ tipo = null, subtipo = null, from = null, to =
     conds.push("JSON_EXTRACT(payload,'$.tipo_pesquisa')=?");
     args.push(subtipo);
   }
-  if (from) { conds.push("substr(submitted_at,1,10) >= ?"); args.push(from); }
-  if (to)   { conds.push("substr(submitted_at,1,10) <= ?"); args.push(to); }
-  if (q)    { conds.push("(payload LIKE ? OR inserido_por LIKE ?)"); args.push(`%${q}%`, `%${q}%`); }
+  if (from) { conds.push("submitted_at >= ?"); args.push(from); }
+  if (to)   { conds.push("submitted_at < date(?, '+1 day')"); args.push(to); }
+  if (q)    {
+    // Busca restrita a campos de identificação — LIKE no payload inteiro casava
+    // chaves internas do JSON e fazia scan duplo da coluna
+    conds.push("(JSON_EXTRACT(payload,'$.nome') LIKE ? OR JSON_EXTRACT(payload,'$.email') LIKE ? OR JSON_EXTRACT(payload,'$.empresa') LIKE ? OR inserido_por LIKE ?)");
+    args.push(`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`);
+  }
   const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
   const total = db.prepare(`SELECT COUNT(*) AS n FROM resposta ${where}`).get(...args).n;
   const offset = (page - 1) * limit;
@@ -205,8 +219,8 @@ export function atualizarResposta(id, payload) {
 }
 
 export function contarPorUrna({ mes = null } = {}) {
-  const where = mes ? 'WHERE substr(submitted_at,1,7) = ?' : '';
-  const args = mes ? [mes] : [];
+  const where = mes ? 'WHERE submitted_at >= ? AND submitted_at < ?' : '';
+  const args = mes ? _mesRange(mes) : [];
   return db.prepare(`
     SELECT JSON_EXTRACT(payload,'$.urna_id') AS urna_id, COUNT(*) AS total
     FROM resposta ${where}
@@ -216,8 +230,8 @@ export function contarPorUrna({ mes = null } = {}) {
 }
 
 export function contarSpaSite({ mes = null } = {}) {
-  const where = mes ? "WHERE app_origem='spa' AND substr(submitted_at,1,7) = ?" : "WHERE app_origem='spa'";
-  const args = mes ? [mes] : [];
+  const where = mes ? "WHERE app_origem='spa' AND submitted_at >= ? AND submitted_at < ?" : "WHERE app_origem='spa'";
+  const args = mes ? _mesRange(mes) : [];
   return db.prepare(`SELECT COUNT(*) AS total FROM resposta ${where}`).get(...args).total;
 }
 
